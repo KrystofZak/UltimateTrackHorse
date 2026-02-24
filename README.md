@@ -53,3 +53,31 @@
 
 #### Oil smudge 
 - spins car on a spot (random rotation matrix) 
+
+## Map Generation & Game Logic (Technical Specs)
+
+This project utilizes a custom procedural generation system to create dynamic, playable tracks. Responsibility for this module includes the generation algorithm, tile connectivity, and core game rules.
+
+### 1. Procedural Generation (Wave Function Collapse)
+The map is generated on a grid based on user-defined dimensions.
+* **The Algorithm:** We use the **Wave Function Collapse (WFC)** algorithm. Every grid cell starts in a state of superposition (all possible tiles) and is collapsed based on local constraints to ensure a logical layout.
+* **Boundary Constraints:** The **Start** and **Finish** points are fixed at the edges of the grid before generation begins. The algorithm ensures a guaranteed continuous path between these two points.
+* **Connectivity (Sockets):** Tiles are connected using a socket-based system. A connection is only valid if the sockets on adjacent sides match (e.g., `Road_Mid` must connect to `Road_Mid`).
+
+### 2. Technical Requirements for Assets
+To ensure the WFC algorithm functions correctly, all environment prefabs must adhere to these standards:
+* **Pivot Point:** Center of the tile ($0,0,0$).
+* **Dimensions:** Tiles must be perfectly square and uniform in size (e.g., $10 \times 10$ units).
+* **Road Alignment:** The road/track must always enter and exit within the **middle third** of any given side to ensure seamless alignment regardless of tile type.
+* **Obstacle Anchors:** Every road prefab must contain empty GameObjects acting as transforms labeled `ObstacleSlot`. These are used by the logic module to spawn interactive elements.
+
+### 3. Obstacle & Hazard Logic
+Obstacles are placed dynamically after the track layout is finalized by completing the track:
+1.  **Placement:** The system identifies valid `ObstacleSlot` locations on the generated tiles.
+2.  **Selection:** Based on user input or random weighting, hazards (Walls, Oil Smudges, Ice, etc.) are instantiated.
+3.  **Collision Layers:** Each obstacle is assigned to a specific layer to interact correctly with the physics-driven car.
+
+### 4. Game Logic & Surface Systems
+The logic module also handles the bridge between the environment and the car physics:
+* **Surface Interface:** We use a unified interface for surface changes. When a car triggers a hazard, the hazard sends data (friction modifiers, rotation matrices for oil, etc.) directly to the Car Controller.
+* **Win/Loss Conditions:** Detection of the player reaching the finish line, lap timing, and checkpoint validation.
