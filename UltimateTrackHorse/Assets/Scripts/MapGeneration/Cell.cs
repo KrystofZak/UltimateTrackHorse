@@ -8,22 +8,21 @@ namespace MapGeneration
         public Vector2Int GridPosition; // Position of the cell in the grid
         public bool IsCollapsed; // Indicates whether the cell has been collapsed to a single tile or not
 
-        public readonly List<TileData>
-            AvailableTiles; // List of possible tiles that can still be placed in this cell based on the WFC constraints
+        public readonly List<TileVariant> AvailableVariants; // List of possible tiles that can still be placed in this cell based on the WFC constraints
 
-        public TileData CollapsedTile; // Final tile that was chosen
+        public TileVariant CollapsedVariant; // Final tile that was chosen
 
         // Constructor of the cell, initializes it with all possible tiles at the beginning
-        public Cell(Vector2Int pos, List<TileData> allTiles)
+        public Cell(Vector2Int pos, List<TileVariant> allVariants)
         {
             GridPosition = pos;
             IsCollapsed = false;
 
-            // All tiles are initially available
-            AvailableTiles = new List<TileData>(allTiles);
+            // All tile variations are initially available
+            AvailableVariants = new List<TileVariant>(allVariants);
         }
 
         // Entropy - a number of possible tiles that can be placed
-        public int Entropy => AvailableTiles.Count;
+        public int Entropy => AvailableVariants.Count;
     }
 }
