@@ -14,54 +14,85 @@ namespace MapGeneration
 
         [Header("WFC Data")] 
         public List<TileData> allAvailableTiles; // List of all available tiles
+        
+        [Header("Special Tiles")]
+        public TileData startTileData;
+        public TileData finishTileData;
 
         private Cell[,] grid; // 2D array representing the map
-        private List<TileVariant> allVariants; // List of all possible tile variants
+        private List<TileVariant> standardVariants; // List of all possible tile variants
+        private List<TileVariant> startVariants; // List of possible start tile variants
+        private List<TileVariant> finishVariants; // List of possible finish tile variants
 
         void Start()
         {
             InitializeGrid(); 
-            RunWFC();
+            //RunWFC();
             //StartCoroutine(RunWFCAnimated());
+            GenerateValidMap();
         }
 
         void InitializeGrid()
         {
-            // Create a list of all possible tile variants
-            allVariants = new List<TileVariant>();
+            standardVariants = new List<TileVariant>();
+            startVariants = new List<TileVariant>();
+            finishVariants = new List<TileVariant>();
+
+            // Split each tile into its 4 possible rotations and categorize them
             foreach (var tile in allAvailableTiles)
             {
                 for (int r = 0; r < 4; r++)
                 {
-                    allVariants.Add(new TileVariant(tile, r));
+                    TileVariant variant = new TileVariant(tile, r);
+
+                    if (tile == startTileData)
+                    {
+                        startVariants.Add(variant);
+                    }
+                    else if (tile == finishTileData)
+                    {
+                        finishVariants.Add(variant);
+                    }
+                    else
+                    {
+                        // All other tiles are standard
+                        standardVariants.Add(variant); 
+                    }
                 }
             }
 
-            // Initialize the grid
+            // Fill the grid with empty cells
             grid = new Cell[mapWidth, mapHeight];
             for (int x = 0; x < mapWidth; x++)
             {
                 for (int y = 0; y < mapHeight; y++)
                 {
-                    grid[x, y] = new Cell(new Vector2Int(x, y), allVariants);
+                    grid[x, y] = new Cell(new Vector2Int(x, y), standardVariants);
                 }
             }
         }
         
         void SetStartAndFinish()
         {
-            // Find all road variants
-            var roadVariants = allVariants.Where(v => v.Sockets.Contains("road")).ToList();
-
-            // Set start to [0, 0]
+            // Set start
             Cell startCell = grid[0, 0];
-            startCell.AvailableVariants = new List<TileVariant>(roadVariants);
-            CollapseCell(startCell); // Collapse random road 
-            Propagate(startCell);    // Propagate to neighbors
+    
+            // Choose valid rotations for start
+            startCell.AvailableVariants = startVariants
+                .Where(v => v.Sockets[0] == "road" || v.Sockets[1] == "road")
+                .ToList();
+    
+            CollapseCell(startCell);
+            Propagate(startCell);
 
-            // Set finish to [mapWidth-1, mapHeight-1]
+            // Set a finish
             Cell endCell = grid[mapWidth - 1, mapHeight - 1];
-            endCell.AvailableVariants = new List<TileVariant>(roadVariants);
+    
+            // Choose valid rotations for finish
+            endCell.AvailableVariants = finishVariants
+                .Where(v => v.Sockets[2] == "road" || v.Sockets[3] == "road")
+                .ToList();
+    
             CollapseCell(endCell);
             Propagate(endCell);
         }
@@ -183,7 +214,7 @@ namespace MapGeneration
                 bool possible = false;
                 foreach (var currentVariant in current.AvailableVariants)
                 {
-                    // Cheeck for socket compatibility
+                    // Check for socket compatibility
                     if (currentVariant.Sockets[directionIndex] == neighborVariant.Sockets[neighborSideIndex])
                     {
                         possible = true;
@@ -217,6 +248,101 @@ namespace MapGeneration
                     Quaternion rot = Quaternion.Euler(0, cell.CollapsedVariant.Rotation * 90, 0);
                     Instantiate(cell.CollapsedVariant.Data.prefab, pos, rot, transform);
                 }
+            }
+        }
+        
+        public bool IsPathPossible(Vector2Int start, Vector2Int end)
+        {
+            Queue<Vector2Int> frontier = new Queue<Vector2Int>();
+            frontier.Enqueue(start);
+
+            HashSet<Vector2Int> reached = new HashSet<Vector2Int>();
+            reached.Add(start);
+
+            while (frontier.Count > 0)
+            {
+                Vector2Int current = frontier.Dequeue();
+
+                if (current == end) return true; // Path was found
+
+                foreach (Vector2Int next in GetRoadNeighbors(current))
+                {
+                    if (!reached.Contains(next))
+                    {
+                        reached.Add(next);
+                        frontier.Enqueue(next);
+                    }
+                }
+            }
+
+            return false; // path does not exist
+        }
+
+        // Helper function for finding neighbors connected by roads
+        List<Vector2Int> GetRoadNeighbors(Vector2Int pos)
+        {
+            List<Vector2Int> neighbors = new List<Vector2Int>();
+            Cell currentCell = grid[pos.x, pos.y];
+            
+            if (currentCell.CollapsedVariant == null) return neighbors;
+
+            Vector2Int[] directions = { 
+                new Vector2Int(0, 1),  // N (index 0)
+                new Vector2Int(1, 0),  // E (index 1)
+                new Vector2Int(0, -1), // S (index 2)
+                new Vector2Int(-1, 0)  // W (index 3)
+            };
+
+            for (int i = 0; i < 4; i++)
+            {
+                
+                if (currentCell.CollapsedVariant.Sockets[i] == "road")
+                {
+                    Vector2Int neighborPos = pos + directions[i];
+                    
+                    if (neighborPos.x >= 0 && neighborPos.x < mapWidth && neighborPos.y >= 0 && neighborPos.y < mapHeight)
+                    {
+                        Cell neighborCell = grid[neighborPos.x, neighborPos.y];
+                        int oppositeSide = (i + 2) % 4;
+                        
+                        if (neighborCell.CollapsedVariant != null && 
+                            neighborCell.CollapsedVariant.Sockets[oppositeSide] == "road")
+                        {
+                            neighbors.Add(neighborPos);
+                        }
+                    }
+                }
+            }
+            return neighbors;
+        }
+        
+        public void GenerateValidMap()
+        {
+            int attempts = 0;
+            bool success = false;
+
+            while (!success && attempts < 100)
+            {
+                attempts++;
+                ClearScene();
+                InitializeGrid(); // Reset of data
+                
+                RunWFC();
+
+                if (IsPathPossible(new Vector2Int(0, 0), new Vector2Int(mapWidth - 1, mapHeight - 1)))
+                {
+                    success = true;
+                    Debug.Log($"Map generated with {attempts} attempts");
+                    InstantiateTiles();
+                }
+            }
+        }
+        
+        void ClearScene()
+        {
+            foreach (Transform child in transform)
+            {
+                Destroy(child.gameObject);
             }
         }
         
