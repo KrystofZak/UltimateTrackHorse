@@ -1,181 +1,94 @@
 using UnityEngine;
-using UnityEngine.InputSystem;
 
 public class CarMovement : MonoBehaviour
 {
-    [Header("Movement Settings")]
-    [SerializeField] private float speed = 15f;
-    [SerializeField] private float acceleration = 10f;
-    [SerializeField] private float deceleration = 15f;
-    [SerializeField] private float maxSpeed = 25f;
-    
-    [Header("Handling Settings")]
-    [SerializeField] private float turnSpeed = 150f;
-    [SerializeField] private float gripStrength = 0.95f;
-    [SerializeField] private float driftGripStrength = 0.4f;
-    [SerializeField] private float handling = 0.8f;
-    
-    [Header("Brake Settings")]
-    [SerializeField] private float normalBrakeForce = 20f;
-    [SerializeField] private float handBrakeForce = 35f;
-    [SerializeField] private float handBrakeDriftMultiplier = 0.3f;
-    
-    [Header("Ground Settings")]
-    [SerializeField] private float hoverHeight = 0.5f;
-    [SerializeField] private float hoverForce = 300f;
-    [SerializeField] private LayerMask groundLayer;
-    
+    [Header("Pohyb")]
+    public float acceleration = 5f;       // Jak silně auto táhne (zkus 5-10)
+    public float maxSpeed = 50f;          // Reálná rychlost v Unity jednotkách
+    public float reverseSpeed = 20f; 
+    public float turnSpeed = 180f;        // Ve stupních za sekundu
+
+
+
+    [Header("Drift a Přilnavost")]
+    [Range(0, 1)]
+    public float driftFactor = 0.95f;
+
+    [Header("Fyzika země")]
+    public float groundCheckDistance = 0.5f; // Jak hluboko pod auto koukáme
+    public LayerMask groundLayer;           // Nastav v Inspectoru na vrstvu podlahy
+    public bool isGrounded;
+
     private Rigidbody rb;
-    private float currentSpeed;
-    private float currentTurnAngle;
-    private bool isDrifting = false;
-    
-    private Vector2 moveInput;
-    private bool handBrakePressed;
+    private float moveInput;
+    private float steerInput;
 
     void Start()
     {
         rb = GetComponent<Rigidbody>();
-        
-        if (rb == null)
-        {
-            rb = gameObject.AddComponent<Rigidbody>();
-        }
-        
-        rb.mass = 1000f;
-        rb.linearDamping = 0.5f;
-        rb.angularDamping = 2f;
         rb.interpolation = RigidbodyInterpolation.Interpolate;
         rb.collisionDetectionMode = CollisionDetectionMode.Continuous;
-        rb.constraints = RigidbodyConstraints.FreezeRotationX | RigidbodyConstraints.FreezeRotationZ;
-        rb.useGravity = false;
-        
-        if (groundLayer == 0)
-        {
-            groundLayer = ~0;
-        }
+        rb.centerOfMass = new Vector3(0, -1f, 0);
     }
 
     void Update()
     {
-        HandleInput();
+        // GetAxisRaw dává okamžitou odezvu (0 nebo 1), což je pro Trackmanii lepší
+        moveInput = Input.GetAxisRaw("Vertical");
+        steerInput = Input.GetAxisRaw("Horizontal");
     }
-    
+
     void FixedUpdate()
     {
-        ApplyHover();
-        ApplyMovement();
-        ApplyGrip();
-    }
-    
-    public void OnMove(InputAction.CallbackContext context)
-    {
-        moveInput = context.ReadValue<Vector2>();
-    }
-    
-    public void OnHandBrake(InputAction.CallbackContext context)
-    {
-        handBrakePressed = context.performed;
-    }
-    
-    private void HandleInput()
-    {
-        float verticalInput = moveInput.y;
-        float horizontalInput = moveInput.x;
-        
-        if (verticalInput > 0)
+        isGrounded = Physics.Raycast(transform.position, -transform.up, groundCheckDistance, groundLayer);
+
+        // 2. Pohyb a zatáčení povolíme jen, když jsme na zemi
+        if (isGrounded)
         {
-            currentSpeed += acceleration * Time.deltaTime;
-        }
-        else if (verticalInput < 0)
-        {
-            currentSpeed -= acceleration * 0.6f * Time.deltaTime;
-        }
-        else
-        {
-            if (Mathf.Abs(currentSpeed) > 0.1f)
-            {
-                currentSpeed -= Mathf.Sign(currentSpeed) * deceleration * Time.deltaTime;
-            }
-            else
-            {
-                currentSpeed = 0f;
-            }
-        }
-        
-        if (handBrakePressed)
-        {
-            float brakeAmount = handBrakeForce * Time.deltaTime;
-            currentSpeed = Mathf.MoveTowards(currentSpeed, 0, brakeAmount);
-            isDrifting = Mathf.Abs(currentSpeed) > 3f && Mathf.Abs(horizontalInput) > 0.1f;
-        }
-        else if (verticalInput < -0.1f && currentSpeed > 0.5f)
-        {
-            float brakeAmount = normalBrakeForce * Time.deltaTime;
-            currentSpeed = Mathf.MoveTowards(currentSpeed, currentSpeed > 0 ? 0 : -maxSpeed * 0.5f, brakeAmount);
-            isDrifting = false;
-        }
-        else
-        {
-            isDrifting = false;
-        }
-        
-        currentSpeed = Mathf.Clamp(currentSpeed, -maxSpeed * 0.5f, maxSpeed);
-        
-        if (Mathf.Abs(currentSpeed) > 0.5f)
-        {
-            float turnMultiplier = Mathf.Clamp01(Mathf.Abs(currentSpeed) / maxSpeed);
-            currentTurnAngle = horizontalInput * turnSpeed * handling * turnMultiplier;
-        }
-        else
-        {
-            currentTurnAngle = 0f;
+            ApplyMovement();
+            ApplySteering();
+            ApplyLateralFriction();
         }
     }
-    
-    private void ApplyHover()
+
+    void ApplyMovement()
     {
-        RaycastHit hit;
-        if (Physics.Raycast(transform.position, -Vector3.up, out hit, 10f, groundLayer))
-        {
-            float currentHeight = hit.distance;
-            float heightDifference = hoverHeight - currentHeight;
-            
-            Vector3 force = Vector3.up * heightDifference * hoverForce;
-            rb.AddForce(force, ForceMode.Force);
-            
-            rb.linearVelocity = new Vector3(rb.linearVelocity.x, rb.linearVelocity.y * 0.9f, rb.linearVelocity.z);
-        }
-    }
-    
-    private void ApplyMovement()
-    {
-        Vector3 forwardVelocity = transform.forward * currentSpeed;
-        Vector3 sidewaysVelocity = transform.right * Vector3.Dot(rb.linearVelocity, transform.right);
-        
-        rb.linearVelocity = new Vector3(
-            forwardVelocity.x + sidewaysVelocity.x, 
-            rb.linearVelocity.y, 
-            forwardVelocity.z + sidewaysVelocity.z
-        );
-        
-        if (Mathf.Abs(currentTurnAngle) > 0.1f)
-        {
-            Quaternion turnRotation = Quaternion.Euler(0f, currentTurnAngle * Time.fixedDeltaTime, 0f);
-            rb.MoveRotation(rb.rotation * turnRotation);
-        }
-    }
-    
-    private void ApplyGrip()
-    {
-        Vector3 forwardVelocity = transform.forward * Vector3.Dot(rb.linearVelocity, transform.forward);
-        Vector3 sidewaysVelocity = transform.right * Vector3.Dot(rb.linearVelocity, transform.right);
-        
-        float gripToUse = isDrifting ? driftGripStrength * handBrakeDriftMultiplier : gripStrength;
-        
-        Vector3 newVelocity = forwardVelocity + sidewaysVelocity * (1f - gripToUse);
-        newVelocity.y = rb.linearVelocity.y;
+        // VÝPOČET CÍLOVÉ RYCHLOSTI
+        float targetSpeedInput = moveInput * (moveInput > 0 ? maxSpeed : reverseSpeed);
+        Vector3 targetVelocity = transform.forward * targetSpeedInput;
+
+        // Klíč k rychlosti: Lerpujeme celou velocity k cíli, ale zachováváme vertikální pohyb (gravitaci)
+        float currentY = rb.linearVelocity.y;
+        Vector3 newVelocity = Vector3.Lerp(rb.linearVelocity, targetVelocity, acceleration * Time.fixedDeltaTime);
+        newVelocity.y = currentY; // Aby auto neplulo, ale padalo gravitací
         
         rb.linearVelocity = newVelocity;
+    }
+
+    void ApplySteering()
+    {
+        // Detekce pohybu vpřed/vzad pro správné zatáčení
+        // Používáme Local Velocity pro přesnost
+        float localVelocityZ = transform.InverseTransformDirection(rb.linearVelocity).z;
+        
+        // Pokud stojíš, nezatáčíš. Pokud couváš, invertuje se to.
+        float steerMultiplier = 1f;
+        if (localVelocityZ < -0.1f) steerMultiplier = -1f;
+
+        // Omezení zatáčení v nízkých rychlostech (volitelné, pro arkádu příjemné)
+        float speedFactor = Mathf.Clamp01(rb.linearVelocity.magnitude / 2f);
+
+        float rotation = steerInput * turnSpeed * steerMultiplier * speedFactor * Time.fixedDeltaTime;
+        rb.MoveRotation(rb.rotation * Quaternion.Euler(0, rotation, 0));
+    }
+
+    void ApplyLateralFriction()
+    {
+        // Tato část zabraňuje klouzání bokem
+        Vector3 forwardVel = transform.forward * Vector3.Dot(rb.linearVelocity, transform.forward);
+        Vector3 rightVel = transform.right * Vector3.Dot(rb.linearVelocity, transform.right);
+
+        // Zde se děje drift: zachováme dopřednou rychlost a jen část boční
+        rb.linearVelocity = forwardVel + (rightVel * driftFactor);
     }
 }

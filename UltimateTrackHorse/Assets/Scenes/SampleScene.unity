@@ -337,17 +337,33 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 1140483302206691021, guid: 9c196733611f46a44980a5d2fdb9b127, type: 3}
+      propertyPath: m_Material
+      value: 
+      objectReference: {fileID: 13400000, guid: f4a66a3ce7c1bee45b329b3318961a00, type: 2}
+    - target: {fileID: 1140483302206691021, guid: 9c196733611f46a44980a5d2fdb9b127, type: 3}
+      propertyPath: m_IsTrigger
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5205230070513549585, guid: 9c196733611f46a44980a5d2fdb9b127, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 20
+      objectReference: {fileID: 0}
+    - target: {fileID: 5205230070513549585, guid: 9c196733611f46a44980a5d2fdb9b127, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 200
+      objectReference: {fileID: 0}
     - target: {fileID: 5205230070513549585, guid: 9c196733611f46a44980a5d2fdb9b127, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 0
+      value: -0
       objectReference: {fileID: 0}
     - target: {fileID: 5205230070513549585, guid: 9c196733611f46a44980a5d2fdb9b127, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 0
+      value: -0.19
       objectReference: {fileID: 0}
     - target: {fileID: 5205230070513549585, guid: 9c196733611f46a44980a5d2fdb9b127, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 0
+      value: -0
       objectReference: {fileID: 0}
     - target: {fileID: 5205230070513549585, guid: 9c196733611f46a44980a5d2fdb9b127, type: 3}
       propertyPath: m_LocalRotation.w
@@ -381,6 +397,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Road
       objectReference: {fileID: 0}
+    - target: {fileID: 7963278052546205467, guid: 9c196733611f46a44980a5d2fdb9b127, type: 3}
+      propertyPath: m_Layer
+      value: 3
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -394,9 +414,33 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 212586375375209821, guid: 7358c7b0a6acc14448d9e77e9a2db954, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 38.4
+      objectReference: {fileID: 0}
+    - target: {fileID: 212586375375209821, guid: 7358c7b0a6acc14448d9e77e9a2db954, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: -22.8
+      objectReference: {fileID: 0}
+    - target: {fileID: 1793938656756641809, guid: 7358c7b0a6acc14448d9e77e9a2db954, type: 3}
+      propertyPath: m_Mass
+      value: 1500
+      objectReference: {fileID: 0}
     - target: {fileID: 1793938656756641809, guid: 7358c7b0a6acc14448d9e77e9a2db954, type: 3}
       propertyPath: m_UseGravity
       value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1793938656756641809, guid: 7358c7b0a6acc14448d9e77e9a2db954, type: 3}
+      propertyPath: m_CollisionDetection
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 4702082069122400321, guid: 7358c7b0a6acc14448d9e77e9a2db954, type: 3}
+      propertyPath: m_Material
+      value: 
+      objectReference: {fileID: 13400000, guid: 43c8f5e1dab4cb04aabd1a2f42f27be5, type: 2}
+    - target: {fileID: 4702082069122400321, guid: 7358c7b0a6acc14448d9e77e9a2db954, type: 3}
+      propertyPath: m_IsTrigger
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 7445308884850202687, guid: 7358c7b0a6acc14448d9e77e9a2db954, type: 3}
       propertyPath: m_LocalPosition.x
@@ -437,6 +481,34 @@ PrefabInstance:
     - target: {fileID: 7445308884850202687, guid: 7358c7b0a6acc14448d9e77e9a2db954, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7561181244498786131, guid: 7358c7b0a6acc14448d9e77e9a2db954, type: 3}
+      propertyPath: maxSpeed
+      value: 50
+      objectReference: {fileID: 0}
+    - target: {fileID: 7561181244498786131, guid: 7358c7b0a6acc14448d9e77e9a2db954, type: 3}
+      propertyPath: turnSpeed
+      value: 100
+      objectReference: {fileID: 0}
+    - target: {fileID: 7561181244498786131, guid: 7358c7b0a6acc14448d9e77e9a2db954, type: 3}
+      propertyPath: driftFactor
+      value: 0.287
+      objectReference: {fileID: 0}
+    - target: {fileID: 7561181244498786131, guid: 7358c7b0a6acc14448d9e77e9a2db954, type: 3}
+      propertyPath: acceleration
+      value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 7561181244498786131, guid: 7358c7b0a6acc14448d9e77e9a2db954, type: 3}
+      propertyPath: reverseSpeed
+      value: 20
+      objectReference: {fileID: 0}
+    - target: {fileID: 7561181244498786131, guid: 7358c7b0a6acc14448d9e77e9a2db954, type: 3}
+      propertyPath: steeringSpeed
+      value: 250
+      objectReference: {fileID: 0}
+    - target: {fileID: 7561181244498786131, guid: 7358c7b0a6acc14448d9e77e9a2db954, type: 3}
+      propertyPath: groundLayer.m_Bits
+      value: 8
       objectReference: {fileID: 0}
     - target: {fileID: 7789217822936007301, guid: 7358c7b0a6acc14448d9e77e9a2db954, type: 3}
       propertyPath: m_Name
