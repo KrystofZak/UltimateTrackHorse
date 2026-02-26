@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 797aead744f2ee14294c6616cdd00dd3
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 2100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 312766
+  packageName: AK Road Editor
+  packageVersion: 1.01
+  assetPath: Assets/MapEditor/Materials/Concrete.mat
+  uploadId: 751876
