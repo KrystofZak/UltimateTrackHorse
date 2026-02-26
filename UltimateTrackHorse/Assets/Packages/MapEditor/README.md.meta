@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 37319709bdb9cfd45988b8ae7654140c
+TextScriptImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 312766
+  packageName: AK Road Editor
+  packageVersion: 1.01
+  assetPath: Assets/MapEditor/README.md
+  uploadId: 751876
