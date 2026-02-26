@@ -1,6 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq; // Důležité pro hledání nejnižší entropie
+using System.Linq; 
 using UnityEngine;
 
 namespace MapGeneration
@@ -21,8 +21,8 @@ namespace MapGeneration
         void Start()
         {
             InitializeGrid(); 
-            //RunWFC();
-            StartCoroutine(RunWFCAnimated());
+            RunWFC();
+            //StartCoroutine(RunWFCAnimated());
         }
 
         void InitializeGrid()
@@ -37,7 +37,7 @@ namespace MapGeneration
                 }
             }
 
-            // 2. Initialize the grid
+            // Initialize the grid
             grid = new Cell[mapWidth, mapHeight];
             for (int x = 0; x < mapWidth; x++)
             {
@@ -48,9 +48,28 @@ namespace MapGeneration
             }
         }
         
+        void SetStartAndFinish()
+        {
+            // Find all road variants
+            var roadVariants = allVariants.Where(v => v.Sockets.Contains("road")).ToList();
+
+            // Set start to [0, 0]
+            Cell startCell = grid[0, 0];
+            startCell.AvailableVariants = new List<TileVariant>(roadVariants);
+            CollapseCell(startCell); // Collapse random road 
+            Propagate(startCell);    // Propagate to neighbors
+
+            // Set finish to [mapWidth-1, mapHeight-1]
+            Cell endCell = grid[mapWidth - 1, mapHeight - 1];
+            endCell.AvailableVariants = new List<TileVariant>(roadVariants);
+            CollapseCell(endCell);
+            Propagate(endCell);
+        }
+        
         // Wave Function Collapse Algorithm
         public void RunWFC()
         {
+            SetStartAndFinish();
             
             while (!IsFullyCollapsed())
             {
@@ -205,6 +224,7 @@ namespace MapGeneration
         // Animated version of the WFC algorithm - debug only
         public IEnumerator RunWFCAnimated()
         {
+            SetStartAndFinish();
             while (!IsFullyCollapsed())
             {
                 Cell nextCell = GetCellWithLowestEntropy();
@@ -219,7 +239,7 @@ namespace MapGeneration
                 Propagate(nextCell);
                 
                 VisualizeCell(nextCell); 
-                yield return new WaitForSeconds(0.05f); // Zpomalení pro ladění
+                yield return new WaitForSeconds(0.05f); // Small delay
             }
         }
         

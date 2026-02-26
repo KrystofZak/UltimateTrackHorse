@@ -8,7 +8,7 @@ namespace MapGeneration
         public Vector2Int GridPosition; // Position of the cell in the grid
         public bool IsCollapsed; // Indicates whether the cell has been collapsed to a single tile or not
 
-        public readonly List<TileVariant> AvailableVariants; // List of possible tiles that can still be placed in this cell based on the WFC constraints
+        public List<TileVariant> AvailableVariants; // List of possible tiles that can still be placed in this cell based on the WFC constraints
 
         public TileVariant CollapsedVariant; // Final tile that was chosen
 
