@@ -10,12 +10,12 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 725e17e940fa04b449fa4a9a6f24e32f, type: 3}
-  m_Name: RightTurn
+  m_Name: RoadPlain
   m_EditorClassIdentifier: Assembly-CSharp::MapGeneration.TileData
-  prefab: {fileID: 759346181849403841, guid: 9f831fed0f760447989db2f411d3b75a, type: 3}
-  tileName: RightTurn
-  socketNorth: road
+  prefab: {fileID: 3226790583523148277, guid: 60931a6317eb26847821cc809f2153fa, type: 3}
+  tileName: Grass
+  socketNorth: grass
   socketEast: grass
   socketSouth: grass
-  socketWest: road
-  baseWeight: 1
+  socketWest: grass
+  baseWeight: 5

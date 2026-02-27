@@ -10,12 +10,12 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 725e17e940fa04b449fa4a9a6f24e32f, type: 3}
-  m_Name: Forward
+  m_Name: RoadTurn
   m_EditorClassIdentifier: Assembly-CSharp::MapGeneration.TileData
-  prefab: {fileID: 6743819701738298842, guid: 25fd4f313d9714ddea966c96304f9d39, type: 3}
-  tileName: Forward
+  prefab: {fileID: 7620479726336564801, guid: 1380bf740cf15fb47bb98f3f4b0d881d, type: 3}
+  tileName: RoadTurn
   socketNorth: road
   socketEast: grass
-  socketSouth: road
-  socketWest: grass
+  socketSouth: grass
+  socketWest: road
   baseWeight: 1

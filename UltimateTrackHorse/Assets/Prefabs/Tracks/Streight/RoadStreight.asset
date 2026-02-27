@@ -10,12 +10,12 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 725e17e940fa04b449fa4a9a6f24e32f, type: 3}
-  m_Name: Grass
+  m_Name: RoadStreight
   m_EditorClassIdentifier: Assembly-CSharp::MapGeneration.TileData
-  prefab: {fileID: 2804903564492084955, guid: 4ec98d87ea7f54161a08a7283793588d, type: 3}
-  tileName: Grass
-  socketNorth: grass
+  prefab: {fileID: 8283001721120670541, guid: e529be0833a25744e91238d6dd0ecca7, type: 3}
+  tileName: Forward
+  socketNorth: road
   socketEast: grass
-  socketSouth: grass
+  socketSouth: road
   socketWest: grass
-  baseWeight: 5
+  baseWeight: 1
