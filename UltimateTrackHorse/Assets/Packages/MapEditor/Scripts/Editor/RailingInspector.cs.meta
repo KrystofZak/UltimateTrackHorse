@@ -1,0 +1,9 @@
+fileFormatVersion: 2
+guid: 51c7a84765cda5f408a822bd8db3531e
+AssetOrigin:
+  serializedVersion: 1
+  productId: 312766
+  packageName: AK Road Editor
+  packageVersion: 1.01
+  assetPath: Assets/MapEditor/Scripts/Editor/RailingInspector.cs
+  uploadId: 751876

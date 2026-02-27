@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 10102ddcc563ce046bfa7be9114f7e15
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 2100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 312766
+  packageName: AK Road Editor
+  packageVersion: 1.01
+  assetPath: Assets/MapEditor/Materials/Grass.mat
+  uploadId: 751876

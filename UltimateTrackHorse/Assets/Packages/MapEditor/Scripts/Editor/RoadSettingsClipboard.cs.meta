@@ -1,0 +1,9 @@
+fileFormatVersion: 2
+guid: f8e5789b87dad274e84181f875f80932
+AssetOrigin:
+  serializedVersion: 1
+  productId: 312766
+  packageName: AK Road Editor
+  packageVersion: 1.01
+  assetPath: Assets/MapEditor/Scripts/Editor/RoadSettingsClipboard.cs
+  uploadId: 751876

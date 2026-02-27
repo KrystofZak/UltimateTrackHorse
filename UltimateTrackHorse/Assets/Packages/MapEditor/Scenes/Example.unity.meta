@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 7e7c36a797ed22643902457fe42e43e4
+DefaultImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 312766
+  packageName: AK Road Editor
+  packageVersion: 1.01
+  assetPath: Assets/MapEditor/Scenes/Example.unity
+  uploadId: 751876

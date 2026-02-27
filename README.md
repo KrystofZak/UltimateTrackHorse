@@ -9,7 +9,7 @@
 ### Left/Right turns
 <img width="269" height="270" alt="image" src="https://github.com/user-attachments/assets/f59bb0b5-895a-44fe-835e-6a7f9468364b" />
 
-### Vagina road 
+### O road 
 <img width="272" height="281" alt="image" src="https://github.com/user-attachments/assets/d9bc7849-2f92-4f6a-a028-b76d87bcf999" />
 
 ### Serpentines

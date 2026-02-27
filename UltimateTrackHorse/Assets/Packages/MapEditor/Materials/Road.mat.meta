@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 0c3098151bf95f94ca8d9527e5c8b137
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 2100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 312766
+  packageName: AK Road Editor
+  packageVersion: 1.01
+  assetPath: Assets/MapEditor/Materials/Road.mat
+  uploadId: 751876
