@@ -10,10 +10,10 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 725e17e940fa04b449fa4a9a6f24e32f, type: 3}
-  m_Name: AnotherForward
+  m_Name: RoadWiggly
   m_EditorClassIdentifier: Assembly-CSharp::MapGeneration.TileData
-  prefab: {fileID: 730839036843626283, guid: 82def84a5ba634b609493d4200128be2, type: 3}
-  tileName: AnotherForward
+  prefab: {fileID: 4353974608937588853, guid: 9aa330511b6253f4eaae370e0c99a095, type: 3}
+  tileName: RoadWiggly
   socketNorth: road
   socketEast: grass
   socketSouth: road

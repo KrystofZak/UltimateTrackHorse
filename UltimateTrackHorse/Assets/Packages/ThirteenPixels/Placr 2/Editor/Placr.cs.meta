@@ -1,9 +1,11 @@
 fileFormatVersion: 2
-guid: a7eec42b9814d1045af8b7f50d768790
+guid: 70b2709c4dcb0354eb1ddcf38020f192
 MonoImporter:
   externalObjects: {}
   serializedVersion: 2
-  defaultReferences: []
+  defaultReferences:
+  - m_Target: {instanceID: 0}
+  - toolIcon: {fileID: 2800000, guid: 44efaf69df86eeb4f83f09fec205ca48, type: 3}
   executionOrder: 0
   icon: {instanceID: 0}
   userData: 
@@ -14,5 +16,5 @@ AssetOrigin:
   productId: 202664
   packageName: Placr
   packageVersion: 1.1.1
-  assetPath: Assets/ThirteenPixels/Placr/Editor/PlacrOverlay.cs
+  assetPath: Assets/ThirteenPixels/Placr/Editor/Placr.cs
   uploadId: 564250
