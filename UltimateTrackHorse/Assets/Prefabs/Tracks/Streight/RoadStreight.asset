@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: RoadStreight
   m_EditorClassIdentifier: Assembly-CSharp::MapGeneration.TileData
   prefab: {fileID: 8283001721120670541, guid: e529be0833a25744e91238d6dd0ecca7, type: 3}
-  tileName: Forward
+  tileName: RoadStreight
   socketNorth: road
   socketEast: grass
   socketSouth: road

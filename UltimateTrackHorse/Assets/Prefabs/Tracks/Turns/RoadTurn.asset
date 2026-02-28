@@ -14,8 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::MapGeneration.TileData
   prefab: {fileID: 7620479726336564801, guid: 1380bf740cf15fb47bb98f3f4b0d881d, type: 3}
   tileName: RoadTurn
-  socketNorth: road
-  socketEast: grass
-  socketSouth: grass
-  socketWest: road
+  socketNorth: grass
+  socketEast: road
+  socketSouth: road
+  socketWest: grass
   baseWeight: 1
