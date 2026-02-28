@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: ab6d68bdeb810284d94ec9bcbdcb82fa
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 2100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 312766
+  packageName: AK Road Editor
+  packageVersion: 1.01
+  assetPath: Assets/MapEditor/Materials/Railing.mat
+  uploadId: 751876

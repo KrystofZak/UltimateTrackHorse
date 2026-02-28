@@ -3,7 +3,13 @@
 --- !u!78 &1
 TagManager:
   serializedVersion: 3
-  tags: []
+  tags:
+  - Grass
+  - Dirt
+  - Road
+  - Tree
+  - Rock
+  - Mushroom
   layers:
   - Default
   - TransparentFX

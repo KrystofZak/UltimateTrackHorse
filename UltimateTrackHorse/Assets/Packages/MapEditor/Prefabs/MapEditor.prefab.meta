@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 303479268a71c6e4181e0413b451ab9c
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 312766
+  packageName: AK Road Editor
+  packageVersion: 1.01
+  assetPath: Assets/MapEditor/Prefabs/MapEditor.prefab
+  uploadId: 751876
