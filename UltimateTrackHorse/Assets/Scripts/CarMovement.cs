@@ -104,23 +104,27 @@ public class CarMovement : MonoBehaviour
     {
         Vector3 velocity = new Vector3(rb.linearVelocity.x, 0, rb.linearVelocity.z);
 
+        // 1. MOTOR (Tlačíme auto dopředu/dozadu)
         if (!isHandbraking && Mathf.Abs(moveInput) > 0.1f)
         {
             velocity += transform.forward * (moveInput * currentAccel * Time.fixedDeltaTime);
         }
 
+        // 2. BRZDY A ODPOR (Dojíždění)
         float drag = 0f;
         if (isHandbraking) drag = 4f;
         else if (Mathf.Abs(moveInput) < 0.1f) drag = coastingDeceleration;
 
         velocity = Vector3.Lerp(velocity, Vector3.zero, drag * Time.fixedDeltaTime);
 
+        // Omezení maximální rychlosti
         float activeMaxSpeed = (moveInput < 0) ? reverseSpeed : currentMaxSpeed;
         if (velocity.magnitude > activeMaxSpeed)
         {
             velocity = velocity.normalized * activeMaxSpeed;
         }
 
+        // 3. KOUZLO DOC HUDSONA (Srovnání letu auta s čumákem)
         if (velocity.magnitude > 0.1f)
         {
             float activeGrip = isHandbraking ? handbrakeGrip : currentGrip;
@@ -128,10 +132,13 @@ public class CarMovement : MonoBehaviour
             float forwardSpeed = Vector3.Dot(velocity, transform.forward);
             Vector3 optimalDirection = transform.forward * Mathf.Sign(forwardSpeed >= 0 ? 1 : -1);
 
-            velocity = Vector3.Lerp(velocity.normalized, optimalDirection, activeGrip * Time.fixedDeltaTime) * velocity.magnitude;
+            // OPRAVA: Přidáno .normalized! Tím se vektor po prolnutí nesmrskne 
+            // a auto si zachová přesně tu rychlost, jakou mělo před smykem.
+            Vector3 newDirection = Vector3.Lerp(velocity.normalized, optimalDirection, activeGrip * Time.fixedDeltaTime).normalized;
+            velocity = newDirection * velocity.magnitude;
         }
 
-        velocity.y = rb.linearVelocity.y;
+        velocity.y = rb.linearVelocity.y; // Vrátíme autu gravitaci
         rb.linearVelocity = velocity;
     }
 }
