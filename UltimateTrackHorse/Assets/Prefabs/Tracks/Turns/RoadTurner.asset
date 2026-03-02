@@ -10,12 +10,12 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 725e17e940fa04b449fa4a9a6f24e32f, type: 3}
-  m_Name: Finish
+  m_Name: RoadTurner
   m_EditorClassIdentifier: Assembly-CSharp::MapGeneration.TileData
-  prefab: {fileID: 9057393065536618697, guid: 722d5de2d06234404aef6b6a83bf3a7b, type: 3}
-  tileName: Finish
+  prefab: {fileID: 4417655678465524208, guid: 8f463300d300f0c48877a09eb04dcde0, type: 3}
+  tileName: RoadTurner
   socketNorth: grass
-  socketEast: grass
+  socketEast: road
   socketSouth: road
   socketWest: grass
   baseWeight: 1
