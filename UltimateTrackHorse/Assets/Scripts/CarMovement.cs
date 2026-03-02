@@ -1,181 +1,144 @@
 using UnityEngine;
-using UnityEngine.InputSystem;
 
 public class CarMovement : MonoBehaviour
 {
-    [Header("Movement Settings")]
-    [SerializeField] private float speed = 15f;
-    [SerializeField] private float acceleration = 10f;
-    [SerializeField] private float deceleration = 15f;
-    [SerializeField] private float maxSpeed = 25f;
-    
-    [Header("Handling Settings")]
-    [SerializeField] private float turnSpeed = 150f;
-    [SerializeField] private float gripStrength = 0.95f;
-    [SerializeField] private float driftGripStrength = 0.4f;
-    [SerializeField] private float handling = 0.8f;
-    
-    [Header("Brake Settings")]
-    [SerializeField] private float normalBrakeForce = 20f;
-    [SerializeField] private float handBrakeForce = 35f;
-    [SerializeField] private float handBrakeDriftMultiplier = 0.3f;
-    
-    [Header("Ground Settings")]
-    [SerializeField] private float hoverHeight = 0.5f;
-    [SerializeField] private float hoverForce = 300f;
-    [SerializeField] private LayerMask groundLayer;
-    
+    [Header("Surface: Asphalt")]
+    public float asphaltAccel = 25f;
+    public float asphaltMaxSpeed = 40f;
+    public float asphaltGrip = 5f;
+
+    [Header("Surface: Ice")]
+    public PhysicsMaterial iceMaterial;
+    public float iceAccel = 8f;
+    public float iceMaxSpeed = 45f;
+    public float iceGrip = 0.5f;
+
+
+    [Header("Control & Handbrake")]
+    public float reverseSpeed = 15f;
+    public float turnSpeed = 250f;
+    public float coastingDeceleration = 1.5f;
+    public float handbrakeGrip = 1f;
+
+    [Header("Physics & Raycast")]
+    public float groundCheckDistance = 0.6f;
+    public LayerMask groundLayer;
+
     private Rigidbody rb;
-    private float currentSpeed;
-    private float currentTurnAngle;
-    private bool isDrifting = false;
-    
-    private Vector2 moveInput;
-    private bool handBrakePressed;
+    private float moveInput;
+    private float steerInput;
+    private bool isHandbraking;
+    private bool isGrounded;
+
+    private float currentAccel;
+    private float currentMaxSpeed;
+    private float currentGrip;
 
     void Start()
     {
         rb = GetComponent<Rigidbody>();
-        
-        if (rb == null)
-        {
-            rb = gameObject.AddComponent<Rigidbody>();
-        }
-        
-        rb.mass = 1000f;
-        rb.linearDamping = 0.5f;
-        rb.angularDamping = 2f;
         rb.interpolation = RigidbodyInterpolation.Interpolate;
         rb.collisionDetectionMode = CollisionDetectionMode.Continuous;
-        rb.constraints = RigidbodyConstraints.FreezeRotationX | RigidbodyConstraints.FreezeRotationZ;
-        rb.useGravity = false;
-        
-        if (groundLayer == 0)
-        {
-            groundLayer = ~0;
-        }
+        rb.centerOfMass = new Vector3(0, -0.5f, 0);
     }
 
     void Update()
     {
-        HandleInput();
+        moveInput = Input.GetAxis("Vertical");
+        steerInput = Input.GetAxis("Horizontal");
+        isHandbraking = Input.GetKey(KeyCode.Space);
     }
-    
+
     void FixedUpdate()
     {
-        ApplyHover();
-        ApplyMovement();
-        ApplyGrip();
-    }
-    
-    public void OnMove(InputAction.CallbackContext context)
-    {
-        moveInput = context.ReadValue<Vector2>();
-    }
-    
-    public void OnHandBrake(InputAction.CallbackContext context)
-    {
-        handBrakePressed = context.performed;
-    }
-    
-    private void HandleInput()
-    {
-        float verticalInput = moveInput.y;
-        float horizontalInput = moveInput.x;
-        
-        if (verticalInput > 0)
+        rb.angularVelocity = Vector3.zero;
+
+        isGrounded = Physics.Raycast(transform.position, -transform.up, out RaycastHit hit, groundCheckDistance, groundLayer);
+
+        if (isGrounded)
         {
-            currentSpeed += acceleration * Time.deltaTime;
+            DetectSurfaceMaterial(hit);
+            ApplySteering();
+            ApplyMovementAndDrift();
         }
-        else if (verticalInput < 0)
+    }
+
+    void DetectSurfaceMaterial(RaycastHit hit)
+    {
+        currentAccel = asphaltAccel;
+        currentMaxSpeed = asphaltMaxSpeed;
+        currentGrip = asphaltGrip;
+
+        if (hit.collider != null && hit.collider.sharedMaterial != null)
         {
-            currentSpeed -= acceleration * 0.6f * Time.deltaTime;
-        }
-        else
-        {
-            if (Mathf.Abs(currentSpeed) > 0.1f)
+            PhysicsMaterial surfaceMat = hit.collider.sharedMaterial;
+
+            if (iceMaterial != null && surfaceMat == iceMaterial || surfaceMat.name.ToUpper().Contains("ICE"))
             {
-                currentSpeed -= Mathf.Sign(currentSpeed) * deceleration * Time.deltaTime;
+                currentAccel = iceAccel;
+                currentMaxSpeed = iceMaxSpeed;
+                currentGrip = iceGrip;
             }
-            else
-            {
-                currentSpeed = 0f;
-            }
-        }
-        
-        if (handBrakePressed)
-        {
-            float brakeAmount = handBrakeForce * Time.deltaTime;
-            currentSpeed = Mathf.MoveTowards(currentSpeed, 0, brakeAmount);
-            isDrifting = Mathf.Abs(currentSpeed) > 3f && Mathf.Abs(horizontalInput) > 0.1f;
-        }
-        else if (verticalInput < -0.1f && currentSpeed > 0.5f)
-        {
-            float brakeAmount = normalBrakeForce * Time.deltaTime;
-            currentSpeed = Mathf.MoveTowards(currentSpeed, currentSpeed > 0 ? 0 : -maxSpeed * 0.5f, brakeAmount);
-            isDrifting = false;
-        }
-        else
-        {
-            isDrifting = false;
-        }
-        
-        currentSpeed = Mathf.Clamp(currentSpeed, -maxSpeed * 0.5f, maxSpeed);
-        
-        if (Mathf.Abs(currentSpeed) > 0.5f)
-        {
-            float turnMultiplier = Mathf.Clamp01(Mathf.Abs(currentSpeed) / maxSpeed);
-            currentTurnAngle = horizontalInput * turnSpeed * handling * turnMultiplier;
-        }
-        else
-        {
-            currentTurnAngle = 0f;
-        }
-    }
-    
-    private void ApplyHover()
-    {
-        RaycastHit hit;
-        if (Physics.Raycast(transform.position, -Vector3.up, out hit, 10f, groundLayer))
-        {
-            float currentHeight = hit.distance;
-            float heightDifference = hoverHeight - currentHeight;
             
-            Vector3 force = Vector3.up * heightDifference * hoverForce;
-            rb.AddForce(force, ForceMode.Force);
-            
-            rb.linearVelocity = new Vector3(rb.linearVelocity.x, rb.linearVelocity.y * 0.9f, rb.linearVelocity.z);
         }
     }
-    
-    private void ApplyMovement()
+
+    void ApplySteering()
     {
-        Vector3 forwardVelocity = transform.forward * currentSpeed;
-        Vector3 sidewaysVelocity = transform.right * Vector3.Dot(rb.linearVelocity, transform.right);
-        
-        rb.linearVelocity = new Vector3(
-            forwardVelocity.x + sidewaysVelocity.x, 
-            rb.linearVelocity.y, 
-            forwardVelocity.z + sidewaysVelocity.z
-        );
-        
-        if (Mathf.Abs(currentTurnAngle) > 0.1f)
+        Vector3 flatVelocity = new Vector3(rb.linearVelocity.x, 0, rb.linearVelocity.z);
+
+        if (flatVelocity.magnitude < 0.5f) return;
+
+        float localVelocityZ = transform.InverseTransformDirection(rb.linearVelocity).z;
+        float steerMultiplier = (localVelocityZ < -0.1f) ? -1f : 1f;
+
+        float speedFactor = Mathf.Clamp01(flatVelocity.magnitude / 10f);
+
+        float activeTurnSpeed = isHandbraking ? turnSpeed * 1.5f : turnSpeed;
+
+        float rotation = steerInput * activeTurnSpeed * steerMultiplier * speedFactor * Time.fixedDeltaTime;
+        rb.MoveRotation(rb.rotation * Quaternion.Euler(0, rotation, 0));
+    }
+
+    void ApplyMovementAndDrift()
+    {
+        Vector3 velocity = new Vector3(rb.linearVelocity.x, 0, rb.linearVelocity.z);
+
+        // 1. MOTOR (Tlačíme auto dopředu/dozadu)
+        if (!isHandbraking && Mathf.Abs(moveInput) > 0.1f)
         {
-            Quaternion turnRotation = Quaternion.Euler(0f, currentTurnAngle * Time.fixedDeltaTime, 0f);
-            rb.MoveRotation(rb.rotation * turnRotation);
+            velocity += transform.forward * (moveInput * currentAccel * Time.fixedDeltaTime);
         }
-    }
-    
-    private void ApplyGrip()
-    {
-        Vector3 forwardVelocity = transform.forward * Vector3.Dot(rb.linearVelocity, transform.forward);
-        Vector3 sidewaysVelocity = transform.right * Vector3.Dot(rb.linearVelocity, transform.right);
-        
-        float gripToUse = isDrifting ? driftGripStrength * handBrakeDriftMultiplier : gripStrength;
-        
-        Vector3 newVelocity = forwardVelocity + sidewaysVelocity * (1f - gripToUse);
-        newVelocity.y = rb.linearVelocity.y;
-        
-        rb.linearVelocity = newVelocity;
+
+        // 2. BRZDY A ODPOR (Dojíždění)
+        float drag = 0f;
+        if (isHandbraking) drag = 4f;
+        else if (Mathf.Abs(moveInput) < 0.1f) drag = coastingDeceleration;
+
+        velocity = Vector3.Lerp(velocity, Vector3.zero, drag * Time.fixedDeltaTime);
+
+        // Omezení maximální rychlosti
+        float activeMaxSpeed = (moveInput < 0) ? reverseSpeed : currentMaxSpeed;
+        if (velocity.magnitude > activeMaxSpeed)
+        {
+            velocity = velocity.normalized * activeMaxSpeed;
+        }
+
+        // 3. KOUZLO DOC HUDSONA (Srovnání letu auta s čumákem)
+        if (velocity.magnitude > 0.1f)
+        {
+            float activeGrip = isHandbraking ? handbrakeGrip : currentGrip;
+
+            float forwardSpeed = Vector3.Dot(velocity, transform.forward);
+            Vector3 optimalDirection = transform.forward * Mathf.Sign(forwardSpeed >= 0 ? 1 : -1);
+
+            // OPRAVA: Přidáno .normalized! Tím se vektor po prolnutí nesmrskne 
+            // a auto si zachová přesně tu rychlost, jakou mělo před smykem.
+            Vector3 newDirection = Vector3.Lerp(velocity.normalized, optimalDirection, activeGrip * Time.fixedDeltaTime).normalized;
+            velocity = newDirection * velocity.magnitude;
+        }
+
+        velocity.y = rb.linearVelocity.y; // Vrátíme autu gravitaci
+        rb.linearVelocity = velocity;
     }
 }
