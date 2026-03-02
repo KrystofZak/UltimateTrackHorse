@@ -1,0 +1,21 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 725e17e940fa04b449fa4a9a6f24e32f, type: 3}
+  m_Name: DifferentForward
+  m_EditorClassIdentifier: Assembly-CSharp::MapGeneration.TileData
+  prefab: {fileID: 8706332269141869858, guid: c0db7f3a4f8704e0b93c521a53f82770, type: 3}
+  tileName: DifferentForward
+  socketNorth: road
+  socketEast: grass
+  socketSouth: road
+  socketWest: grass
+  baseWeight: 1
