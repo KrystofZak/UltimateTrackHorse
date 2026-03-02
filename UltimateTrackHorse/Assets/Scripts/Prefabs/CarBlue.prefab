@@ -299,19 +299,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c186c0f17e504fe41884f5ae28ee7771, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CarMovement
-  speed: 10
-  acceleration: 5
-  deceleration: 15
-  maxSpeed: 25
+  asphaltAccel: 25
+  asphaltMaxSpeed: 40
+  asphaltGrip: 5
+  iceMaterial: {fileID: 0}
+  iceAccel: 8
+  iceMaxSpeed: 45
+  iceGrip: 0.5
+  reverseSpeed: 15
   turnSpeed: 300
-  gripStrength: 0.95
-  driftGripStrength: 0.4
-  handling: 1
-  normalBrakeForce: 20
-  handBrakeForce: 35
-  handBrakeDriftMultiplier: 0.3
-  hoverHeight: 0
-  hoverForce: 300
+  coastingDeceleration: 1.5
+  handbrakeGrip: 1
+  groundCheckDistance: 0.6
   groundLayer:
     serializedVersion: 2
     m_Bits: 0
