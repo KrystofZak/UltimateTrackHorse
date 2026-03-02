@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 725e17e940fa04b449fa4a9a6f24e32f, type: 3}
   m_Name: RoadStart
   m_EditorClassIdentifier: Assembly-CSharp::MapGeneration.TileData
-  prefab: {fileID: 3380691765634137617, guid: c8d23e6bdcd47a24d8dee128fc962edc, type: 3}
+  prefab: {fileID: 2648149259483458749, guid: c8d23e6bdcd47a24d8dee128fc962edc, type: 3}
   tileName: RoadStart
   socketNorth: road
   socketEast: grass
