@@ -11,5 +11,5 @@ AssetOrigin:
   productId: 312766
   packageName: AK Road Editor
   packageVersion: 1.01
-  assetPath: Assets/MapEditor/Materials/Railing.mat
+  assetPath: Assets/Packages/MapEditor/Materials/Railing.mat
   uploadId: 751876

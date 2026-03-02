@@ -10,5 +10,5 @@ AssetOrigin:
   productId: 312766
   packageName: AK Road Editor
   packageVersion: 1.01
-  assetPath: Assets/MapEditor/Prefabs/MapEditor.prefab
+  assetPath: Assets/Packages/MapEditor/Prefabs/MapEditor.prefab
   uploadId: 751876

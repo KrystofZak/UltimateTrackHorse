@@ -1,6 +1,9 @@
 using System.Collections.Generic;
 using UnityEngine;
+
+#if UNITY_EDITOR
 using UnityEditor;
+#endif
 
 namespace AK.MapEditorTools
 {
@@ -71,7 +74,9 @@ namespace AK.MapEditorTools
             float accumulatedDistance = 0;
 
             // Draw the line itself
+#if UNITY_EDITOR
             Handles.color = Color.green;
+#endif
             int stepCount = pathPoints.Count;
 
             for (int i = 0; i < stepCount; i++)
@@ -101,7 +106,9 @@ namespace AK.MapEditorTools
                 // Draw line segment
                 if (i > 0)
                 {
+#if UNITY_EDITOR
                     Handles.DrawAAPolyLine(line.lineWidth, lastPoint, currentPoint);
+#endif
 
                     // Calculate distance for this segment
                     float segmentDistance = Vector3.Distance(lastPoint, currentPoint);
@@ -137,8 +144,10 @@ namespace AK.MapEditorTools
             Vector3 right = Quaternion.Euler(0, -30, 0) * -direction * size;
             Vector3 left = Quaternion.Euler(0, 30, 0) * -direction * size;
 
+#if UNITY_EDITOR
             Handles.DrawAAPolyLine(2f, position, position + right);
             Handles.DrawAAPolyLine(2f, position, position + left);
+#endif
         }
     }
 }

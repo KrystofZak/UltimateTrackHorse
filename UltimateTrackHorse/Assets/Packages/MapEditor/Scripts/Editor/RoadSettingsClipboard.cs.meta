@@ -5,5 +5,5 @@ AssetOrigin:
   productId: 312766
   packageName: AK Road Editor
   packageVersion: 1.01
-  assetPath: Assets/MapEditor/Scripts/Editor/RoadSettingsClipboard.cs
+  assetPath: Assets/Packages/MapEditor/Scripts/Editor/RoadSettingsClipboard.cs
   uploadId: 751876
