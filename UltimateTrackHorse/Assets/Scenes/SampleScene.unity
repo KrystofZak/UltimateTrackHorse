@@ -152,8 +152,8 @@ MonoBehaviour:
   mapHeight: 10
   tileSize: 20
   allAvailableTiles:
-  - {fileID: 11400000, guid: b24ded52df81d478c95e5c2da682180d, type: 2}
-  - {fileID: 11400000, guid: 8e079a6ec678240ca827438e7c19e9c5, type: 2}
+  - {fileID: 11400000, guid: e3f47f68231ce417d879cbad309abef8, type: 2}
+  - {fileID: 11400000, guid: c05c846ebf17a4f5ab59fc69a0a4ae51, type: 2}
   - {fileID: 11400000, guid: f81901d96e3f547ddbcd86bc0ed6a3ff, type: 2}
   - {fileID: 11400000, guid: f8b3ce6ae4dc749ca8647fe5e2079e41, type: 2}
   - {fileID: 11400000, guid: 28cd785cbe42948bbb8b3b6c6fac1004, type: 2}
