@@ -120,5 +120,5 @@ AssetOrigin:
   productId: 312766
   packageName: AK Road Editor
   packageVersion: 1.01
-  assetPath: Assets/MapEditor/Textures/guardrail.png
+  assetPath: Assets/Packages/MapEditor/Textures/guardrail.png
   uploadId: 751876

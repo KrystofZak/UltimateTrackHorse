@@ -542,7 +542,6 @@ namespace AK.MapEditorTools
             }
         }
 
-#if UNITY_EDITOR
         // Draw traffic lines in the scene view
         public void DrawTrafficLines()
         {
@@ -627,7 +626,6 @@ namespace AK.MapEditorTools
 
             RegenerateTrafficLines();
         }
-#endif
 
         /// <summary>
         /// Synchronizes the traffic line generators with the traffic lines list

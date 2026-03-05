@@ -10,5 +10,5 @@ AssetOrigin:
   productId: 312766
   packageName: AK Road Editor
   packageVersion: 1.01
-  assetPath: Assets/MapEditor/Scenes/Example.unity
+  assetPath: Assets/Packages/MapEditor/Scenes/Example.unity
   uploadId: 751876

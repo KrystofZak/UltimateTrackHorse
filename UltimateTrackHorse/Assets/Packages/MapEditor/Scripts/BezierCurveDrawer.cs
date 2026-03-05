@@ -1,5 +1,9 @@
 using UnityEngine;
+
+#if UNITY_EDITOR
 using UnityEditor;
+#endif
+
 using System.Collections.Generic;
 
 namespace AK.MapEditorTools
@@ -62,17 +66,23 @@ namespace AK.MapEditorTools
             if (curvePoints == null || curvePoints.Count < 2)
                 return;
 
+#if UNITY_EDITOR
             Handles.color = pathColor;
             Handles.DrawPolyLine(curvePoints.ToArray());
+#endif
 
             // Optionally draw points along the curve for debugging
             if (showCurvePoints)
             {
+#if UNITY_EDITOR
                 Handles.color = Color.green;
                 float size = 0.05f;
+#endif
                 foreach (var point in curvePoints)
                 {
+#if UNITY_EDITOR
                     Handles.SphereHandleCap(0, point, Quaternion.identity, size, EventType.Repaint);
+#endif
                 }
             }
         }
@@ -95,15 +105,18 @@ namespace AK.MapEditorTools
                 bool isSelected = selectedPointIndex == i;
 
                 // Draw anchor point
+#if UNITY_EDITOR
                 Handles.color = isSelected ? selectedPointColor : normalPointColor;
                 float size = HandleUtility.GetHandleSize(point.position) * 0.1f;
+#endif
 
+#if UNITY_EDITOR
                 if (Handles.Button(point.position, Quaternion.identity, size, size, Handles.SphereHandleCap))
                 {
                     if (onPointSelected != null)
                         onPointSelected(i, HandleType.Anchor);
                 }
-
+#endif
                 // Draw handle lines and points
                 DrawPointHandles(point, i, selectedPointIndex, onPointSelected);
             }
@@ -114,10 +127,12 @@ namespace AK.MapEditorTools
         /// </summary>
         /// <param name="position">Current position</param>
         /// <returns>New position after editing</returns>
+#if UNITY_EDITOR
         public Vector3 DrawPositionHandle(Vector3 position)
         {
             return Handles.PositionHandle(position, Quaternion.identity);
         }
+#endif
 
         /// <summary>
         /// Calculates a smooth bezier curve between specified points
@@ -295,38 +310,47 @@ namespace AK.MapEditorTools
                                     System.Action<int, HandleType> onHandleSelected)
         {
             // Draw handle lines
+#if UNITY_EDITOR
             Handles.color = handleLineColor;
             Handles.DrawLine(point.position, point.handleIn);
             Handles.DrawLine(point.position, point.handleOut);
 
             // Draw handle points
             Handles.color = handlePointColor;
-            float handleSize = HandleUtility.GetHandleSize(point.handleIn) * 0.075f;
 
+            float handleSize = HandleUtility.GetHandleSize(point.handleIn) * 0.075f;
+#endif
+
+#if UNITY_EDITOR
             if (Handles.Button(point.handleIn, Quaternion.identity, handleSize, handleSize, Handles.SphereHandleCap))
             {
                 if (onHandleSelected != null)
                     onHandleSelected(pointIndex, HandleType.InHandle);
             }
-
+#endif
+#if UNITY_EDITOR
             if (Handles.Button(point.handleOut, Quaternion.identity, handleSize, handleSize, Handles.SphereHandleCap))
             {
                 if (onHandleSelected != null)
                     onHandleSelected(pointIndex, HandleType.OutHandle);
             }
-
+#endif
             // Draw labels for the handles
             GUIStyle style = new GUIStyle();
             style.normal.textColor = handlePointColor;
             style.fontSize = 12;
             style.fontStyle = FontStyle.Bold;
 
+#if UNITY_EDITOR
             // Position the labels slightly offset from the handles
             Vector3 inLabelPos = point.handleIn + Vector3.up * handleSize * 2;
             Vector3 outLabelPos = point.handleOut + Vector3.up * handleSize * 2;
+#endif
 
+#if UNITY_EDITOR
             Handles.Label(inLabelPos, "IN", style);
             Handles.Label(outLabelPos, "OUT", style);
+#endif
         }
 
         /// <summary>
