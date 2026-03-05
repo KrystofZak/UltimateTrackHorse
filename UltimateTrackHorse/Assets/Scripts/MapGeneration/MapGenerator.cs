@@ -72,7 +72,7 @@ namespace MapGeneration
             }
         }
         
-        void SetStartAndFinish()
+        void SetStartAndFinish(bool visualize = false)
         {
             // Set start
             Cell startCell = grid[0, 0];
@@ -84,6 +84,8 @@ namespace MapGeneration
     
             CollapseCell(startCell);
             Propagate(startCell);
+            if (visualize) VisualizeCell(startCell);
+
 
             // Set a finish
             Cell endCell = grid[mapWidth - 1, mapHeight - 1];
@@ -95,6 +97,7 @@ namespace MapGeneration
     
             CollapseCell(endCell);
             Propagate(endCell);
+            if (visualize) VisualizeCell(endCell);
         }
         
         // Wave Function Collapse Algorithm
@@ -350,7 +353,7 @@ namespace MapGeneration
         // Animated version of the WFC algorithm - debug only
         public IEnumerator RunWFCAnimated()
         {
-            SetStartAndFinish();
+            SetStartAndFinish(visualize: true);
             while (!IsFullyCollapsed())
             {
                 Cell nextCell = GetCellWithLowestEntropy();
