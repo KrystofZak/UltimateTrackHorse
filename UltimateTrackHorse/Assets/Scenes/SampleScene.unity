@@ -495,6 +495,10 @@ PrefabInstance:
       value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 7561181244498786131, guid: 7358c7b0a6acc14448d9e77e9a2db954, type: 3}
+      propertyPath: defaultGrip
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7561181244498786131, guid: 7358c7b0a6acc14448d9e77e9a2db954, type: 3}
       propertyPath: driftFactor
       value: 0.287
       objectReference: {fileID: 0}
@@ -515,6 +519,10 @@ PrefabInstance:
       value: 0.95
       objectReference: {fileID: 0}
     - target: {fileID: 7561181244498786131, guid: 7358c7b0a6acc14448d9e77e9a2db954, type: 3}
+      propertyPath: defaultAccel
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 7561181244498786131, guid: 7358c7b0a6acc14448d9e77e9a2db954, type: 3}
       propertyPath: reverseSpeed
       value: 20
       objectReference: {fileID: 0}
@@ -523,8 +531,16 @@ PrefabInstance:
       value: 250
       objectReference: {fileID: 0}
     - target: {fileID: 7561181244498786131, guid: 7358c7b0a6acc14448d9e77e9a2db954, type: 3}
+      propertyPath: asphaltMaterial
+      value: 
+      objectReference: {fileID: 13400000, guid: f4a66a3ce7c1bee45b329b3318961a00, type: 2}
+    - target: {fileID: 7561181244498786131, guid: 7358c7b0a6acc14448d9e77e9a2db954, type: 3}
       propertyPath: asphaltMaxSpeed
       value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 7561181244498786131, guid: 7358c7b0a6acc14448d9e77e9a2db954, type: 3}
+      propertyPath: defaultMaxSpeed
+      value: 5
       objectReference: {fileID: 0}
     - target: {fileID: 7561181244498786131, guid: 7358c7b0a6acc14448d9e77e9a2db954, type: 3}
       propertyPath: groundLayer.m_Bits
