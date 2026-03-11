@@ -11,6 +11,9 @@ namespace MapGeneration
         public int mapWidth = 10;
         public int mapHeight = 10;
         public float tileSize = 20f; 
+        
+        [Header("Track Settings")]
+        public int targetTrackLength = 15; // Number of tiles in the track includes start and finish
 
         [Header("WFC Data")] 
         public List<TileData> allAvailableTiles; // List of all available tiles
@@ -36,7 +39,8 @@ namespace MapGeneration
         void Start()
         {
             InitializeGrid(); 
-            GenerateValidMap();
+            //GenerateValidMap();
+            GenerateValidMap2();
         }
 
         /// <summary>
@@ -117,7 +121,7 @@ namespace MapGeneration
         // Wave Function Collapse Algorithm
         public void RunWFC()
         {
-            SetStartAndFinish();
+            //SetStartAndFinish();
             
             while (!IsFullyCollapsed())
             {
@@ -179,7 +183,115 @@ namespace MapGeneration
                 }
             }
 
-            return null; // Cesta neexistuje
+            return null; // Path does not exist
+        }
+        
+        /// <summary>
+        /// Generates a random contiguous path of a specific length using DFS.
+        /// (This will be replaced by the ACO algorithm in the future).
+        /// </summary>
+        List<Vector2Int> GenerateRandomPath(Vector2Int startPos, int length)
+        {
+            List<Vector2Int> currentPath = new List<Vector2Int>();
+            HashSet<Vector2Int> visited = new HashSet<Vector2Int>();
+            
+            if (DFSPath(startPos, length, currentPath, visited))
+            {
+                return currentPath;
+            }
+            return null; 
+        }
+
+        bool DFSPath(Vector2Int current, int targetLength, List<Vector2Int> path, HashSet<Vector2Int> visited)
+        {
+            path.Add(current);
+            visited.Add(current);
+
+            if (path.Count == targetLength) return true;
+
+            Vector2Int[] dirs = { new Vector2Int(0, 1), new Vector2Int(1, 0), new Vector2Int(0, -1), new Vector2Int(-1, 0) };
+            
+            // Shuffle the directions to randomize the path
+            for (int i = 0; i < dirs.Length; i++)
+            {
+                int rnd = Random.Range(0, dirs.Length);
+                (dirs[i], dirs[rnd]) = (dirs[rnd], dirs[i]);
+            }
+
+            foreach (var dir in dirs)
+            {
+                Vector2Int next = current + dir;
+                // One tile border around the map for start and finish
+                if (next.x >= 1 && next.x < mapWidth - 1 && next.y >= 1 && next.y < mapHeight - 1)
+                {
+                    if (!visited.Contains(next))
+                    {
+                        if (DFSPath(next, targetLength, path, visited))
+                            return true;
+                    }
+                }
+            }
+
+            // Backtracking - remove the current position from the path
+            path.RemoveAt(path.Count - 1);
+            visited.Remove(current);
+            return false;
+        }
+        
+        /// <summary>
+        /// Restricts the available variants in the WFC grid to match the generated path skeleton.
+        /// </summary>
+        void ApplyPathToWFC(List<Vector2Int> path)
+        {
+            for (int i = 0; i < path.Count; i++)
+            {
+                Vector2Int current = path[i];
+                Cell cell = grid[current.x, current.y];
+
+                Vector2Int? prev = i > 0 ? path[i - 1] : (Vector2Int?)null;
+                Vector2Int? next = i < path.Count - 1 ? path[i + 1] : (Vector2Int?)null;
+
+                List<TileVariant> validForPath = new List<TileVariant>();
+
+                // Choose the source variants based on whether it's the start, finish, or a middle cell
+                List<TileVariant> sourceVariants = standardVariants;
+                if (i == 0) sourceVariants = startVariants;
+                else if (i == path.Count - 1) sourceVariants = finishVariants;
+
+                // Choose only the variants with road sockets
+                foreach (var variant in sourceVariants)
+                {
+                    bool matches = true;
+                    Vector2Int[] dirs = { new Vector2Int(0, 1), new Vector2Int(1, 0), new Vector2Int(0, -1), new Vector2Int(-1, 0) };
+
+                    for (int d = 0; d < 4; d++)
+                    {
+                        Vector2Int neighborPos = current + dirs[d];
+                        bool isPathConnection = (prev.HasValue && prev.Value == neighborPos) || 
+                                                (next.HasValue && next.Value == neighborPos);
+
+                        bool hasRoadSocket = variant.Sockets[d] == "road";
+
+                        if (isPathConnection && !hasRoadSocket) matches = false;
+                        if (!isPathConnection && hasRoadSocket) matches = false;
+                    }
+
+                    if (matches) validForPath.Add(variant);
+                }
+
+                if (validForPath.Count > 0)
+                {
+                    // Randomly choose one of the valid variants for the path cell
+                    cell.AvailableVariants = new List<TileVariant> { validForPath[Random.Range(0, validForPath.Count)] };
+                    cell.CollapsedVariant = cell.AvailableVariants[0];
+                    cell.IsCollapsed = true;
+                    Propagate(cell);
+                }
+                else
+                {
+                    Debug.LogError($"Missing prefab for path cell at {current.x}, {current.y}");
+                }
+            }
         }
         
         /// <summary>
@@ -441,21 +553,42 @@ namespace MapGeneration
                 
                 RunWFC();
 
-                // Hledáme cestu mezi tvými novými body (1,1) a (width-2, height-2)
+                // Search for a valid path between start and finish
                 validPath = FindPath(new Vector2Int(1, 1), new Vector2Int(mapWidth - 2, mapHeight - 2));
 
                 if (validPath != null)
                 {
                     Debug.Log($"Map generated with {attempts} attempts");
                     
-                    // Zavoláme naši novou sjednocenou funkci
+                    
                     InstantiatePathAndScenery(validPath);
                 }
             }
             
             if (validPath == null)
             {
-                Debug.LogError("Nepodařilo se najít průjezdnou mapu ani po 100 pokusech.");
+                Debug.LogError("Did not find path in 100 attempts.");
+            }
+        }
+        
+        public void GenerateValidMap2()
+        {
+            ClearScene();
+            InitializeGrid(); 
+            
+            List<Vector2Int> generatedPath = GenerateRandomPath(new Vector2Int(1, 1), targetTrackLength);
+
+            if (generatedPath != null)
+            {
+                ApplyPathToWFC(generatedPath);
+                RunWFC(); 
+                InstantiatePathAndScenery(generatedPath);
+                
+                Debug.Log($"Track generated with length {generatedPath.Count}.");
+            }
+            else
+            {
+                Debug.LogError("Failed to generate a valid path.");
             }
         }
         
