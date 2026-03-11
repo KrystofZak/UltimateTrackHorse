@@ -12,10 +12,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 725e17e940fa04b449fa4a9a6f24e32f, type: 3}
   m_Name: RoadPlainHouse
   m_EditorClassIdentifier: Assembly-CSharp::MapGeneration.TileData
-  prefab: {fileID: 0}
-  tileName: 
-  socketNorth: 
-  socketEast: 
-  socketSouth: 
-  socketWest: 
+  prefab: {fileID: 6742427243111729894, guid: 8153fe9f415d4f04ba769cc55a7c90f3, type: 3}
+  tileName: RoadPlainHouse
+  socketNorth: grass
+  socketEast: grass
+  socketSouth: grass
+  socketWest: grass
   baseWeight: 1
