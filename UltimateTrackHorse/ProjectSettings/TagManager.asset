@@ -10,6 +10,7 @@ TagManager:
   - Tree
   - Rock
   - Mushroom
+  - Trap
   layers:
   - Default
   - TransparentFX
