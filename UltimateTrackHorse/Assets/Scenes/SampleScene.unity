@@ -151,6 +151,7 @@ MonoBehaviour:
   mapWidth: 10
   mapHeight: 10
   tileSize: 20
+  targetTrackLength: 15
   allAvailableTiles:
   - {fileID: 11400000, guid: e3f47f68231ce417d879cbad309abef8, type: 2}
   - {fileID: 11400000, guid: c05c846ebf17a4f5ab59fc69a0a4ae51, type: 2}
@@ -162,8 +163,11 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 9e9266cb6930441cca37a716103c1087, type: 2}
   - {fileID: 11400000, guid: 0c253f5c96cc64b25a835498751c27ad, type: 2}
   - {fileID: 11400000, guid: e460372db746f4d52a4905889916c726, type: 2}
-  roadPlain: {fileID: 11400000, guid: f8b3ce6ae4dc749ca8647fe5e2079e41, type: 2}
-  roadPlainHouse: {fileID: 11400000, guid: 9e9266cb6930441cca37a716103c1087, type: 2}
+  sceneryTiles:
+  - {fileID: 11400000, guid: f8b3ce6ae4dc749ca8647fe5e2079e41, type: 2}
+  - {fileID: 11400000, guid: e59e64cfc8cb14f268575e5c4be35f77, type: 2}
+  - {fileID: 11400000, guid: 9e9266cb6930441cca37a716103c1087, type: 2}
+  - {fileID: 11400000, guid: ae975692015c94ce688d54ffa1a3d0da, type: 2}
   startTileData: {fileID: 11400000, guid: 9087856a12768481cbdeb35fdd7de9f5, type: 2}
   finishTileData: {fileID: 11400000, guid: 91b5f9480f7704da7a8241335cff0f85, type: 2}
 --- !u!4 &365963430
