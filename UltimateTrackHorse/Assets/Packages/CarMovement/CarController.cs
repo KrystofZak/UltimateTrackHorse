@@ -1,7 +1,29 @@
+using System;
 using UnityEngine;
 
 public class CarController : MonoBehaviour
 {
+    [Serializable]
+    public struct SurfaceSettings
+    {
+        public string name;
+        public LayerMask layer;
+        [Tooltip("Multiplier applied to acceleration on this surface (e.g. 0.6 for grass)")]
+        public float accelerationMultiplier;
+        [Tooltip("Multiplier applied to maxSpeed on this surface")]
+        public float maxSpeedMultiplier;
+        [Tooltip("Multiplier applied to dragCoefficient on this surface (higher = more sideways grip loss)")]
+        public float dragCoefficientMultiplier;
+
+        public static SurfaceSettings Default => new SurfaceSettings
+        {
+            name = "Default",
+            accelerationMultiplier = 1f,
+            maxSpeedMultiplier = 1f,
+            dragCoefficientMultiplier = 1f
+        };
+    }
+
     [Header("Refrences")]
     [SerializeField] private Rigidbody carRB;
     [SerializeField] private Transform[] rayPoints;
@@ -28,6 +50,10 @@ public class CarController : MonoBehaviour
     [SerializeField] private AnimationCurve steerCurve;
     [SerializeField] private float dragCoefficient = 1f;
 
+    [Header("Surface Settings")]
+    [Tooltip("Override car behaviour per surface layer. Layers not listed here use default multipliers (1.0).")]
+    [SerializeField] private SurfaceSettings[] surfaceSettings = new SurfaceSettings[0];
+
     [Header("Visuals")]
     [SerializeField] private float tireRotationSpeed = 3000f;
 
@@ -37,6 +63,8 @@ public class CarController : MonoBehaviour
 
     private int[] wheelIsGrounded = new int[4];
     private bool isGrounded = false;
+
+    private SurfaceSettings activeSurface = SurfaceSettings.Default;
 
 
     #region Unity Methods
@@ -82,12 +110,14 @@ public class CarController : MonoBehaviour
     }
     private void Acceleration()
     {
-        carRB.AddForceAtPosition(transform.forward * moveInput * acceleration, accelerationPoint.position, ForceMode.Acceleration);
+        float effectiveAcceleration = acceleration * activeSurface.accelerationMultiplier;
+        carRB.AddForceAtPosition(transform.forward * moveInput * effectiveAcceleration, accelerationPoint.position, ForceMode.Acceleration);
     }
 
     private void Deceleration()
     {
-        carRB.AddForceAtPosition(-transform.forward * moveInput * deceleration, accelerationPoint.position, ForceMode.Acceleration);
+        float effectiveDeceleration = deceleration * activeSurface.accelerationMultiplier;
+        carRB.AddForceAtPosition(-transform.forward * moveInput * effectiveDeceleration, accelerationPoint.position, ForceMode.Acceleration);
     }
 
     private void Steer()
@@ -99,7 +129,8 @@ public class CarController : MonoBehaviour
     {
         float currentSidewaysSpeed = currentCarLocalVelocity.x;
 
-        float dragForceMagnitude = -currentSidewaysSpeed * dragCoefficient;
+        float effectiveDrag = dragCoefficient * activeSurface.dragCoefficientMultiplier;
+        float dragForceMagnitude = -currentSidewaysSpeed * effectiveDrag;
 
         Vector3 dragForce = transform.right * dragForceMagnitude;
 
@@ -151,7 +182,8 @@ public class CarController : MonoBehaviour
     private void CalculateCarVelocity()
     {
         currentCarLocalVelocity = transform.InverseTransformDirection(carRB.linearVelocity);
-        carVelocityRatio = currentCarLocalVelocity.z / maxSpeed;
+        float effectiveMaxSpeed = maxSpeed * activeSurface.maxSpeedMultiplier;
+        carVelocityRatio = currentCarLocalVelocity.z / effectiveMaxSpeed;
     }
 
     #endregion
@@ -164,35 +196,59 @@ public class CarController : MonoBehaviour
     }
     #endregion
 
+    #region Surface Detection
+    private SurfaceSettings GetSurfaceForLayer(int layer)
+    {
+        for (int i = 0; i < surfaceSettings.Length; i++)
+        {
+            if ((surfaceSettings[i].layer.value & (1 << layer)) != 0)
+                return surfaceSettings[i];
+        }
+        return SurfaceSettings.Default;
+    }
+    #endregion
+
     #region Suspension methods
     private void Suspension()
     {
+        int dominantLayer = -1;
+        int mostGroundedIndex = -1;
+
         for (int i = 0; i < rayPoints.Length; i++)
         {
             RaycastHit hit;
 
             float maxDistance = restLength;
 
-            if (Physics.Raycast(rayPoints[i].position, -rayPoints[i].up, out hit, maxDistance + wheelRadius, drivable))
+            if (Physics.Raycast(rayPoints[i].position, -rayPoints[i].up, out hit, maxDistance + wheelRadius))
             {
+                int hitLayer = hit.collider.gameObject.layer;
+                bool isDrivable = (drivable.value & (1 << hitLayer)) != 0;
+
                 wheelIsGrounded[i] = 1;
+
+                if (mostGroundedIndex == -1 || isDrivable)
+                {
+                    dominantLayer = hitLayer;
+                    mostGroundedIndex = i;
+                }
 
                 float currentSpringLength = hit.distance - wheelRadius;
 
                 float springCompression = (restLength - currentSpringLength) / springTravel;
-                
+
                 float springVelocity = Vector3.Dot(carRB.GetPointVelocity(rayPoints[i].position), rayPoints[i].up);
                 float damperForce = springVelocity * damperStiffness;
 
                 float springForce = springCompression * springStiffness;
 
                 float netForce = springForce - damperForce;
-                
+
                 carRB.AddForceAtPosition(rayPoints[i].up * netForce, rayPoints[i].position);
 
                 SetTirePosition(tires[i], hit.point + rayPoints[i].up * wheelRadius);
 
-                Debug.DrawLine(rayPoints[i].position, hit.point, Color.red);
+                Debug.DrawLine(rayPoints[i].position, hit.point, isDrivable ? Color.red : Color.yellow);
             }
             else
             {
@@ -204,6 +260,7 @@ public class CarController : MonoBehaviour
             }
         }
 
+        activeSurface = dominantLayer >= 0 ? GetSurfaceForLayer(dominantLayer) : SurfaceSettings.Default;
     }
     #endregion
 }
