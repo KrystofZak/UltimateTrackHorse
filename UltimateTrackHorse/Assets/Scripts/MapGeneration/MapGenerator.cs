@@ -20,8 +20,7 @@ namespace MapGeneration
         
         // Scenery tiles for areas around the track
         [Header("Scenery Tiles")]
-        public TileData roadPlain; 
-        public TileData roadPlainHouse;
+        public List<TileData> sceneryTiles; // List of all scenery tiles
         
         // Start and finish tiles
         [Header("Special Tiles")]
@@ -38,6 +37,7 @@ namespace MapGeneration
         /// </summary>
         void Start()
         {
+            targetTrackLength += 2; // Account for start and finish tiles
             InitializeGrid(); 
             //GenerateValidMap();
             GenerateValidMap2();
@@ -345,10 +345,16 @@ namespace MapGeneration
             // Draw the scenery - random scenery tiles
             foreach (Vector2Int pos in scenerySet)
             {
+                if (sceneryTiles == null || sceneryTiles.Count == 0)
+                {
+                    Debug.LogWarning("No scenery tiles available!");
+                    continue;
+                }
+                
                 Vector3 worldPos = new Vector3(pos.x * tileSize, 0, pos.y * tileSize);
                 
-                // Choose a random scenery tile (80% chance for plain, 20% chance for house)
-                TileData sceneryToPlace = (Random.value > 0.2f) ? roadPlain : roadPlainHouse;
+                // Choose a random scenery tile from the list
+                TileData sceneryToPlace = sceneryTiles[Random.Range(0, sceneryTiles.Count)];
                 
                 // Random rotation
                 float randomYRot = Random.Range(0, 4) * 90f;
