@@ -159,6 +159,11 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 28cd785cbe42948bbb8b3b6c6fac1004, type: 2}
   - {fileID: 11400000, guid: 9087856a12768481cbdeb35fdd7de9f5, type: 2}
   - {fileID: 11400000, guid: 91b5f9480f7704da7a8241335cff0f85, type: 2}
+  - {fileID: 11400000, guid: 9e9266cb6930441cca37a716103c1087, type: 2}
+  - {fileID: 11400000, guid: 0c253f5c96cc64b25a835498751c27ad, type: 2}
+  - {fileID: 11400000, guid: e460372db746f4d52a4905889916c726, type: 2}
+  roadPlain: {fileID: 11400000, guid: f8b3ce6ae4dc749ca8647fe5e2079e41, type: 2}
+  roadPlainHouse: {fileID: 11400000, guid: 9e9266cb6930441cca37a716103c1087, type: 2}
   startTileData: {fileID: 11400000, guid: 9087856a12768481cbdeb35fdd7de9f5, type: 2}
   finishTileData: {fileID: 11400000, guid: 91b5f9480f7704da7a8241335cff0f85, type: 2}
 --- !u!4 &365963430

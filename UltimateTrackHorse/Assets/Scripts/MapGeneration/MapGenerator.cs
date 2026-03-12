@@ -11,10 +11,19 @@ namespace MapGeneration
         public int mapWidth = 10;
         public int mapHeight = 10;
         public float tileSize = 20f; 
+        
+        [Header("Track Settings")]
+        public int targetTrackLength = 15; // Number of tiles in the track includes start and finish
 
         [Header("WFC Data")] 
         public List<TileData> allAvailableTiles; // List of all available tiles
         
+        // Scenery tiles for areas around the track
+        [Header("Scenery Tiles")]
+        public TileData roadPlain; 
+        public TileData roadPlainHouse;
+        
+        // Start and finish tiles
         [Header("Special Tiles")]
         public TileData startTileData;
         public TileData finishTileData;
@@ -24,14 +33,19 @@ namespace MapGeneration
         private List<TileVariant> startVariants; // List of possible start tile variants
         private List<TileVariant> finishVariants; // List of possible finish tile variants
 
+        /// <summary>
+        /// Initializes the map generator and generates a valid map with start and finish cells
+        /// </summary>
         void Start()
         {
             InitializeGrid(); 
-            //RunWFC();
-            //StartCoroutine(RunWFCAnimated());
-            GenerateValidMap();
+            //GenerateValidMap();
+            GenerateValidMap2();
         }
 
+        /// <summary>
+        /// Initializes the grid with empty cells and splits each tile into its 4 possible rotations
+        /// </summary>
         void InitializeGrid()
         {
             standardVariants = new List<TileVariant>();
@@ -72,10 +86,14 @@ namespace MapGeneration
             }
         }
         
-        void SetStartAndFinish()
+        /// <summary>
+        /// Sets the start and finish cells to valid positions
+        /// </summary>
+        /// <param name="visualize"></param>
+        void SetStartAndFinish(bool visualize = false)
         {
             // Set start
-            Cell startCell = grid[0, 0];
+            Cell startCell = grid[1, 1];
     
             // Choose valid rotations for start
             startCell.AvailableVariants = startVariants
@@ -84,9 +102,11 @@ namespace MapGeneration
     
             CollapseCell(startCell);
             Propagate(startCell);
+            if (visualize) VisualizeCell(startCell);
+
 
             // Set a finish
-            Cell endCell = grid[mapWidth - 1, mapHeight - 1];
+            Cell endCell = grid[mapWidth - 2, mapHeight - 2];
     
             // Choose valid rotations for finish
             endCell.AvailableVariants = finishVariants
@@ -95,32 +115,253 @@ namespace MapGeneration
     
             CollapseCell(endCell);
             Propagate(endCell);
+            if (visualize) VisualizeCell(endCell);
         }
         
         // Wave Function Collapse Algorithm
         public void RunWFC()
         {
-            SetStartAndFinish();
+            //SetStartAndFinish();
             
             while (!IsFullyCollapsed())
             {
                 Cell nextCell = GetCellWithLowestEntropy();
                 
-                // No possible cell to collapse
                 if (nextCell == null || nextCell.Entropy == 0)
                 {
-                    Debug.LogError("Error: No possible cell to collapse.");
                     return; 
                 }
 
                 CollapseCell(nextCell);
                 Propagate(nextCell);
             }
+        }
+        
+        /// <summary>
+        /// BFS algorithm for finding a path between two points on the generated map,
+        /// considering only tiles that have "road" sockets connecting them
+        /// </summary>
+        /// <param name="start">Start of the track</param>
+        /// <param name="end">Finish of the track</param>
+        /// <returns></returns>
+        public List<Vector2Int> FindPath(Vector2Int start, Vector2Int end)
+        {
+            Queue<Vector2Int> frontier = new Queue<Vector2Int>();
+            frontier.Enqueue(start);
 
-            InstantiateTiles();
+            // Dictionary to store the path
+            Dictionary<Vector2Int, Vector2Int> cameFrom = new Dictionary<Vector2Int, Vector2Int>();
+            cameFrom[start] = start; 
+
+            while (frontier.Count > 0)
+            {
+                Vector2Int current = frontier.Dequeue();
+
+                if (current == end) 
+                {
+                    // Finish was found, build the path
+                    List<Vector2Int> path = new List<Vector2Int>();
+                    Vector2Int curr = end;
+                    while (curr != start) 
+                    {
+                        path.Add(curr);
+                        curr = cameFrom[curr];
+                    }
+                    path.Add(start);
+                    path.Reverse(); // Revert the path to get it from start to finish
+                    return path; 
+                }
+
+                // 
+                foreach (Vector2Int next in GetRoadNeighbors(current))
+                {
+                    if (!cameFrom.ContainsKey(next))
+                    {
+                        cameFrom[next] = current;
+                        frontier.Enqueue(next);
+                    }
+                }
+            }
+
+            return null; // Path does not exist
+        }
+        
+        /// <summary>
+        /// Generates a random contiguous path of a specific length using DFS.
+        /// (This will be replaced by the ACO algorithm in the future).
+        /// </summary>
+        List<Vector2Int> GenerateRandomPath(Vector2Int startPos, int length)
+        {
+            List<Vector2Int> currentPath = new List<Vector2Int>();
+            HashSet<Vector2Int> visited = new HashSet<Vector2Int>();
+            
+            if (DFSPath(startPos, length, currentPath, visited))
+            {
+                return currentPath;
+            }
+            return null; 
         }
 
-        // Checks if all cells are collapsed
+        bool DFSPath(Vector2Int current, int targetLength, List<Vector2Int> path, HashSet<Vector2Int> visited)
+        {
+            path.Add(current);
+            visited.Add(current);
+
+            if (path.Count == targetLength) return true;
+
+            Vector2Int[] dirs = { new Vector2Int(0, 1), new Vector2Int(1, 0), new Vector2Int(0, -1), new Vector2Int(-1, 0) };
+            
+            // Shuffle the directions to randomize the path
+            for (int i = 0; i < dirs.Length; i++)
+            {
+                int rnd = Random.Range(0, dirs.Length);
+                (dirs[i], dirs[rnd]) = (dirs[rnd], dirs[i]);
+            }
+
+            foreach (var dir in dirs)
+            {
+                Vector2Int next = current + dir;
+                // One tile border around the map for start and finish
+                if (next.x >= 1 && next.x < mapWidth - 1 && next.y >= 1 && next.y < mapHeight - 1)
+                {
+                    if (!visited.Contains(next))
+                    {
+                        if (DFSPath(next, targetLength, path, visited))
+                            return true;
+                    }
+                }
+            }
+
+            // Backtracking - remove the current position from the path
+            path.RemoveAt(path.Count - 1);
+            visited.Remove(current);
+            return false;
+        }
+        
+        /// <summary>
+        /// Restricts the available variants in the WFC grid to match the generated path skeleton.
+        /// </summary>
+        void ApplyPathToWFC(List<Vector2Int> path)
+        {
+            for (int i = 0; i < path.Count; i++)
+            {
+                Vector2Int current = path[i];
+                Cell cell = grid[current.x, current.y];
+
+                Vector2Int? prev = i > 0 ? path[i - 1] : (Vector2Int?)null;
+                Vector2Int? next = i < path.Count - 1 ? path[i + 1] : (Vector2Int?)null;
+
+                List<TileVariant> validForPath = new List<TileVariant>();
+
+                // Choose the source variants based on whether it's the start, finish, or a middle cell
+                List<TileVariant> sourceVariants = standardVariants;
+                if (i == 0) sourceVariants = startVariants;
+                else if (i == path.Count - 1) sourceVariants = finishVariants;
+
+                // Choose only the variants with road sockets
+                foreach (var variant in sourceVariants)
+                {
+                    bool matches = true;
+                    Vector2Int[] dirs = { new Vector2Int(0, 1), new Vector2Int(1, 0), new Vector2Int(0, -1), new Vector2Int(-1, 0) };
+
+                    for (int d = 0; d < 4; d++)
+                    {
+                        Vector2Int neighborPos = current + dirs[d];
+                        bool isPathConnection = (prev.HasValue && prev.Value == neighborPos) || 
+                                                (next.HasValue && next.Value == neighborPos);
+
+                        bool hasRoadSocket = variant.Sockets[d] == "road";
+
+                        if (isPathConnection && !hasRoadSocket) matches = false;
+                        if (!isPathConnection && hasRoadSocket) matches = false;
+                    }
+
+                    if (matches) validForPath.Add(variant);
+                }
+
+                if (validForPath.Count > 0)
+                {
+                    // Randomly choose one of the valid variants for the path cell
+                    cell.AvailableVariants = new List<TileVariant> { validForPath[Random.Range(0, validForPath.Count)] };
+                    cell.CollapsedVariant = cell.AvailableVariants[0];
+                    cell.IsCollapsed = true;
+                    Propagate(cell);
+                }
+                else
+                {
+                    Debug.LogError($"Missing prefab for path cell at {current.x}, {current.y}");
+                }
+            }
+        }
+        
+        /// <summary>
+        /// Draws the path and scenery on the map.
+        /// The path is drawn using the WFC-generated tiles,
+        /// while the scenery is placed around the path with a simple random distribution of scenery tiles.
+        /// </summary>
+        /// <param name="path">Generated track</param>
+        void InstantiatePathAndScenery(List<Vector2Int> path)
+        {
+            HashSet<Vector2Int> pathSet = new HashSet<Vector2Int>(path);
+            HashSet<Vector2Int> scenerySet = new HashSet<Vector2Int>();
+
+            
+            foreach (Vector2Int pathPos in path)
+            {
+                // Go through all 8 neighbors of the current position
+                for (int x = -1; x <= 1; x++)
+                {
+                    for (int y = -1; y <= 1; y++)
+                    {
+                        if (x == 0 && y == 0) continue; // Ignore the path position itself
+
+                        Vector2Int neighborPos = new Vector2Int(pathPos.x + x, pathPos.y + y);
+                        
+                        // Check if the neighbor is within the map bounds
+                        if (neighborPos.x >= 0 && neighborPos.x < mapWidth && neighborPos.y >= 0 && neighborPos.y < mapHeight)
+                        {
+                            // If the neighbor is not part of the path, add it to the scenery set
+                            if (!pathSet.Contains(neighborPos))
+                            {
+                                scenerySet.Add(neighborPos);
+                            }
+                        }
+                    }
+                }
+            }
+
+            // Draw the path - WFC-generated tiles
+            foreach (Vector2Int pos in pathSet)
+            {
+                Cell cell = grid[pos.x, pos.y];
+                if (cell.CollapsedVariant != null)
+                {
+                    Vector3 worldPos = new Vector3(pos.x * tileSize, 0, pos.y * tileSize);
+                    Quaternion rot = Quaternion.Euler(0, cell.CollapsedVariant.Rotation * 90f, 0);
+                    Instantiate(cell.CollapsedVariant.Data.prefab, worldPos, rot, transform);
+                }
+            }
+
+            // Draw the scenery - random scenery tiles
+            foreach (Vector2Int pos in scenerySet)
+            {
+                Vector3 worldPos = new Vector3(pos.x * tileSize, 0, pos.y * tileSize);
+                
+                // Choose a random scenery tile (80% chance for plain, 20% chance for house)
+                TileData sceneryToPlace = (Random.value > 0.2f) ? roadPlain : roadPlainHouse;
+                
+                // Random rotation
+                float randomYRot = Random.Range(0, 4) * 90f;
+                Quaternion rot = Quaternion.Euler(0, randomYRot, 0);
+
+                Instantiate(sceneryToPlace.prefab, worldPos, rot, transform);
+            }
+        }
+
+        /// <summary>
+        /// Checks if the map is fully collapsed (all cells are collapsed and have no available variants)
+        /// </summary>
+        /// <returns>True if collapsed, false otherwise</returns>
         bool IsFullyCollapsed()
         {
             foreach (var cell in grid)
@@ -130,7 +371,10 @@ namespace MapGeneration
             return true;
         }
 
-        // Choose the cell with the lowest entropy
+        /// <summary>
+        /// Returns the cell with the lowest entropy value.
+        /// </summary>
+        /// <returns>Cell with the lowest entropy</returns>
         Cell GetCellWithLowestEntropy()
         {
             Cell bestCell = null;
@@ -151,7 +395,10 @@ namespace MapGeneration
             return bestCell;
         }
 
-        // Randomly selects a variant from the available variants and collapses the cell
+        /// <summary>
+        /// Collapses a cell by choosing a random variant from its available variants.
+        /// </summary>
+        /// <param name="cell">Cell to be collapsed</param>
         void CollapseCell(Cell cell)
         {
             int randomIndex = Random.Range(0, cell.AvailableVariants.Count);
@@ -160,8 +407,11 @@ namespace MapGeneration
             cell.AvailableVariants.Add(cell.CollapsedVariant);
             cell.IsCollapsed = true;
         }
-
-        // Propagates the collapsed cell's variant to its neighbors
+        
+        /// <summary>
+        /// Propagates the collapsed cell's variant to its neighboring cells.'
+        /// </summary>
+        /// <param name="collapsedCell">Collapsed cell</param>
         void Propagate(Cell collapsedCell)
         {
             Stack<Cell> stack = new Stack<Cell>();
@@ -201,6 +451,13 @@ namespace MapGeneration
             }
         }
 
+        /// <summary>
+        /// Constrains the neighbor's variants to match the current cell's variant.
+        /// </summary>
+        /// <param name="current">Current cell</param>
+        /// <param name="neighbor">Neighbor cell</param>
+        /// <param name="directionIndex">Facing direction</param>
+        /// <returns></returns>
         bool ConstrainNeighbor(Cell current, Cell neighbor, int directionIndex)
         {
             bool changed = false;
@@ -237,48 +494,11 @@ namespace MapGeneration
             return changed;
         }
 
-        // Instantiate the final map
-        void InstantiateTiles()
-        {
-            foreach (var cell in grid)
-            {
-                if (cell.CollapsedVariant != null)
-                {
-                    Vector3 pos = new Vector3(cell.GridPosition.x * tileSize, 0, cell.GridPosition.y * tileSize);
-                    Quaternion rot = Quaternion.Euler(0, cell.CollapsedVariant.Rotation * 90, 0);
-                    Instantiate(cell.CollapsedVariant.Data.prefab, pos, rot, transform);
-                }
-            }
-        }
-        
-        public bool IsPathPossible(Vector2Int start, Vector2Int end)
-        {
-            Queue<Vector2Int> frontier = new Queue<Vector2Int>();
-            frontier.Enqueue(start);
-
-            HashSet<Vector2Int> reached = new HashSet<Vector2Int>();
-            reached.Add(start);
-
-            while (frontier.Count > 0)
-            {
-                Vector2Int current = frontier.Dequeue();
-
-                if (current == end) return true; // Path was found
-
-                foreach (Vector2Int next in GetRoadNeighbors(current))
-                {
-                    if (!reached.Contains(next))
-                    {
-                        reached.Add(next);
-                        frontier.Enqueue(next);
-                    }
-                }
-            }
-
-            return false; // path does not exist
-        }
-
-        // Helper function for finding neighbors connected by roads
+        /// <summary>
+        /// Helper function to get all neighbors of a cell that have "road" sockets.
+        /// </summary>
+        /// <param name="pos">Current position</param>
+        /// <returns></returns>
         List<Vector2Int> GetRoadNeighbors(Vector2Int pos)
         {
             List<Vector2Int> neighbors = new List<Vector2Int>();
@@ -316,28 +536,65 @@ namespace MapGeneration
             return neighbors;
         }
         
+        /// <summary>
+        /// Generates a valid map with start and finish cells.
+        /// 100 attempts are made to generate a map with a valid path between the start and finish.
+        /// </summary>
         public void GenerateValidMap()
         {
             int attempts = 0;
-            bool success = false;
+            List<Vector2Int> validPath = null;
 
-            while (!success && attempts < 100)
+            while (validPath == null && attempts < 100)
             {
                 attempts++;
                 ClearScene();
-                InitializeGrid(); // Reset of data
+                InitializeGrid(); 
                 
                 RunWFC();
 
-                if (IsPathPossible(new Vector2Int(0, 0), new Vector2Int(mapWidth - 1, mapHeight - 1)))
+                // Search for a valid path between start and finish
+                validPath = FindPath(new Vector2Int(1, 1), new Vector2Int(mapWidth - 2, mapHeight - 2));
+
+                if (validPath != null)
                 {
-                    success = true;
                     Debug.Log($"Map generated with {attempts} attempts");
-                    InstantiateTiles();
+                    
+                    
+                    InstantiatePathAndScenery(validPath);
                 }
+            }
+            
+            if (validPath == null)
+            {
+                Debug.LogError("Did not find path in 100 attempts.");
             }
         }
         
+        public void GenerateValidMap2()
+        {
+            ClearScene();
+            InitializeGrid(); 
+            
+            List<Vector2Int> generatedPath = GenerateRandomPath(new Vector2Int(1, 1), targetTrackLength);
+
+            if (generatedPath != null)
+            {
+                ApplyPathToWFC(generatedPath);
+                RunWFC(); 
+                InstantiatePathAndScenery(generatedPath);
+                
+                Debug.Log($"Track generated with length {generatedPath.Count}.");
+            }
+            else
+            {
+                Debug.LogError("Failed to generate a valid path.");
+            }
+        }
+        
+        /// <summary>
+        /// Clears the scene by destroying all game objects in the scene.
+        /// </summary>
         void ClearScene()
         {
             foreach (Transform child in transform)
@@ -346,30 +603,11 @@ namespace MapGeneration
             }
         }
         
-
-        // Animated version of the WFC algorithm - debug only
-        public IEnumerator RunWFCAnimated()
-        {
-            SetStartAndFinish();
-            while (!IsFullyCollapsed())
-            {
-                Cell nextCell = GetCellWithLowestEntropy();
         
-                if (nextCell == null || nextCell.Entropy == 0)
-                {
-                    Debug.LogError("Error: No possible cell to collapse!");
-                    yield break; 
-                }
-
-                CollapseCell(nextCell);
-                Propagate(nextCell);
-                
-                VisualizeCell(nextCell); 
-                yield return new WaitForSeconds(0.05f); // Small delay
-            }
-        }
-        
-        // Helper function for animated visualization
+        /// <summary>
+        /// Visualizes a cell in the scene.
+        /// </summary>
+        /// <param name="cell">Cell to be drawn</param>
         void VisualizeCell(Cell cell)
         {
             if (cell.CollapsedVariant != null)
