@@ -41,7 +41,6 @@ ExportedObj/
 .consulo/
 *.csproj
 *.unityproj
-*.unity
 *.sln
 *.suo
 *.tmp
@@ -82,3 +81,5 @@ crashlytics-build.properties
 UltimateTrackHorse/ProjectSettings/ProjectVersion.txt
 UltimateTrackHorse/ProjectSettings/ProjectVersion.txt
 UltimateTrackHorse/ProjectSettings/ProjectVersion.txt
+UltimateTrackHorse/ProjectSettings/ProjectVersion.txt
+/UltimateTrackHorse/ProjectSettings
