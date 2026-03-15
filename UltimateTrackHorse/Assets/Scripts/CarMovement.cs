@@ -2,132 +2,227 @@ using UnityEngine;
 
 public class CarMovement : MonoBehaviour
 {
+    [Header("Car Components")]
+    public Rigidbody rb;
+    public Transform carBody;
+    private BoxCollider carCollider;
+
     [Header("Surface: Asphalt")]
-    public float asphaltAccel = 25f;
-    public float asphaltMaxSpeed = 40f;
+    public Material asphaltMaterial;
+    public float asphaltAccel = 2.5f;
+    public float asphaltMaxSpeed = 18f;
+    public float asphaltTurnSpeed = 100f;
     public float asphaltGrip = 5f;
 
-    [Header("Surface: Ice")]
-    public PhysicsMaterial iceMaterial;
-    public float iceAccel = 8f;
-    public float iceMaxSpeed = 45f;
-    public float iceGrip = 0.5f;
+    [Header("Surface: Grass")]
+    public float grassAccel = 8f;
+    public float grassMaxSpeed = 7f;
+    public float grassTurnSpeed = 100f;
+    public float grassGrip = 8f;
 
+    [Header("General Movement")]
+    public float brakeDecel = 30f;
+    public float naturalDecel = 14f;
 
-    [Header("Control & Handbrake")]
-    public float reverseSpeed = 15f;
-    public float turnSpeed = 250f;
-    public float coastingDeceleration = 1.5f;
-    public float handbrakeGrip = 1f;
+    [Header("Drift Settings")]
+    public float turnSlipGrip = 2f;
+    public float handbrakeGrip = 0.5f;
+    public float driftTurnMultiplier = 2f;
+    public float driftDecel = 5f;
 
-    [Header("Physics & Raycast")]
-    public float groundCheckDistance = 0.6f;
-    public LayerMask groundLayer;
+    [Header("Ground Detection")]
+    public float groundCheckDistance = 1.5f;
+    public float groundedGravity = 30f;
+    public float airGravity = 45f;
 
-    private Rigidbody rb;
-    private float moveInput;
-    private float steerInput;
+    [Header("Visuals")]
+    public float tiltSpeed = 12f;
+
+    private Vector2 inputVector;
     private bool isHandbraking;
+    private float currentSpeed;
     private bool isGrounded;
+    private Vector3 groundNormal = Vector3.up;
 
     private float currentAccel;
     private float currentMaxSpeed;
+    private float currentTurnSpeed;
     private float currentGrip;
+
+    [Header("Debug")]
+    public bool showDebug = false;
+    private string debugHitObjectName = "---";
+    private string debugHitMaterialName = "---";
+    private string debugSurfaceType = "---";
+    private float debugGrip = 0f;
+    private float debugAngleDiff = 0f;
 
     void Start()
     {
-        rb = GetComponent<Rigidbody>();
+        if (rb == null) rb = GetComponent<Rigidbody>();
+        carCollider = GetComponent<BoxCollider>();
         rb.interpolation = RigidbodyInterpolation.Interpolate;
-        rb.collisionDetectionMode = CollisionDetectionMode.Continuous;
-        rb.centerOfMass = new Vector3(0, -0.5f, 0);
+        rb.constraints = RigidbodyConstraints.FreezeRotation;
     }
 
-    void Update()
+    public void OnMove(InputAction.CallbackContext context)
     {
-        moveInput = Input.GetAxis("Vertical");
-        steerInput = Input.GetAxis("Horizontal");
-        isHandbraking = Input.GetKey(KeyCode.Space);
+        inputVector = context.ReadValue<Vector2>();
+    }
+
+    public void OnHandBrake(InputAction.CallbackContext context)
+    {
+        isHandbraking = context.ReadValue<float>() > 0.5f;
     }
 
     void FixedUpdate()
     {
-        rb.angularVelocity = Vector3.zero;
+        CheckGroundAndMaterial();
+        SteerCar();
+        MoveCar();
 
-        isGrounded = Physics.Raycast(transform.position, -transform.up, out RaycastHit hit, groundCheckDistance, groundLayer);
-
-        if (isGrounded)
-        {
-            DetectSurfaceMaterial(hit);
-            ApplySteering();
-            ApplyMovementAndDrift();
-        }
+        Debug.DrawRay(transform.position, transform.forward * 4f, Color.blue);
+        Debug.DrawRay(transform.position, rb.linearVelocity, Color.yellow);
     }
 
-    void DetectSurfaceMaterial(RaycastHit hit)
+    void Update()
     {
-        currentAccel = asphaltAccel;
-        currentMaxSpeed = asphaltMaxSpeed;
-        currentGrip = asphaltGrip;
+        AlignVisualsWithGround();
+    }
 
-        if (hit.collider != null && hit.collider.sharedMaterial != null)
+    void CheckGroundAndMaterial()
+    {
+        if (carCollider != null) carCollider.enabled = false;
+        Vector3 rayOrigin = transform.position + Vector3.up * 0.1f;
+        bool hit = Physics.Raycast(rayOrigin, Vector3.down, out RaycastHit hitInfo, groundCheckDistance);
+        if (carCollider != null) carCollider.enabled = true;
+
+        if (showDebug)
         {
-            PhysicsMaterial surfaceMat = hit.collider.sharedMaterial;
+            Color rayColor = hit ? Color.green : Color.red;
+            Debug.DrawRay(rayOrigin, Vector3.down * groundCheckDistance, rayColor);
+        }
 
-            if (iceMaterial != null && surfaceMat == iceMaterial || surfaceMat.name.ToUpper().Contains("ICE"))
+        if (hit)
+        {
+            isGrounded = true;
+            groundNormal = hitInfo.normal;
+            MeshRenderer r = hitInfo.collider.GetComponent<MeshRenderer>();
+
+            if (showDebug)
             {
-                currentAccel = iceAccel;
-                currentMaxSpeed = iceMaxSpeed;
-                currentGrip = iceGrip;
+                debugHitObjectName = hitInfo.collider.gameObject.name;
+                debugHitMaterialName = (r != null && r.sharedMaterial != null) ? r.sharedMaterial.name : "NULL";
             }
-            
+
+            bool onAsphalt = r != null && asphaltMaterial != null && r.sharedMaterial != null
+                && r.sharedMaterial.name.Replace(" (Instance)", "") == asphaltMaterial.name.Replace(" (Instance)", "");
+
+            if (showDebug)
+                debugSurfaceType = onAsphalt ? "ASPHALT" : "GRASS";
+
+            if (onAsphalt) { currentAccel = asphaltAccel; currentMaxSpeed = asphaltMaxSpeed; currentTurnSpeed = asphaltTurnSpeed; currentGrip = asphaltGrip; }
+            else { currentAccel = grassAccel; currentMaxSpeed = grassMaxSpeed; currentTurnSpeed = grassTurnSpeed; currentGrip = grassGrip; }
+        }
+        else
+        {
+            isGrounded = false;
+            groundNormal = Vector3.up;
+            if (showDebug) { debugHitObjectName = "NOTHING"; debugHitMaterialName = "---"; debugSurfaceType = "AIR"; }
         }
     }
 
-    void ApplySteering()
+    void SteerCar()
     {
-        Vector3 flatVelocity = new Vector3(rb.linearVelocity.x, 0, rb.linearVelocity.z);
+        if (!isGrounded || Mathf.Abs(currentSpeed) < 0.1f) return;
 
-        if (flatVelocity.magnitude < 0.5f) return;
+        float turnDir = currentSpeed >= 0f ? 1f : -1f;
 
-        float localVelocityZ = transform.InverseTransformDirection(rb.linearVelocity).z;
-        float steerMultiplier = (localVelocityZ < -0.1f) ? -1f : 1f;
+        bool isDrifting = isHandbraking || Mathf.Abs(inputVector.x) > 0.1f;
+        float turnMult = isDrifting ? driftTurnMultiplier : 1f;
 
-        float speedFactor = Mathf.Clamp01(flatVelocity.magnitude / 10f);
-
-        float activeTurnSpeed = isHandbraking ? turnSpeed * 1.5f : turnSpeed;
-
-        float rotation = steerInput * activeTurnSpeed * steerMultiplier * speedFactor * Time.fixedDeltaTime;
-        rb.MoveRotation(rb.rotation * Quaternion.Euler(0, rotation, 0));
+        float rotation = inputVector.x * currentTurnSpeed * turnMult * turnDir * Time.fixedDeltaTime;
+        transform.Rotate(0f, rotation, 0f);
     }
 
-    void ApplyMovementAndDrift()
+    void MoveCar()
     {
-        Vector3 velocity = new Vector3(rb.linearVelocity.x, 0, rb.linearVelocity.z);
-        if (!isHandbraking && Mathf.Abs(moveInput) > 0.1f)
-        {
-            velocity += transform.forward * (moveInput * currentAccel * Time.fixedDeltaTime);
-        }
-        float drag = 0f;
-        if (isHandbraking) drag = 4f;
-        else if (Mathf.Abs(moveInput) < 0.1f) drag = coastingDeceleration;
+        rb.AddForce(Vector3.down * (isGrounded ? groundedGravity : airGravity), ForceMode.Acceleration);
 
-        velocity = Vector3.Lerp(velocity, Vector3.zero, drag * Time.fixedDeltaTime);
-        float activeMaxSpeed = (moveInput < 0) ? reverseSpeed : currentMaxSpeed;
-        if (velocity.magnitude > activeMaxSpeed)
-        {
-            velocity = velocity.normalized * activeMaxSpeed;
-        }
-        if (velocity.magnitude > 0.1f)
-        {
-            float activeGrip = isHandbraking ? handbrakeGrip : currentGrip;
+        if (!isGrounded) return;
 
-            float forwardSpeed = Vector3.Dot(velocity, transform.forward);
-            Vector3 optimalDirection = transform.forward * Mathf.Sign(forwardSpeed >= 0 ? 1 : -1);
-            Vector3 newDirection = Vector3.Lerp(velocity.normalized, optimalDirection, activeGrip * Time.fixedDeltaTime).normalized;
-            velocity = newDirection * velocity.magnitude;
+        if (isHandbraking) currentSpeed = Mathf.MoveTowards(currentSpeed, 0f, driftDecel * Time.fixedDeltaTime);
+        else if (Mathf.Abs(inputVector.y) > 0.01f)
+        {
+            float target = inputVector.y * currentMaxSpeed;
+            bool braking = Mathf.Sign(inputVector.y) != Mathf.Sign(currentSpeed) && Mathf.Abs(currentSpeed) > 0.1f;
+            float decel = braking ? brakeDecel : currentAccel;
+            currentSpeed = Mathf.MoveTowards(currentSpeed, target, decel * Time.fixedDeltaTime);
+        }
+        else currentSpeed = Mathf.MoveTowards(currentSpeed, 0f, naturalDecel * Time.fixedDeltaTime);
+
+        Vector3 currentVel = rb.linearVelocity;
+        currentVel.y = 0f;
+
+        Vector3 moveDir = currentVel.magnitude > 0.1f ? currentVel.normalized : (transform.forward * Mathf.Sign(currentSpeed >= 0 ? 1 : -1));
+        Vector3 targetDir = transform.forward * (currentSpeed >= 0 ? 1 : -1);
+
+        float grip;
+        if (isHandbraking) grip = handbrakeGrip;
+        else if (Mathf.Abs(inputVector.x) > 0.01f) grip = turnSlipGrip;
+        else grip = currentGrip;
+
+        if (showDebug)
+        {
+            debugGrip = grip;
+            debugAngleDiff = Vector3.Angle(moveDir, targetDir);
         }
 
-        velocity.y = rb.linearVelocity.y; 
-        rb.linearVelocity = velocity;
+        moveDir = Vector3.RotateTowards(moveDir, targetDir, grip * Time.fixedDeltaTime, 0f).normalized;
+
+        Vector3 finalVel = moveDir * Mathf.Abs(currentSpeed);
+        finalVel.y = rb.linearVelocity.y;
+
+        rb.linearVelocity = finalVel;
+    }
+
+    void AlignVisualsWithGround()
+    {
+        if (carBody == null) return;
+        Vector3 up = groundNormal;
+        Vector3 fwd = transform.forward;
+        Vector3 right = Vector3.Cross(up, fwd).normalized;
+        fwd = Vector3.Cross(right, up).normalized;
+        Quaternion targetRot = Quaternion.LookRotation(fwd, up);
+        carBody.rotation = Quaternion.Slerp(carBody.rotation, targetRot, Time.deltaTime * tiltSpeed);
+    }
+
+    void OnGUI()
+    {
+        if (!showDebug) return;
+
+        GUIStyle style = new GUIStyle(GUI.skin.box);
+        style.fontSize = 14;
+        style.alignment = TextAnchor.UpperLeft;
+        style.normal.textColor = Color.white;
+
+        string asphaltMatName = asphaltMaterial != null ? asphaltMaterial.name : "NEPŘIŘAZEN!";
+
+        string info =
+            $"=== CAR DEBUG ===\n" +
+            $"Povrch:      {debugSurfaceType}\n" +
+            $"Hit objekt:  {debugHitObjectName}\n" +
+            $"Hit mat:     {debugHitMaterialName}\n" +
+            $"Asphalt mat: {asphaltMatName}\n" +
+            $"Shoda jmen:  {debugHitMaterialName.Replace(" (Instance)", "") == asphaltMatName.Replace(" (Instance)", "")}\n" +
+            $"---\n" +
+            $"isGrounded:  {isGrounded}\n" +
+            $"Speed:       {currentSpeed:F2}\n" +
+            $"Input:       {inputVector}\n" +
+            $"Handbrake:   {isHandbraking}\n" +
+            $"Grip:        {debugGrip:F3}\n" +
+            $"Vel angle:   {debugAngleDiff:F1}° (drift = >{(180f * turnSlipGrip * Time.fixedDeltaTime):F1}°/frame)";
+
+        GUI.Box(new Rect(10, 10, 340, 230), info, style);
     }
 }
