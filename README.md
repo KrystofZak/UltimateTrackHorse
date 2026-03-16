@@ -27,14 +27,14 @@
 
 <img width="274" height="271" alt="image" src="https://github.com/user-attachments/assets/c7311bd9-0730-4c68-aea7-988b2ddfaf1c" />
 
-## Obsticles
+## Obstacles
 
 ### Barrier/Wall
 
 - different sizes and shapes
 - eg.: Boulder, Fallen Tree, Car Wreck, etc. 
 
-### Blurry obsticles
+### Blurry obstacles
 
 - Blurs visions
 - eg.: HayBale, Paint Cans, Smoke Wall
