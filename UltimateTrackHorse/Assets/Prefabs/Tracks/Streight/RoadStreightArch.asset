@@ -1,0 +1,21 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 725e17e940fa04b449fa4a9a6f24e32f, type: 3}
+  m_Name: RoadStreightArch
+  m_EditorClassIdentifier: Assembly-CSharp::MapGeneration.TileData
+  prefab: {fileID: 8203838800515696129, guid: a1b15a06df00df04182fe03edb8a4cc9, type: 3}
+  tileName: RoadStreightArch
+  socketNorth: grass
+  socketEast: road
+  socketSouth: grass
+  socketWest: road
+  baseWeight: 1
