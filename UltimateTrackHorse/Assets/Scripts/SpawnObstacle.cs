@@ -7,7 +7,7 @@ public class SpawnObstacle : MonoBehaviour
 
     [Header("What to spawn")]
     [SerializeField] private ObstacleLibrary.ObstacleType obstacleType;
-    [SerializeField] private int prefabIndex = 0;
+    [SerializeField] private int prefabIndex;
 
     [Header("Options")]
     [SerializeField] private bool keepParent = true;
@@ -22,6 +22,59 @@ public class SpawnObstacle : MonoBehaviour
         if (Input.GetKeyDown(replaceKey))
         {
             ReplaceWithSelectedPrefab();
+        }
+    }
+
+    private void SpawnNewObstacles(int n)
+    {
+        if (library == null)
+        {
+            Debug.LogError("ObstacleLibrary reference is missing.");
+            return;
+        }
+
+        var cubes = GameObject.FindGameObjectsWithTag("Obstacle");
+
+        if (cubes == null || cubes.Length == 0)
+        {
+            Debug.LogWarning("No objects with tag 'placeholder' were found.");
+            return;
+        }
+
+        n = Mathf.Clamp(n, 0, cubes.Length);
+        if (n == 0) return;
+
+        // Shuffle that bitch
+        for (int i = 0; i < n; i++)
+        {
+            int randomIndex = Random.Range(i, cubes.Length);
+            (cubes[i], cubes[randomIndex]) = (cubes[randomIndex], cubes[i]);
+        }
+
+        for (int i = 0; i < n; i++)
+        {
+            var cube = cubes[i];
+            var randomType = library.GetRandomType();
+            var prefab = library.GetRandomPrefab(randomType);
+
+            if (prefab == null)
+                continue;
+
+            var parent = keepParent ? cube.transform.parent : null;
+
+            var spawned = Instantiate(
+                prefab,
+                cube.transform.position,
+                cube.transform.rotation,
+                parent
+            );
+
+            if (keepScale)
+            {
+                spawned.transform.localScale = cube.transform.localScale;
+            }
+
+            Destroy(cube);
         }
     }
 
@@ -48,7 +101,7 @@ public class SpawnObstacle : MonoBehaviour
         replaced = true;
         Destroy(gameObject);
     }
-    
+
     private void ReplaceAll()
     {
         if (library == null)
@@ -62,17 +115,22 @@ public class SpawnObstacle : MonoBehaviour
 
         var cubes = GameObject.FindGameObjectsWithTag("placeholder");
 
-        // TODO: tady pak místo všech vybrat jen pár
         foreach (var cube in cubes)
         {
+            var parent = keepParent ? cube.transform.parent : null;
+
             var spawned = Instantiate(
                 prefab,
                 cube.transform.position,
                 cube.transform.rotation,
-                cube.transform.parent
+                parent
             );
 
-            spawned.transform.localScale = cube.transform.localScale;
+            if (keepScale)
+            {
+                spawned.transform.localScale = cube.transform.localScale;
+            }
+
             Destroy(cube);
         }
     }
