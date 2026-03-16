@@ -10,6 +10,7 @@ TagManager:
   - Tree
   - Rock
   - Mushroom
+  - Obstacle
   layers:
   - Default
   - TransparentFX

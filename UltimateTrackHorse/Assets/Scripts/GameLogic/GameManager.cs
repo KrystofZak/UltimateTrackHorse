@@ -1,6 +1,6 @@
 using UnityEngine;
-using Cinemachine; 
-using MapGeneration; 
+using Cinemachine;
+using MapGeneration;
 
 namespace GameLogic
 {
@@ -13,7 +13,9 @@ namespace GameLogic
         public GameObject playerCar;
         public MapGenerator mapGenerator;
         private int lapCount = 0;
-        
+
+        [SerializeField] private SpawnObstacle spawnObstacle;
+
         /// <summary>
         /// Subscribe to the finish line event when the game manager is enabled, and unsubscribe when disabled.
         /// </summary>
@@ -29,7 +31,7 @@ namespace GameLogic
             lapCount++;
             Debug.Log("Completed laps: " + lapCount);
             PlaceCarOnStart();
-            // TODO: Add trap placement / time penalty here
+            spawnObstacle.SpawnNewObstacles(1); 
         }
         
         /// <summary>

@@ -45,10 +45,7 @@ namespace MapGeneration
         /// </summary>
         private void Start()
         {
-            ClearScene();
             targetTrackLength += 2; // Account for start and finish tiles
-            InitializeGrid(); 
-            GenerateValidMap();
         }
 
         /// <summary>
@@ -56,7 +53,9 @@ namespace MapGeneration
         /// </summary>
         public void OnPlayClicked()
         {
-            Start();
+            ClearScene();
+            InitializeGrid();
+            GenerateValidMap();
         }
 
         /// <summary>

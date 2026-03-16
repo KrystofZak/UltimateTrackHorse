@@ -1071,6 +1071,8 @@ GameObject:
   m_Component:
   - component: {fileID: 1965604382}
   - component: {fileID: 1965604381}
+  - component: {fileID: 1965604383}
+  - component: {fileID: 1965604384}
   m_Layer: 0
   m_Name: GameManager
   m_TagString: Untagged
@@ -1092,6 +1094,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::GameLogic.GameManager
   playerCar: {fileID: 1303591705}
   mapGenerator: {fileID: 365963429}
+  spawnObstacle: {fileID: 1965604383}
 --- !u!4 &1965604382
 Transform:
   m_ObjectHideFlags: 0
@@ -1107,6 +1110,39 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1965604383
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1965604380}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9198ef53210048019b50aa4bdf436562, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GameLogic.SpawnObstacle
+  replaceKey: 102
+  library: {fileID: 1965604384}
+  obstacleType: 0
+  prefabIndex: 0
+  keepParent: 1
+  keepScale: 1
+--- !u!114 &1965604384
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1965604380}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 22d15e61cdd347a5977552d5c556c991, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ObstacleLibrary
+  walls: []
+  fogs: []
+  surfaces: []
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
