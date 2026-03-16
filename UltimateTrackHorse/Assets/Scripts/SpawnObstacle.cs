@@ -2,11 +2,16 @@
 
 public class SpawnObstacle : MonoBehaviour
 {
-    // připravit rozhraní pro Obstacles, možná 
-    // GameObject.FindGameObjectsWithTag -> get all cubes
     [SerializeField] private KeyCode replaceKey = KeyCode.F;
     [SerializeField] private ObstacleLibrary library;
-    [SerializeField] private int wallIndex = 0;
+
+    [Header("What to spawn")]
+    [SerializeField] private ObstacleLibrary.ObstacleType obstacleType;
+    [SerializeField] private int prefabIndex = 0;
+
+    [Header("Options")]
+    [SerializeField] private bool keepParent = true;
+    [SerializeField] private bool keepScale = true;
 
     private bool replaced = false;
 
@@ -16,11 +21,35 @@ public class SpawnObstacle : MonoBehaviour
 
         if (Input.GetKeyDown(replaceKey))
         {
-            ReplaceWithWall();
+            ReplaceWithSelectedPrefab();
         }
     }
 
-    private void ReplaceWithWall()
+    private void ReplaceWithSelectedPrefab()
+    {
+        if (!library)
+        {
+            Debug.LogError("ObstacleLibrary reference is missing.");
+            return;
+        }
+
+        var prefab = library.GetPrefab(obstacleType, prefabIndex);
+        if (!prefab) return;
+
+        var parent = keepParent ? transform.parent : null;
+
+        var spawned = Instantiate(prefab, transform.position, transform.rotation, parent);
+
+        if (keepScale)
+        {
+            spawned.transform.localScale = transform.localScale;
+        }
+
+        replaced = true;
+        Destroy(gameObject);
+    }
+    
+    private void ReplaceAll()
     {
         if (library == null)
         {
@@ -28,24 +57,23 @@ public class SpawnObstacle : MonoBehaviour
             return;
         }
 
-        if (library.walls == null || library.walls.Length == 0)
+        var prefab = library.GetPrefab(obstacleType, prefabIndex);
+        if (prefab == null) return;
+
+        var cubes = GameObject.FindGameObjectsWithTag("placeholder");
+
+        // TODO: tady pak místo všech vybrat jen pár
+        foreach (var cube in cubes)
         {
-            Debug.LogError("Walls array is empty. Make sure prefabs were loaded.");
-            return;
+            var spawned = Instantiate(
+                prefab,
+                cube.transform.position,
+                cube.transform.rotation,
+                cube.transform.parent
+            );
+
+            spawned.transform.localScale = cube.transform.localScale;
+            Destroy(cube);
         }
-
-        if (wallIndex < 0 || wallIndex >= library.walls.Length)
-        {
-            Debug.LogError("wallIndex is out of range.");
-            return;
-        }
-
-        GameObject prefab = library.walls[wallIndex];
-        GameObject spawned = Instantiate(prefab, transform.position, transform.rotation);
-        // GameObject spawned = Instantiate(prefab, transform.position, transform.rotation * prefab.transform.rotation);
-        // pokud by bylo potřeba sčítat rotace prefabu a placeholderu => násobení quaternionu
-
-        replaced = true;
-        Destroy(gameObject);
     }
 }
