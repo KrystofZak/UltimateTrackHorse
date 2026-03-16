@@ -45,9 +45,18 @@ namespace MapGeneration
         /// </summary>
         private void Start()
         {
+            ClearScene();
             targetTrackLength += 2; // Account for start and finish tiles
             InitializeGrid(); 
             GenerateValidMap();
+        }
+
+        /// <summary>
+        /// Starts the game. Connect this to PlayButton in Main Menu.
+        /// </summary>
+        public void OnPlayClicked()
+        {
+            Start();
         }
 
         /// <summary>
