@@ -1,0 +1,3 @@
+repository "tutorial/UltimateTrackHorse@7972504302010@cloud"
+  path "/"
+    smartbranch "/main"
