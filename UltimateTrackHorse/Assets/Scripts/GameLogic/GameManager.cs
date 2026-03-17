@@ -32,6 +32,17 @@ namespace GameLogic
             Debug.Log("Completed laps: " + lapCount);
             PlaceCarOnStart();
             spawnObstacle.SpawnNewObstacles(1); 
+            
+            Timer timer = FindObjectOfType<Timer>();
+
+            Debug.Log("Lap time: " + timer.timeElapsed);
+
+            if (timer != null)
+            {
+                timer.ResetTimer();
+            }
+
+            
         }
         
         /// <summary>

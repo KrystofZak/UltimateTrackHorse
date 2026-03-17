@@ -35,6 +35,13 @@ public class UIManager : MonoBehaviour
         HideAllViews();
         gameView.SetActive(true);
         Time.timeScale = 1f; // Ensure time is running
+
+        Timer timer = FindObjectOfType<Timer>();
+        if (timer != null)
+        {
+            timer.ResetTimer();
+            timer.StartTimer();
+        }
     }
 
     /// <summary>

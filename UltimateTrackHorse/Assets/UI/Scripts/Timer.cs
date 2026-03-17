@@ -5,34 +5,38 @@ public class Timer : MonoBehaviour
 {
     [Header("Timer Settings")]
     [SerializeField] private TMP_Text timerText;
-    private float timeRemaining = 30f;
+    public float timeElapsed = 0f;
     private bool timerIsRunning = false;
 
     void Start()
     {
-        // Starts the timer automatically
-        timerIsRunning = true;
+        // Timer no longer starts automatically
+        DisplayTime(timeElapsed);
     }
 
     void Update()
     {
         if (timerIsRunning)
         {
-            if (timeRemaining > 0)
-            {
-                timeRemaining -= Time.deltaTime;
-                DisplayTime(timeRemaining);
-            }
-            else
-            {
-                timeRemaining = 0;
-                timerIsRunning = false;
-                DisplayTime(timeRemaining);
-                
-                // --- Add any logic for when the timer ends here ---
-                Debug.Log("Time has run out!");
-            }
+            timeElapsed += Time.deltaTime;
+            DisplayTime(timeElapsed);
         }
+    }
+
+    public void StartTimer()
+    {
+        timerIsRunning = true;
+    }
+
+    public void StopTimer()
+    {
+        timerIsRunning = false;
+    }
+
+    public void ResetTimer()
+    {
+        timeElapsed = 0f;
+        DisplayTime(timeElapsed);
     }
 
     private void DisplayTime(float timeToDisplay)
