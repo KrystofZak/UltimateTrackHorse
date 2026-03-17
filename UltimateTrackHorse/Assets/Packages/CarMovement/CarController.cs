@@ -137,7 +137,7 @@ public class CarController : MonoBehaviour
 
         if (moveInput > 0.1f)
         {
-            // Jízda vpøed
+            
             if (forwardSpeed < -0.5f)
             {
                 carRB.AddForceAtPosition(transform.forward * moveInput * effectiveDeceleration, accelerationPoint.position, ForceMode.Acceleration);
@@ -151,7 +151,7 @@ public class CarController : MonoBehaviour
         {
             if (preventReverse)
             {
-                // Pokud jsme se zamkli v módu brždìní, tak jen brzdíme nebo držíme na místì
+                
                 if (forwardSpeed > 0.5f)
                 {
                     carRB.AddForceAtPosition(transform.forward * moveInput * effectiveDeceleration, accelerationPoint.position, ForceMode.Acceleration);
@@ -163,7 +163,7 @@ public class CarController : MonoBehaviour
             }
             else
             {
-                // Zde jsme stiskli klávesu pøi malé rychlosti = mùžeme couvat jako s normálním plynem
+                
                 carRB.AddForceAtPosition(transform.forward * moveInput * effectiveAcceleration, accelerationPoint.position, ForceMode.Acceleration);
             }
         }
@@ -303,7 +303,7 @@ public class CarController : MonoBehaviour
     #region Input Handeling
     private void GetInput()
     {
-        moveInput = Input.GetAxis("Vertical");
+        moveInput = Input.GetAxisRaw("Vertical");
         steerInput = Input.GetAxisRaw("Horizontal");
         bool pressingBrake = moveInput < -0.1f;
 
