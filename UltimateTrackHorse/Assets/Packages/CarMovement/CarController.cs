@@ -30,6 +30,8 @@ public class CarController : MonoBehaviour
     [SerializeField] private LayerMask drivable;
     [SerializeField] private Transform accelerationPoint;
     [SerializeField] private GameObject[] tires = new GameObject[4];
+    [SerializeField] private TrailRenderer[] skidMarks = new TrailRenderer[2];
+    [SerializeField] private ParticleSystem[] skidSmokes = new ParticleSystem[2];
 
     [Header("Suspension Settings")]
     [SerializeField] private float springStiffness;
@@ -56,6 +58,7 @@ public class CarController : MonoBehaviour
 
     [Header("Visuals")]
     [SerializeField] private float tireRotationSpeed = 3000f;
+    [SerializeField] private float minSkidVelocity = 10f;
 
 
     private Vector3 currentCarLocalVelocity = Vector3.zero;
@@ -88,6 +91,7 @@ public class CarController : MonoBehaviour
         CalculateCarVelocity();
         Movement();
         Visuals();
+        Vfx();
     }
 
     private void Update()
@@ -155,6 +159,43 @@ public class CarController : MonoBehaviour
     private void SetTirePosition(GameObject tire, Vector3 targetPosition)
     {
         tire.transform.position = targetPosition;
+    }
+
+    private void Vfx()
+    {
+        if(isGrounded && currentCarLocalVelocity.x > minSkidVelocity)
+        {
+            ToggleSkidMarks(true);
+            ToggleSkidSmokes(true);
+
+        }
+        else
+        {
+            ToggleSkidMarks(false);
+            ToggleSkidSmokes(false);
+
+        }
+    }
+    private void ToggleSkidMarks(bool toggle) 
+    {
+        foreach (TrailRenderer skid in skidMarks)
+        {
+            skid.emitting = toggle;
+        }
+    }
+    private void ToggleSkidSmokes(bool toggle)
+    {
+        foreach (ParticleSystem skid in skidSmokes)
+        {
+            if (toggle) 
+            {
+                skid.Play();
+            }
+            else
+            {
+                skid.Stop();
+            }
+        }
     }
 
     #endregion
