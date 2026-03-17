@@ -172,8 +172,12 @@ namespace MapGeneration
                 {
                     if (!visited.Contains(next))
                     {
-                        if (DFSPath(next, targetLength, path, visited))
-                            return true;
+                        // Check if the next position creates a shortcut (adjacent to older path segments, not just neighbors)
+                        if (!CreatesShortcut(next, current, path))
+                        {
+                            if (DFSPath(next, targetLength, path, visited))
+                                return true;
+                        }
                     }
                 }
             }
@@ -181,6 +185,44 @@ namespace MapGeneration
             // Backtracking - remove the current position from the path
             path.RemoveAt(path.Count - 1);
             visited.Remove(current);
+            return false;
+        }
+
+        /// <summary>
+        /// Checks if adding a new position would create a shortcut through the path.
+        /// A shortcut is when the new position touches a non-adjacent segment of the path.
+        /// Adjacent segments (neighbors in sequence) are allowed - these create turns in the path.
+        /// </summary>
+        private bool CreatesShortcut(Vector2Int newPos, Vector2Int currentPos, List<Vector2Int> path)
+        {
+            // Check all 8 neighbors
+            for (int x = -1; x <= 1; x++)
+            {
+                for (int y = -1; y <= 1; y++)
+                {
+                    if (x == 0 && y == 0) continue;
+
+                    Vector2Int neighbor = new Vector2Int(newPos.x + x, newPos.y + y);
+                    
+                    // Find the index of this neighbor in the path
+                    int neighborIndex = path.IndexOf(neighbor);
+                    if (neighborIndex == -1) continue; // Not in path
+                    
+                    // Find the index of current position
+                    int currentIndex = path.IndexOf(currentPos);
+                    
+                    // Allow if it's a direct neighbor in sequence (e.g., can touch prev segment)
+                    // But disallow if it skips segments (creates a shortcut)
+                    int distance = Mathf.Abs(neighborIndex - currentIndex);
+                    
+                    // Allow direct connections in sequence (distance 1) or from start
+                    if (distance > 1)
+                    {
+                        return true; // Creates a shortcut!
+                    }
+                }
+            }
+            
             return false;
         }
         
