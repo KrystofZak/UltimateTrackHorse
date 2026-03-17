@@ -43,8 +43,9 @@ public class CarController : MonoBehaviour
     [Header("Input")]
     private float moveInput = 0;
     private float steerInput = 0;
-    private bool canReverse = false;
-    public float reverseThrashHold = 0.5f;
+    private bool isBraking = false;
+    private bool preventReverse = false;
+    public float reverseSpeedThreshold = 1f;
 
     [Header("Car Settings")]
     [SerializeField] private float acceleration = 25f;
@@ -136,6 +137,7 @@ public class CarController : MonoBehaviour
 
         if (moveInput > 0.1f)
         {
+            // Jízda vpøed
             if (forwardSpeed < -0.5f)
             {
                 carRB.AddForceAtPosition(transform.forward * moveInput * effectiveDeceleration, accelerationPoint.position, ForceMode.Acceleration);
@@ -145,24 +147,29 @@ public class CarController : MonoBehaviour
                 carRB.AddForceAtPosition(transform.forward * moveInput * effectiveAcceleration, accelerationPoint.position, ForceMode.Acceleration);
             }
         }
-        
         else if (moveInput < -0.1f)
         {
-            if (forwardSpeed > 0.5f) 
+            if (preventReverse)
             {
-                carRB.AddForceAtPosition(transform.forward * moveInput * effectiveDeceleration, accelerationPoint.position, ForceMode.Acceleration);
-                canReverse = false; 
+                // Pokud jsme se zamkli v módu brždìní, tak jen brzdíme nebo držíme na místì
+                if (forwardSpeed > 0.5f)
+                {
+                    carRB.AddForceAtPosition(transform.forward * moveInput * effectiveDeceleration, accelerationPoint.position, ForceMode.Acceleration);
+                }
+                else
+                {
+                    BrakeToStop();
+                }
             }
-            else if (canReverse)
+            else
             {
+                // Zde jsme stiskli klávesu pøi malé rychlosti = mùžeme couvat jako s normálním plynem
                 carRB.AddForceAtPosition(transform.forward * moveInput * effectiveAcceleration, accelerationPoint.position, ForceMode.Acceleration);
             }
-            else 
-            {
-                BrakeToStop();
-            }
         }
+    
     }
+
     private void BrakeToStop()
     {
         
@@ -251,7 +258,7 @@ public class CarController : MonoBehaviour
     {
         foreach (ParticleSystem skid in skidSmokes)
         {
-            if (toggle) 
+            if (toggle && !skid.isPlaying) 
             {
                 skid.Play();
             }
@@ -298,9 +305,26 @@ public class CarController : MonoBehaviour
     {
         moveInput = Input.GetAxis("Vertical");
         steerInput = Input.GetAxisRaw("Horizontal");
-        if (Mathf.Abs(moveInput) < reverseThrashHold)
+        bool pressingBrake = moveInput < -0.1f;
+
+        if (pressingBrake && !isBraking)
         {
-            canReverse = true;
+            
+            isBraking = true;
+            if (currentCarLocalVelocity.z > reverseSpeedThreshold)
+            {
+                preventReverse = true;
+            }
+            else
+            {
+                preventReverse = false;
+            }
+        }
+        else if (!pressingBrake)
+        {
+            
+            isBraking = false;
+            preventReverse = false;
         }
     }
     #endregion
