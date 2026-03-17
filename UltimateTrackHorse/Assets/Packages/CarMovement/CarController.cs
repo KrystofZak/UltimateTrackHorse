@@ -43,6 +43,8 @@ public class CarController : MonoBehaviour
     [Header("Input")]
     private float moveInput = 0;
     private float steerInput = 0;
+    private bool canReverse = false;
+    public float reverseThrashHold = 0.5f;
 
     [Header("Car Settings")]
     [SerializeField] private float acceleration = 25f;
@@ -106,10 +108,12 @@ public class CarController : MonoBehaviour
     {
         if (isGrounded)
         {
-            Acceleration();
-            Deceleration();
+            HandleMotor();
+            //Acceleration();
+            //Deceleration();
             Steer();
             SidewaysDrag();
+            LongitudinalDrag();
         }
     }
     private void Acceleration()
@@ -124,9 +128,69 @@ public class CarController : MonoBehaviour
         carRB.AddForceAtPosition(-transform.forward * moveInput * effectiveDeceleration, accelerationPoint.position, ForceMode.Acceleration);
     }
 
+    private void HandleMotor()
+    {
+        float forwardSpeed = currentCarLocalVelocity.z;
+        float effectiveAcceleration = acceleration * activeSurface.accelerationMultiplier;
+        float effectiveDeceleration = deceleration * activeSurface.accelerationMultiplier;
+
+        if (moveInput > 0.1f)
+        {
+            if (forwardSpeed < -0.5f)
+            {
+                carRB.AddForceAtPosition(transform.forward * moveInput * effectiveDeceleration, accelerationPoint.position, ForceMode.Acceleration);
+            }
+            else
+            {
+                carRB.AddForceAtPosition(transform.forward * moveInput * effectiveAcceleration, accelerationPoint.position, ForceMode.Acceleration);
+            }
+        }
+        
+        else if (moveInput < -0.1f)
+        {
+            if (forwardSpeed > 0.5f) 
+            {
+                carRB.AddForceAtPosition(transform.forward * moveInput * effectiveDeceleration, accelerationPoint.position, ForceMode.Acceleration);
+                canReverse = false; 
+            }
+            else if (canReverse)
+            {
+                carRB.AddForceAtPosition(transform.forward * moveInput * effectiveAcceleration, accelerationPoint.position, ForceMode.Acceleration);
+            }
+            else 
+            {
+                BrakeToStop();
+            }
+        }
+    }
+    private void BrakeToStop()
+    {
+        
+        float stoppingForce = -currentCarLocalVelocity.z * deceleration;
+        carRB.AddForceAtPosition(transform.forward * stoppingForce, accelerationPoint.position, ForceMode.Acceleration);
+    }
+    private void LongitudinalDrag()
+    {
+        
+        if (Mathf.Abs(moveInput) < 0.1f)
+        {
+            float dragForce = -currentCarLocalVelocity.z * (deceleration * 0.5f);
+            carRB.AddForceAtPosition(transform.forward * dragForce, accelerationPoint.position, ForceMode.Acceleration);
+        }
+    }
+
+
+
+
+
     private void Steer()
     {
-        carRB.AddTorque(steerStrength * steerInput * steerCurve.Evaluate(carVelocityRatio) * Mathf.Sign(carVelocityRatio) * transform.up, ForceMode.Acceleration);
+        
+        float speedRatioAbs = Mathf.Abs(carVelocityRatio);
+
+        float direction = currentCarLocalVelocity.z >= -0.1f ? 1f : -1f;
+
+        carRB.AddTorque(steerStrength * steerInput * steerCurve.Evaluate(speedRatioAbs) * direction * transform.up, ForceMode.Acceleration);
     }
 
     private void SidewaysDrag()
@@ -233,7 +297,11 @@ public class CarController : MonoBehaviour
     private void GetInput()
     {
         moveInput = Input.GetAxis("Vertical");
-        steerInput = Input.GetAxis("Horizontal");
+        steerInput = Input.GetAxisRaw("Horizontal");
+        if (Mathf.Abs(moveInput) < reverseThrashHold)
+        {
+            canReverse = true;
+        }
     }
     #endregion
 
