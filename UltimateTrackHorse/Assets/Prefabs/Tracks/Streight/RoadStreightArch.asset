@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 725e17e940fa04b449fa4a9a6f24e32f, type: 3}
   m_Name: RoadStreightArch
   m_EditorClassIdentifier: Assembly-CSharp::MapGeneration.TileData
-  prefab: {fileID: 4670186211672389188, guid: a1b15a06df00df04182fe03edb8a4cc9, type: 3}
+  prefab: {fileID: 2030331147788364159, guid: a1b15a06df00df04182fe03edb8a4cc9, type: 3}
   tileName: RoadStreightArch
   socketNorth: grass
   socketEast: road
