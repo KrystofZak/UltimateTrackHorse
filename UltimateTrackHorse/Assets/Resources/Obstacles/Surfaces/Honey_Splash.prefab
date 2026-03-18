@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 4709667758700506383}
   - component: {fileID: 7401928316894370245}
   - component: {fileID: 2636733388196589245}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Honey_Splash
   m_TagString: Untagged
   m_Icon: {fileID: 0}
