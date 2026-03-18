@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using GameLogic;
 using UnityEngine;
 
@@ -39,6 +40,11 @@ namespace MapGeneration
         private List<TileVariant> standardVariants; // List of all possible tile variants
         private List<TileVariant> startVariants; // List of possible start tile variants
         private List<TileVariant> finishVariants; // List of possible finish tile variants
+        private bool useManualSeed;
+        private int manualSeed;
+
+        public int LastUsedSeed { get; private set; }
+        public string LastGenerationSignature { get; private set; }
 
         /// <summary>
         /// Initializes the map generator and generates a valid map with start and finish cells
@@ -53,9 +59,123 @@ namespace MapGeneration
         /// </summary>
         public void OnPlayClicked()
         {
-            ClearScene();
-            InitializeGrid();
-            GenerateValidMap();
+            GenerateMapWithCurrentSeed();
+        }
+
+        /// <summary>
+        /// Overrides random seed generation with a specific seed string.
+        /// Empty string disables override and switches back to random seeds.
+        /// </summary>
+        public void SetSeed(string seed)
+        {
+            if (string.IsNullOrWhiteSpace(seed))
+            {
+                useManualSeed = false;
+                Debug.Log("Manual seed cleared. Map generation will use random seeds.");
+                return;
+            }
+
+            string trimmedSeed = seed.Trim();
+            if (int.TryParse(trimmedSeed, out int parsedSeed))
+            {
+                manualSeed = parsedSeed;
+            }
+            else
+            {
+                // Stable hash ensures same text input always maps to the same seed.
+                manualSeed = ComputeStableSeedFromString(trimmedSeed);
+            }
+
+            useManualSeed = true;
+            Debug.Log($"Manual seed set to {manualSeed} (input: '{trimmedSeed}').");
+        }
+
+        private void GenerateMapWithCurrentSeed()
+        {
+            int seed = useManualSeed ? manualSeed : unchecked((int)System.DateTime.UtcNow.Ticks);
+            GenerateMapFromSeed(seed);
+        }
+
+        private int ComputeStableSeedFromString(string seedText)
+        {
+            unchecked
+            {
+                // FNV-1a 32-bit hash for deterministic string-to-seed conversion.
+                uint hash = 2166136261;
+                for (int i = 0; i < seedText.Length; i++)
+                {
+                    hash ^= seedText[i];
+                    hash *= 16777619;
+                }
+
+                return (int)hash;
+            }
+        }
+
+        /// <summary>
+        /// Generates a map deterministically from the provided seed.
+        /// </summary>
+        public bool GenerateMapFromSeed(int seed)
+        {
+            LastUsedSeed = seed;
+            Random.State previousRandomState = Random.state;
+
+            try
+            {
+                Random.InitState(LastUsedSeed);
+                bool success = GenerateValidMap();
+                LastGenerationSignature = success ? BuildGenerationSignature() : string.Empty;
+                return success;
+            }
+            finally
+            {
+                Random.state = previousRandomState;
+            }
+        }
+
+        private string BuildGenerationSignature()
+        {
+            StringBuilder sb = new StringBuilder();
+
+            for (int x = 0; x < mapWidth; x++)
+            {
+                for (int y = 0; y < mapHeight; y++)
+                {
+                    Cell cell = grid[x, y];
+                    if (cell?.CollapsedVariant == null)
+                    {
+                        continue;
+                    }
+
+                    string tileName = cell.CollapsedVariant.Data != null ? cell.CollapsedVariant.Data.tileName : "null";
+                    sb.Append(x)
+                        .Append(',')
+                        .Append(y)
+                        .Append(',')
+                        .Append(tileName)
+                        .Append(',')
+                        .Append(cell.CollapsedVariant.Rotation)
+                        .Append('|');
+                }
+            }
+
+            // Include instantiated result so scenery differences are caught too.
+            List<string> placements = new List<string>();
+            foreach (Transform child in transform)
+            {
+                Vector3 position = child.position;
+                int rotY = Mathf.RoundToInt(child.rotation.eulerAngles.y) % 360;
+                string prefabName = child.name.Replace("(Clone)", string.Empty);
+                placements.Add($"{Mathf.RoundToInt(position.x)}:{Mathf.RoundToInt(position.z)}:{rotY}:{prefabName}");
+            }
+
+            placements.Sort();
+            for (int i = 0; i < placements.Count; i++)
+            {
+                sb.Append(placements[i]).Append('|');
+            }
+
+            return sb.ToString();
         }
 
         /// <summary>
@@ -319,7 +439,7 @@ namespace MapGeneration
             }
 
             // Draw the path - WFC-generated tiles
-            foreach (Vector2Int pos in pathSet)
+            foreach (Vector2Int pos in path)
             {
                 Cell cell = grid[pos.x, pos.y];
                 if (cell.CollapsedVariant != null)
@@ -330,8 +450,14 @@ namespace MapGeneration
                 }
             }
 
+            // Draw the scenery in stable order so random picks stay deterministic with the same seed.
+            List<Vector2Int> orderedScenery = scenerySet
+                .OrderBy(p => p.x)
+                .ThenBy(p => p.y)
+                .ToList();
+
             // Draw the scenery - random scenery tiles
-            foreach (Vector2Int pos in scenerySet)
+            foreach (Vector2Int pos in orderedScenery)
             {
                 if (sceneryTiles == null || sceneryTiles.Count == 0)
                 {
@@ -508,7 +634,7 @@ namespace MapGeneration
         /// Using DFS to generate a random path and applying it to the WFC grid.
         /// Then running the WFC algorithm to collapse the cells.
         /// </summary>
-        private void GenerateValidMap()
+        private bool GenerateValidMap()
         {
             ClearScene();
             InitializeGrid(); 
@@ -526,12 +652,12 @@ namespace MapGeneration
                     gameManager.PlaceCarOnStart();
                 }
                 
-                Debug.Log($"Track generated with length {generatedPath.Count}.");
+                Debug.Log($"Track generated with length {generatedPath.Count}. Seed: {LastUsedSeed}");
+                return true;
             }
-            else
-            {
-                Debug.LogError("Failed to generate a valid path.");
-            }
+
+            Debug.LogError($"Failed to generate a valid path. Seed: {LastUsedSeed}");
+            return false;
         }
         
         /// <summary>
