@@ -234,17 +234,16 @@ public class CarController : MonoBehaviour
 
     private void Vfx()
     {
-        if(isGrounded && currentCarLocalVelocity.x > minSkidVelocity)
+       
+        if (isGrounded && Mathf.Abs(currentCarLocalVelocity.x) > minSkidVelocity)
         {
             ToggleSkidMarks(true);
             ToggleSkidSmokes(true);
-
         }
         else
         {
             ToggleSkidMarks(false);
             ToggleSkidSmokes(false);
-
         }
     }
     private void ToggleSkidMarks(bool toggle) 
@@ -258,13 +257,21 @@ public class CarController : MonoBehaviour
     {
         foreach (ParticleSystem skid in skidSmokes)
         {
-            if (toggle && !skid.isPlaying) 
+            if (toggle)
             {
-                skid.Play();
+               
+                if (!skid.isPlaying)
+                {
+                    skid.Play();
+                }
             }
             else
             {
-                skid.Stop();
+               
+                if (skid.isPlaying)
+                {
+                    skid.Stop();
+                }
             }
         }
     }
