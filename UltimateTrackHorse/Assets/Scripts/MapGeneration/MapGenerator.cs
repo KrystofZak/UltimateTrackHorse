@@ -54,6 +54,50 @@ namespace MapGeneration
             targetTrackLength += 2; // Account for start and finish tiles
         }
 
+        #region UI Toggle Methods for Track Length
+        
+        /// <summary>
+        /// Sets a short track length. Connect this to the OnValueChanged event of a "Short Track" UI Toggle.
+        /// </summary>
+        public void SetTrackLengthFive()
+        {
+            targetTrackLength = 5;
+        }
+
+        /// <summary>
+        /// Sets a medium track length. Connect this to the OnValueChanged event of a "Medium Track" UI Toggle.
+        /// </summary>
+        public void SetTrackLengthTen()
+        {
+            targetTrackLength = 10;
+        }
+
+        /// <summary>
+        /// Sets a long track length. Connect this to the OnValueChanged event of a "Long Track" UI Toggle.
+        /// </summary>
+        public void SetTrackLengthFifteen()
+        {
+            targetTrackLength = 15;
+        }
+
+        /// <summary>
+        /// Sets a custom track length from a string input. Connect this to the OnEndEdit event of an InputField.
+        /// </summary>
+        public void SetCustomTrackLengthFromString(string lengthString)
+        {
+            if (int.TryParse(lengthString, out int parsedLength))
+            {
+                // Optionally clamp the value to prevent too small or too large maps
+                targetTrackLength = Mathf.Clamp(parsedLength, 3, 100); 
+            }
+            else
+            {
+                Debug.LogWarning("Invalid track length inputted: " + lengthString);
+            }
+        }
+        
+        #endregion
+
         /// <summary>
         /// Starts the game. Connect this to PlayButton in Main Menu.
         /// </summary>
