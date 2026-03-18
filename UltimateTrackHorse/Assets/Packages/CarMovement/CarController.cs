@@ -30,6 +30,8 @@ public class CarController : MonoBehaviour
     [SerializeField] private LayerMask drivable;
     [SerializeField] private Transform accelerationPoint;
     [SerializeField] private GameObject[] tires = new GameObject[4];
+    [SerializeField] private TrailRenderer[] skidMarks = new TrailRenderer[2];
+    [SerializeField] private ParticleSystem[] skidSmokes = new ParticleSystem[2];
 
     [Header("Suspension Settings")]
     [SerializeField] private float springStiffness;
@@ -41,6 +43,9 @@ public class CarController : MonoBehaviour
     [Header("Input")]
     private float moveInput = 0;
     private float steerInput = 0;
+    private bool isBraking = false;
+    private bool preventReverse = false;
+    public float reverseSpeedThreshold = 1f;
 
     [Header("Car Settings")]
     [SerializeField] private float acceleration = 25f;
@@ -56,6 +61,7 @@ public class CarController : MonoBehaviour
 
     [Header("Visuals")]
     [SerializeField] private float tireRotationSpeed = 3000f;
+    [SerializeField] private float minSkidVelocity = 10f;
 
 
     private Vector3 currentCarLocalVelocity = Vector3.zero;
@@ -88,6 +94,7 @@ public class CarController : MonoBehaviour
         CalculateCarVelocity();
         Movement();
         Visuals();
+        Vfx();
     }
 
     private void Update()
@@ -102,10 +109,12 @@ public class CarController : MonoBehaviour
     {
         if (isGrounded)
         {
-            Acceleration();
-            Deceleration();
+            HandleMotor();
+            //Acceleration();
+            //Deceleration();
             Steer();
             SidewaysDrag();
+            LongitudinalDrag();
         }
     }
     private void Acceleration()
@@ -120,9 +129,75 @@ public class CarController : MonoBehaviour
         carRB.AddForceAtPosition(-transform.forward * moveInput * effectiveDeceleration, accelerationPoint.position, ForceMode.Acceleration);
     }
 
+    private void HandleMotor()
+    {
+        float forwardSpeed = currentCarLocalVelocity.z;
+        float effectiveAcceleration = acceleration * activeSurface.accelerationMultiplier;
+        float effectiveDeceleration = deceleration * activeSurface.accelerationMultiplier;
+
+        if (moveInput > 0.1f)
+        {
+            
+            if (forwardSpeed < -0.5f)
+            {
+                carRB.AddForceAtPosition(transform.forward * moveInput * effectiveDeceleration, accelerationPoint.position, ForceMode.Acceleration);
+            }
+            else
+            {
+                carRB.AddForceAtPosition(transform.forward * moveInput * effectiveAcceleration, accelerationPoint.position, ForceMode.Acceleration);
+            }
+        }
+        else if (moveInput < -0.1f)
+        {
+            if (preventReverse)
+            {
+                
+                if (forwardSpeed > 0.5f)
+                {
+                    carRB.AddForceAtPosition(transform.forward * moveInput * effectiveDeceleration, accelerationPoint.position, ForceMode.Acceleration);
+                }
+                else
+                {
+                    BrakeToStop();
+                }
+            }
+            else
+            {
+                
+                carRB.AddForceAtPosition(transform.forward * moveInput * effectiveAcceleration, accelerationPoint.position, ForceMode.Acceleration);
+            }
+        }
+    
+    }
+
+    private void BrakeToStop()
+    {
+        
+        float stoppingForce = -currentCarLocalVelocity.z * deceleration;
+        carRB.AddForceAtPosition(transform.forward * stoppingForce, accelerationPoint.position, ForceMode.Acceleration);
+    }
+    private void LongitudinalDrag()
+    {
+        
+        if (Mathf.Abs(moveInput) < 0.1f)
+        {
+            float dragForce = -currentCarLocalVelocity.z * (deceleration * 0.5f);
+            carRB.AddForceAtPosition(transform.forward * dragForce, accelerationPoint.position, ForceMode.Acceleration);
+        }
+    }
+
+
+
+
+
     private void Steer()
     {
-        carRB.AddTorque(steerStrength * steerInput * steerCurve.Evaluate(carVelocityRatio) * Mathf.Sign(carVelocityRatio) * transform.up, ForceMode.Acceleration);
+        
+        float speedRatioAbs = Mathf.Abs(carVelocityRatio);
+
+        float direction = currentCarLocalVelocity.z >= -0.1f ? 1f : -1f;
+
+        carRB.AddTorque(steerStrength * steerInput * steerCurve.Evaluate(speedRatioAbs) * direction * transform.up, ForceMode.Acceleration);
     }
 
     private void SidewaysDrag()
@@ -155,6 +230,50 @@ public class CarController : MonoBehaviour
     private void SetTirePosition(GameObject tire, Vector3 targetPosition)
     {
         tire.transform.position = targetPosition;
+    }
+
+    private void Vfx()
+    {
+       
+        if (isGrounded && Mathf.Abs(currentCarLocalVelocity.x) > minSkidVelocity)
+        {
+            ToggleSkidMarks(true);
+            ToggleSkidSmokes(true);
+        }
+        else
+        {
+            ToggleSkidMarks(false);
+            ToggleSkidSmokes(false);
+        }
+    }
+    private void ToggleSkidMarks(bool toggle) 
+    {
+        foreach (TrailRenderer skid in skidMarks)
+        {
+            skid.emitting = toggle;
+        }
+    }
+    private void ToggleSkidSmokes(bool toggle)
+    {
+        foreach (ParticleSystem skid in skidSmokes)
+        {
+            if (toggle)
+            {
+               
+                if (!skid.isPlaying)
+                {
+                    skid.Play();
+                }
+            }
+            else
+            {
+               
+                if (skid.isPlaying)
+                {
+                    skid.Stop();
+                }
+            }
+        }
     }
 
     #endregion
@@ -191,8 +310,29 @@ public class CarController : MonoBehaviour
     #region Input Handeling
     private void GetInput()
     {
-        moveInput = Input.GetAxis("Vertical");
-        steerInput = Input.GetAxis("Horizontal");
+        moveInput = Input.GetAxisRaw("Vertical");
+        steerInput = Input.GetAxisRaw("Horizontal");
+        bool pressingBrake = moveInput < -0.1f;
+
+        if (pressingBrake && !isBraking)
+        {
+            
+            isBraking = true;
+            if (currentCarLocalVelocity.z > reverseSpeedThreshold)
+            {
+                preventReverse = true;
+            }
+            else
+            {
+                preventReverse = false;
+            }
+        }
+        else if (!pressingBrake)
+        {
+            
+            isBraking = false;
+            preventReverse = false;
+        }
     }
     #endregion
 
