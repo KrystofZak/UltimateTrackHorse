@@ -10,6 +10,8 @@ TagManager:
   - Tree
   - Rock
   - Mushroom
+  - Obstacle
+  - Trap
   layers:
   - Default
   - TransparentFX
@@ -17,8 +19,8 @@ TagManager:
   - Road
   - Water
   - UI
-  - 
-  - 
+  - Honey
+  - Oil
   - 
   - 
   - 

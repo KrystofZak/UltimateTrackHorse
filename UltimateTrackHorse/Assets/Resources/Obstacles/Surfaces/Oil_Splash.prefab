@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 7433785692915990991}
   - component: {fileID: 4669929323689637125}
   - component: {fileID: 5652705633135705637}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Oil_Splash
   m_TagString: Untagged
   m_Icon: {fileID: 0}
