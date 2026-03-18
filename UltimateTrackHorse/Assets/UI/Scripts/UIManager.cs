@@ -4,7 +4,6 @@ public class UIManager : MonoBehaviour
 {
     [Header("UI Views")]
     public GameObject mainMenuView;
-    public GameObject gameSelectionView;
     public GameObject gameView;
     public GameObject pauseView;
     public GameObject settingsView;
@@ -34,7 +33,6 @@ public class UIManager : MonoBehaviour
     public void OnPlayClicked()
     {
         HideAllViews();
-
         gameView.SetActive(true);
         Time.timeScale = 1f; // Ensure time is running
 
@@ -44,12 +42,6 @@ public class UIManager : MonoBehaviour
             timer.ResetTimer();
             timer.StartTimer();
         }
-    }
-
-    public void OnPlayMenuClicked()
-    {
-        HideAllViews();
-        gameSelectionView.SetActive(true);
     }
 
     /// <summary>
@@ -126,7 +118,6 @@ public class UIManager : MonoBehaviour
     private void HideAllViews()
     {
         if (mainMenuView != null) mainMenuView.SetActive(false);
-        if (gameSelectionView != null) gameSelectionView.SetActive(false);
         if (gameView != null) gameView.SetActive(false);
         if (pauseView != null) pauseView.SetActive(false);
         if (settingsView != null) settingsView.SetActive(false);
