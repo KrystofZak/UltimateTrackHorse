@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 725e17e940fa04b449fa4a9a6f24e32f, type: 3}
   m_Name: RoadWoobly
   m_EditorClassIdentifier: Assembly-CSharp::MapGeneration.TileData
-  prefab: {fileID: 6342229096555043340, guid: 68912468ee884fe40b597bc64f8901b0, type: 3}
+  prefab: {fileID: 6981674724239121830, guid: 68912468ee884fe40b597bc64f8901b0, type: 3}
   tileName: RoadWoobly
   socketNorth: road
   socketEast: grass
