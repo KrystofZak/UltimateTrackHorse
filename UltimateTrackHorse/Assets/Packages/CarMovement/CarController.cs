@@ -134,6 +134,8 @@ public class CarController : MonoBehaviour
         float forwardSpeed = currentCarLocalVelocity.z;
         float effectiveAcceleration = acceleration * activeSurface.accelerationMultiplier;
         float effectiveDeceleration = deceleration * activeSurface.accelerationMultiplier;
+        
+        float effectiveMaxSpeed = maxSpeed * activeSurface.maxSpeedMultiplier;
 
         if (moveInput > 0.1f)
         {
@@ -142,7 +144,8 @@ public class CarController : MonoBehaviour
             {
                 carRB.AddForceAtPosition(transform.forward * moveInput * effectiveDeceleration, accelerationPoint.position, ForceMode.Acceleration);
             }
-            else
+           
+            else if (forwardSpeed < effectiveMaxSpeed)
             {
                 carRB.AddForceAtPosition(transform.forward * moveInput * effectiveAcceleration, accelerationPoint.position, ForceMode.Acceleration);
             }
@@ -163,11 +166,10 @@ public class CarController : MonoBehaviour
             }
             else
             {
-                
+               
                 carRB.AddForceAtPosition(transform.forward * moveInput * effectiveAcceleration, accelerationPoint.position, ForceMode.Acceleration);
             }
         }
-    
     }
 
     private void BrakeToStop()
@@ -303,6 +305,7 @@ public class CarController : MonoBehaviour
         currentCarLocalVelocity = transform.InverseTransformDirection(carRB.linearVelocity);
         float effectiveMaxSpeed = maxSpeed * activeSurface.maxSpeedMultiplier;
         carVelocityRatio = currentCarLocalVelocity.z / effectiveMaxSpeed;
+
     }
 
     #endregion
@@ -399,8 +402,12 @@ public class CarController : MonoBehaviour
                 Debug.DrawLine(rayPoints[i].position, rayPoints[i].position - rayPoints[i].up * maxDistance, Color.green);
             }
         }
-
+        SurfaceSettings lastSettings = activeSurface;
         activeSurface = dominantLayer >= 0 ? GetSurfaceForLayer(dominantLayer) : SurfaceSettings.Default;
+        if (lastSettings.name != activeSurface.name)
+        {
+            Debug.Log($"Active Surface: {activeSurface.name}");
+        }
     }
     #endregion
 }

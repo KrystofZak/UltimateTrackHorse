@@ -1431,6 +1431,30 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 5935799533555940743, guid: dcc984e4f714ae8429d6319d492d1888, type: 3}
+      propertyPath: maxSpeed
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 5935799533555940743, guid: dcc984e4f714ae8429d6319d492d1888, type: 3}
+      propertyPath: acceleration
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 5935799533555940743, guid: dcc984e4f714ae8429d6319d492d1888, type: 3}
+      propertyPath: surfaceSettings.Array.data[0].maxSpeedMultiplier
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 5935799533555940743, guid: dcc984e4f714ae8429d6319d492d1888, type: 3}
+      propertyPath: surfaceSettings.Array.data[1].maxSpeedMultiplier
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5935799533555940743, guid: dcc984e4f714ae8429d6319d492d1888, type: 3}
+      propertyPath: surfaceSettings.Array.data[0].accelerationMultiplier
+      value: 0.8
+      objectReference: {fileID: 0}
+    - target: {fileID: 5935799533555940743, guid: dcc984e4f714ae8429d6319d492d1888, type: 3}
+      propertyPath: surfaceSettings.Array.data[1].accelerationMultiplier
+      value: 0.8
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
