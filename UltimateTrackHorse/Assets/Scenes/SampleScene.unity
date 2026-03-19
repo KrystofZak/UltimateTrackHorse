@@ -1405,7 +1405,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6988889565937382384, guid: f25ab119f83f326498a0bdbeba225716, type: 3}
       propertyPath: restLength
-      value: 0.16
+      value: 0.17
       objectReference: {fileID: 0}
     - target: {fileID: 6988889565937382384, guid: f25ab119f83f326498a0bdbeba225716, type: 3}
       propertyPath: deceleration
