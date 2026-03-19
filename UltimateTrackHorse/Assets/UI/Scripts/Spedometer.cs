@@ -8,6 +8,6 @@ public class Spedometer : MonoBehaviour
     void Update()
     {
         float speed = car.linearVelocity.magnitude * 3.6f;
-        speedText.text = speed.ToString("0") + " km/h";
+        speedText.text = speed.ToString("0");
     }
 }
