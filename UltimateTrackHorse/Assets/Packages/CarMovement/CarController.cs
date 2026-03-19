@@ -73,6 +73,9 @@ public class CarController : MonoBehaviour
     private SurfaceSettings activeSurface = SurfaceSettings.Default;
 
 
+    private bool isStopping = false;
+    private float lastMoveInput = 0;
+
     #region Unity Methods
     private void Start()
     {
@@ -134,49 +137,72 @@ public class CarController : MonoBehaviour
         float forwardSpeed = currentCarLocalVelocity.z;
         float effectiveAcceleration = acceleration * activeSurface.accelerationMultiplier;
         float effectiveDeceleration = deceleration * activeSurface.accelerationMultiplier;
-        
         float effectiveMaxSpeed = maxSpeed * activeSurface.maxSpeedMultiplier;
 
+        // --- LOGIKA ROZJEZDU A JÍZDY VPØED ---
         if (moveInput > 0.1f)
         {
-            
+            // Pokud se auto pohybuje vzad (couváme), brzdíme pro plynulé zastavení
             if (forwardSpeed < -0.5f)
             {
                 carRB.AddForceAtPosition(transform.forward * moveInput * effectiveDeceleration, accelerationPoint.position, ForceMode.Acceleration);
             }
-           
+            // Plynulý rozjezd vpøed
             else if (forwardSpeed < effectiveMaxSpeed)
             {
-                carRB.AddForceAtPosition(transform.forward * moveInput * effectiveAcceleration, accelerationPoint.position, ForceMode.Acceleration);
+                // Pøidáme extra sílu pøi rozjezdu z nuly do kopce, aby auto necouvlo
+                float startAssist = (forwardSpeed < 1f) ? 1.5f : 1f;
+                carRB.AddForceAtPosition(transform.forward * moveInput * effectiveAcceleration * startAssist, accelerationPoint.position, ForceMode.Acceleration);
             }
         }
+        // --- LOGIKA BRZDÌNÍ / COUVÁNÍ ---
         else if (moveInput < -0.1f)
         {
             if (preventReverse)
             {
-                
+                // Pokud jedeme rychle vpøed, brzdíme
                 if (forwardSpeed > 0.5f)
                 {
                     carRB.AddForceAtPosition(transform.forward * moveInput * effectiveDeceleration, accelerationPoint.position, ForceMode.Acceleration);
                 }
                 else
                 {
+                    // Jsme skoro zastaveni, aktivujeme brzdu k úplnému zastavení
                     BrakeToStop();
                 }
             }
             else
             {
-               
+                // Klasická zpáteèka (pokud už nebrzdíme)
                 carRB.AddForceAtPosition(transform.forward * moveInput * effectiveAcceleration, accelerationPoint.position, ForceMode.Acceleration);
+            }
+        }
+        // --- HILL HOLD (Zastavení v kopci bez vstupu) ---
+        else
+        {
+            // Pokud hráè nic nemaèká a auto se skoro nehýbe, aplikujeme protisílu
+            if (Mathf.Abs(forwardSpeed) < 1.0f)
+            {
+                // Totální zastavení "pøilepením" k zemi (zabrání sklouzávání)
+                carRB.linearVelocity = Vector3.Lerp(carRB.linearVelocity, new Vector3(0, carRB.linearVelocity.y, 0), Time.fixedDeltaTime * 10f);
             }
         }
     }
 
     private void BrakeToStop()
     {
-        
-        float stoppingForce = -currentCarLocalVelocity.z * deceleration;
+        float forwardSpeed = currentCarLocalVelocity.z;
+        // Aplikujeme sílu proti smìru pohybu, dokud se auto nezastaví
+        float stoppingForce = -forwardSpeed * (deceleration * 1.2f);
         carRB.AddForceAtPosition(transform.forward * stoppingForce, accelerationPoint.position, ForceMode.Acceleration);
+
+        // Pokud je rychlost minimální, vynutíme nulu pro eliminaci "tøesu" v kopci
+        if (Mathf.Abs(forwardSpeed) < 0.2f)
+        {
+            Vector3 localVel = transform.InverseTransformDirection(carRB.linearVelocity);
+            localVel.z = 0;
+            carRB.linearVelocity = transform.TransformDirection(localVel);
+        }
     }
     private void LongitudinalDrag()
     {
@@ -313,14 +339,16 @@ public class CarController : MonoBehaviour
     #region Input Handeling
     private void GetInput()
     {
+        float lastInput = moveInput;
         moveInput = Input.GetAxisRaw("Vertical");
         steerInput = Input.GetAxisRaw("Horizontal");
+
         bool pressingBrake = moveInput < -0.1f;
 
         if (pressingBrake && !isBraking)
         {
-            
             isBraking = true;
+            // Pokud jedeme vpøed rychleji než treshold, první stisknutí je BRZDA
             if (currentCarLocalVelocity.z > reverseSpeedThreshold)
             {
                 preventReverse = true;
@@ -332,8 +360,8 @@ public class CarController : MonoBehaviour
         }
         else if (!pressingBrake)
         {
-            
             isBraking = false;
+            // preventReverse se resetuje až když hráè pustí tlaèítko
             preventReverse = false;
         }
     }
