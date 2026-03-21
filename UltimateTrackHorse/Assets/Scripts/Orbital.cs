@@ -4,33 +4,52 @@ using UnityEngine.InputSystem;
 
 public class CameraOrbitControl : MonoBehaviour
 {
-    private CinemachineInputProvider inputProvider;
+    [Header("Rotation Settings")]
+    public float minAngle = -45f;
+    public float maxAngle = 45f;
+    public float mouseSensitivity = 0.5f;
+    public float returnSpeed = 5f;
+
+    [Header("Teleport Fix")]
+    public Transform targetCar;
+    public float teleportDistance = 10f;
+
     private CinemachineFreeLook freeLookCamera;
+    private Vector3 lastCarPosition;
 
     void Start()
     {
-        // Najde potøebné komponenty na kameøe
-        inputProvider = GetComponent<CinemachineInputProvider>();
         freeLookCamera = GetComponent<CinemachineFreeLook>();
+        if (targetCar != null)
+        {
+            lastCarPosition = targetCar.position;
+        }
     }
 
-    void LateUpdate() // Pro kamery je lepší používat LateUpdate
+    void Update()
     {
-        // 1. OMEZENÍ NA LEVÉ TLAÈÍTKO MYŠI
+        if (freeLookCamera == null) return;
+
+        if (targetCar != null)
+        {
+            if (Vector3.Distance(targetCar.position, lastCarPosition) > teleportDistance)
+            {
+                freeLookCamera.m_XAxis.Value = 0f;
+                freeLookCamera.PreviousStateIsValid = false;
+            }
+            lastCarPosition = targetCar.position;
+        }
+
         if (Mouse.current != null && Mouse.current.leftButton.isPressed)
         {
-            inputProvider.enabled = true; // Zapne otáèení
+            float mouseX = Mouse.current.delta.x.ReadValue();
+            freeLookCamera.m_XAxis.Value += mouseX * mouseSensitivity;
         }
         else
         {
-            inputProvider.enabled = false; // Vypne otáèení
+            freeLookCamera.m_XAxis.Value = Mathf.Lerp(freeLookCamera.m_XAxis.Value, 0f, Time.deltaTime * returnSpeed);
         }
 
-        // 2. OMEZENÍ ÚHLU (MANTINELY -45 AŽ 45 STUPÒÙ)
-        if (freeLookCamera != null)
-        {
-            // Natvrdo drží hodnotu osy X v našem rozmezí
-            freeLookCamera.m_XAxis.Value = Mathf.Clamp(freeLookCamera.m_XAxis.Value, -45f, 45f);
-        }
+        freeLookCamera.m_XAxis.Value = Mathf.Clamp(freeLookCamera.m_XAxis.Value, minAngle, maxAngle);
     }
 }

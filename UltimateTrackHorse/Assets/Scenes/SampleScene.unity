@@ -529,7 +529,7 @@ MonoBehaviour:
   m_XAxis:
     Value: 0
     m_SpeedMode: 0
-    m_MaxSpeed: 100
+    m_MaxSpeed: 0
     m_AccelTime: 0.1
     m_DecelTime: 0.1
     m_InputAxisName: Mouse X
@@ -598,6 +598,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a21eaa28e97c2264680d20e481228f41, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CameraOrbitControl
+  minAngle: -45
+  maxAngle: 45
+  citlivostMysi: 0.5
+  rychlostNavratu: 5
+  sledovaneAuto: {fileID: 0}
+  vzdalenostProTeleport: 10
 --- !u!114 &596340132
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -612,7 +618,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Cinemachine::Cinemachine.CinemachineInputProvider
   PlayerIndex: -1
   AutoEnableInputs: 1
-  XYAxis: {fileID: -5630151704836100654, guid: 052faaac586de48259a63d0c4782560b, type: 3}
+  XYAxis: {fileID: 0}
   ZAxis: {fileID: 0}
 --- !u!1 &630748427
 GameObject:
