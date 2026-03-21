@@ -2186,6 +2186,54 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 2813353242786893272, guid: 240da73542f29034b8fc2bc8fd5bb9e2, type: 3}
+      propertyPath: surfaceSettings.Array.size
+      value: 4
+      objectReference: {fileID: 0}
+    - target: {fileID: 2813353242786893272, guid: 240da73542f29034b8fc2bc8fd5bb9e2, type: 3}
+      propertyPath: surfaceSettings.Array.data[2].name
+      value: Honey
+      objectReference: {fileID: 0}
+    - target: {fileID: 2813353242786893272, guid: 240da73542f29034b8fc2bc8fd5bb9e2, type: 3}
+      propertyPath: surfaceSettings.Array.data[3].name
+      value: Oil
+      objectReference: {fileID: 0}
+    - target: {fileID: 2813353242786893272, guid: 240da73542f29034b8fc2bc8fd5bb9e2, type: 3}
+      propertyPath: surfaceSettings.Array.data[2].killMomentum
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2813353242786893272, guid: 240da73542f29034b8fc2bc8fd5bb9e2, type: 3}
+      propertyPath: surfaceSettings.Array.data[2].layer.m_Bits
+      value: 64
+      objectReference: {fileID: 0}
+    - target: {fileID: 2813353242786893272, guid: 240da73542f29034b8fc2bc8fd5bb9e2, type: 3}
+      propertyPath: surfaceSettings.Array.data[3].layer.m_Bits
+      value: 128
+      objectReference: {fileID: 0}
+    - target: {fileID: 2813353242786893272, guid: 240da73542f29034b8fc2bc8fd5bb9e2, type: 3}
+      propertyPath: surfaceSettings.Array.data[2].maxSpeedMultiplier
+      value: 0.2
+      objectReference: {fileID: 0}
+    - target: {fileID: 2813353242786893272, guid: 240da73542f29034b8fc2bc8fd5bb9e2, type: 3}
+      propertyPath: surfaceSettings.Array.data[3].maxSpeedMultiplier
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2813353242786893272, guid: 240da73542f29034b8fc2bc8fd5bb9e2, type: 3}
+      propertyPath: surfaceSettings.Array.data[2].accelerationMultiplier
+      value: 0.3
+      objectReference: {fileID: 0}
+    - target: {fileID: 2813353242786893272, guid: 240da73542f29034b8fc2bc8fd5bb9e2, type: 3}
+      propertyPath: surfaceSettings.Array.data[3].accelerationMultiplier
+      value: 0.8
+      objectReference: {fileID: 0}
+    - target: {fileID: 2813353242786893272, guid: 240da73542f29034b8fc2bc8fd5bb9e2, type: 3}
+      propertyPath: surfaceSettings.Array.data[2].dragCoefficientMultiplier
+      value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 2813353242786893272, guid: 240da73542f29034b8fc2bc8fd5bb9e2, type: 3}
+      propertyPath: surfaceSettings.Array.data[3].dragCoefficientMultiplier
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 3557543197106714043, guid: 240da73542f29034b8fc2bc8fd5bb9e2, type: 3}
       propertyPath: m_LocalPosition.x
       value: 20

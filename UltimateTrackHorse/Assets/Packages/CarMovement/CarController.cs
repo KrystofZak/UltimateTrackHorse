@@ -14,6 +14,7 @@ public class CarController : MonoBehaviour
         public float maxSpeedMultiplier;
         [Tooltip("Multiplier applied to dragCoefficient on this surface (higher = more sideways grip loss)")]
         public float dragCoefficientMultiplier;
+        public bool killMomentum;
 
         public static SurfaceSettings Default => new SurfaceSettings
         {
@@ -117,6 +118,7 @@ public class CarController : MonoBehaviour
     {
         if (isGrounded)
         {
+            EnforceSurfaceMaxSpeed();
             HandleMotor();
             //Acceleration();
             //Deceleration();
@@ -217,6 +219,21 @@ public class CarController : MonoBehaviour
         }
     }
 
+    private void EnforceSurfaceMaxSpeed()
+    {
+        
+        if (!activeSurface.killMomentum) return;
+
+        float forwardSpeed = currentCarLocalVelocity.z;
+        float effectiveMaxSpeed = maxSpeed * activeSurface.maxSpeedMultiplier;
+
+        if (forwardSpeed > effectiveMaxSpeed && forwardSpeed > 1f)
+        {
+           
+            float overSpeedForce = (forwardSpeed - effectiveMaxSpeed) * (deceleration * 5f);
+            carRB.AddForceAtPosition(-transform.forward * overSpeedForce, accelerationPoint.position, ForceMode.Acceleration);
+        }
+    }
 
 
 
