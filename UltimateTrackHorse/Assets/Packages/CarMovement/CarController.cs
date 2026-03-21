@@ -15,13 +15,16 @@ public class CarController : MonoBehaviour
         [Tooltip("Multiplier applied to dragCoefficient on this surface (higher = more sideways grip loss)")]
         public float dragCoefficientMultiplier;
         public bool killMomentum;
+        public float lingerTime;
 
         public static SurfaceSettings Default => new SurfaceSettings
         {
             name = "Default",
             accelerationMultiplier = 1f,
             maxSpeedMultiplier = 1f,
-            dragCoefficientMultiplier = 1f
+            dragCoefficientMultiplier = 1f,
+            killMomentum = false,
+            lingerTime = 0f
         };
     }
 
@@ -66,6 +69,8 @@ public class CarController : MonoBehaviour
     [SerializeField] private float maxVisualSteerAngle = 35f;
     [SerializeField] private float visualSteerSpeed = 10f;
 
+    private float activeLingerTimer = 0f;
+    private SurfaceSettings lingeringSurface;
 
     private float currentTireSpinAngle = 0f;
     private float currentVisualSteerAngle = 0f;
@@ -473,7 +478,25 @@ public class CarController : MonoBehaviour
             }
         }
         SurfaceSettings lastSettings = activeSurface;
-        activeSurface = dominantLayer >= 0 ? GetSurfaceForLayer(dominantLayer) : SurfaceSettings.Default;
+        SurfaceSettings detectedSurface = dominantLayer >= 0 ? GetSurfaceForLayer(dominantLayer) : SurfaceSettings.Default;
+
+        if (detectedSurface.lingerTime > 0f)
+        {
+            lingeringSurface = detectedSurface;
+            activeLingerTimer = detectedSurface.lingerTime;
+        }
+
+        if (activeLingerTimer > 0f)
+        {
+            activeLingerTimer -= Time.fixedDeltaTime;
+            activeSurface = lingeringSurface; 
+        }
+        else
+        {
+            
+            activeSurface = detectedSurface;
+        }
+
         if (lastSettings.name != activeSurface.name)
         {
             Debug.Log($"Active Surface: {activeSurface.name}");
