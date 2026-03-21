@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 7433785692915990991}
   - component: {fileID: 4669929323689637125}
   - component: {fileID: 5652705633135705637}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Oil_Splash
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -28,7 +28,7 @@ Transform:
   m_GameObject: {fileID: 6615250786108363984}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: -0.8039607, z: 0, w: 0.5946826}
-  m_LocalPosition: {x: -0.919, y: 3.05, z: 17.594}
+  m_LocalPosition: {x: -0.919, y: 0.05, z: 17.594}
   m_LocalScale: {x: 74, y: 74, z: 74}
   m_ConstrainProportionsScale: 1
   m_Children: []

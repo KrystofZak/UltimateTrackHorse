@@ -60,18 +60,18 @@ namespace GameLogic
                 Quaternion startRot = Quaternion.Euler(0, startCell.CollapsedVariant.Rotation * 90f, 0);
 
                 Rigidbody rb = playerCar.GetComponent<Rigidbody>();
-        
+
                 if (rb != null)
                 {
                     // Vypneme fyziku, teleportujeme a zase zapneme
-                    rb.isKinematic = true; 
+                    rb.isKinematic = true;
                     rb.position = startPos;
                     rb.rotation = startRot;
-            
+
                     // Důležité: Resetujeme transformaci i skrze Rigidbody
                     playerCar.transform.SetPositionAndRotation(startPos, startRot);
-            
-                    rb.isKinematic = false; 
+
+                    rb.isKinematic = false;
                     rb.linearVelocity = Vector3.zero;
                     rb.angularVelocity = Vector3.zero;
                 }
@@ -79,7 +79,21 @@ namespace GameLogic
                 {
                     playerCar.transform.SetPositionAndRotation(startPos, startRot);
                 }
+                Physics.SyncTransforms();
 
+                // 2. Najdeme virtuální kameru ve scéně
+                CinemachineVirtualCamera vcam = FindObjectOfType<CinemachineVirtualCamera>();
+
+                if (vcam != null)
+                {
+                    // 3. Řekneme jí, ať nepočítá přechod
+                    vcam.PreviousStateIsValid = false;
+
+                    // 4. Ultimátní reset: vypnout a zapnout. Cinemachine se díky tomu
+                    // postaví přesně na pozici Follow/LookAt jako by hra teprve začala.
+                    vcam.enabled = false;
+                    vcam.enabled = true;
+                }
             }
         }
         

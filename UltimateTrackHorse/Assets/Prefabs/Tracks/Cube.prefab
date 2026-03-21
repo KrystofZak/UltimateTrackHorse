@@ -81,7 +81,7 @@ MonoBehaviour:
   obstacleType: 1
   prefabIndex: 0
   keepParent: 1
-  keepScale: 1
+  keepScale: 0
 --- !u!114 &5692975645167754992
 MonoBehaviour:
   m_ObjectHideFlags: 0
