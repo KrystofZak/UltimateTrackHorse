@@ -403,13 +403,25 @@ public class CarController : MonoBehaviour
                 }
 
                 float currentSpringLength = hit.distance - wheelRadius;
-
                 float springCompression = (restLength - currentSpringLength) / springTravel;
 
+                float springForce = springCompression * springStiffness;
+
+                if (springCompression > 0.7f)
+                {
+                   
+                    float bumpFactor = Mathf.Pow(springCompression, 4f);
+                    springForce += springStiffness * bumpFactor;
+                }
+
+                
                 float springVelocity = Vector3.Dot(carRB.GetPointVelocity(rayPoints[i].position), rayPoints[i].up);
                 float damperForce = springVelocity * damperStiffness;
 
-                float springForce = springCompression * springStiffness;
+                if (springVelocity < -1.5f && springCompression > 0.5f)
+                {
+                    damperForce *= 2.5f; 
+                }
 
                 float netForce = springForce - damperForce;
 
