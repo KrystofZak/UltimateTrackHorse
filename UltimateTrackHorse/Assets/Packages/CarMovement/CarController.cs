@@ -62,7 +62,12 @@ public class CarController : MonoBehaviour
     [Header("Visuals")]
     [SerializeField] private float tireRotationSpeed = 3000f;
     [SerializeField] private float minSkidVelocity = 10f;
+    [SerializeField] private float maxVisualSteerAngle = 35f;
+    [SerializeField] private float visualSteerSpeed = 10f;
 
+
+    private float currentTireSpinAngle = 0f;
+    private float currentVisualSteerAngle = 0f;
 
     private Vector3 currentCarLocalVelocity = Vector3.zero;
     private float carVelocityRatio = 0f;
@@ -247,9 +252,19 @@ public class CarController : MonoBehaviour
     }
     private void RotateTires()
     {
+        
+        currentTireSpinAngle += tireRotationSpeed * carVelocityRatio * Time.deltaTime;
+
+        float targetSteerAngle = steerInput * maxVisualSteerAngle;
+
+        currentVisualSteerAngle = Mathf.Lerp(currentVisualSteerAngle, targetSteerAngle, Time.deltaTime * visualSteerSpeed);
+
         for (int i = 0; i < tires.Length; i++)
         {
-            tires[i].transform.Rotate(Vector3.right, tireRotationSpeed * carVelocityRatio * Time.deltaTime, Space.Self);
+           
+            float applySteer = (i < 2) ? currentVisualSteerAngle : 0f;
+
+            tires[i].transform.localRotation = Quaternion.Euler(currentTireSpinAngle, applySteer, 0f);
         }
     }
 
