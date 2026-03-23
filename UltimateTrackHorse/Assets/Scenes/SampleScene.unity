@@ -2186,6 +2186,14 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 785708908426259827, guid: 1eaeeeb0fc85b47499a11b348531a27b, type: 3}
+      propertyPath: m_Parameters.widthMultiplier
+      value: 0.14
+      objectReference: {fileID: 0}
+    - target: {fileID: 1647294200642635740, guid: 1eaeeeb0fc85b47499a11b348531a27b, type: 3}
+      propertyPath: m_Parameters.widthMultiplier
+      value: 0.14
+      objectReference: {fileID: 0}
     - target: {fileID: 3743814379106414346, guid: 1eaeeeb0fc85b47499a11b348531a27b, type: 3}
       propertyPath: m_Name
       value: Car
