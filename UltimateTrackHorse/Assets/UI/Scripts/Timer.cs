@@ -5,22 +5,32 @@ public class Timer : MonoBehaviour
 {
     [Header("Timer Settings")]
     [SerializeField] private TMP_Text timerText;
-    public float timeElapsed = 0f;
+    public float timeElapsed { get; private set; } = 0f;
+    private float timeRemaining = 30f;
     private bool timerIsRunning = false;
-
-    void Start()
-    {
-        // Timer no longer starts automatically
-        DisplayTime(timeElapsed);
-    }
 
     void Update()
     {
         if (timerIsRunning)
         {
             timeElapsed += Time.deltaTime;
-            DisplayTime(timeElapsed);
+            timeRemaining -= Time.deltaTime;
+
+            if (timeRemaining < 0)
+            {
+                timeRemaining = 0;
+            }
+            
+            DisplayTime(timeRemaining);
         }
+    }
+
+    public void SetStartTime(float startTime)
+    {
+        timeRemaining = startTime;
+        timeElapsed = 0f;
+        DisplayTime(timeRemaining);
+        StartTimer();
     }
 
     public void StartTimer()
@@ -35,8 +45,10 @@ public class Timer : MonoBehaviour
 
     public void ResetTimer()
     {
+        StopTimer();
         timeElapsed = 0f;
-        DisplayTime(timeElapsed);
+        timeRemaining = 0f;
+        DisplayTime(timeRemaining);
     }
 
     private void DisplayTime(float timeToDisplay)

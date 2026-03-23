@@ -45,6 +45,7 @@ namespace MapGeneration
 
         public int LastUsedSeed { get; private set; }
         public string LastGenerationSignature { get; private set; }
+        public List<Vector2Int> GeneratedPath { get; private set; }
 
         /// <summary>
         /// Initializes the map generator and generates a valid map with start and finish cells
@@ -55,7 +56,6 @@ namespace MapGeneration
         }
 
         #region UI Toggle Methods for Track Length
-        
         /// <summary>
         /// Sets a short track length. Connect this to the OnValueChanged event of a "Short Track" UI Toggle.
         /// </summary>
@@ -104,6 +104,11 @@ namespace MapGeneration
         public void OnPlayClicked()
         {
             GenerateMapWithCurrentSeed();
+            if (gameManager != null)
+            {
+                gameManager.SetupNewTrack();
+            }
+            
         }
 
         /// <summary>
@@ -678,20 +683,20 @@ namespace MapGeneration
             ClearScene();
             InitializeGrid(); 
             
-            List<Vector2Int> generatedPath = GenerateRandomPath(new Vector2Int(1, 1), targetTrackLength);
+            GeneratedPath = GenerateRandomPath(new Vector2Int(1, 1), targetTrackLength);
 
-            if (generatedPath != null)
+            if (GeneratedPath != null)
             {
-                ApplyPathToWFC(generatedPath);
+                ApplyPathToWFC(GeneratedPath);
                 RunWFC(); 
-                InstantiatePathAndScenery(generatedPath);
+                InstantiatePathAndScenery(GeneratedPath);
 
                 if (gameManager != null)
                 {
                     gameManager.PlaceCarOnStart();
                 }
                 
-                Debug.Log($"Track generated with length {generatedPath.Count}. Seed: {LastUsedSeed}");
+                Debug.Log($"Track generated with length {GeneratedPath.Count}. Seed: {LastUsedSeed}");
                 return true;
             }
 

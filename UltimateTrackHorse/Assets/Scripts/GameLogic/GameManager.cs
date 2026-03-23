@@ -13,6 +13,7 @@ namespace GameLogic
         public GameObject playerCar;
         public MapGenerator mapGenerator;
         private int lapCount = 0;
+        private float totalTimeComplexity;
 
         [SerializeField] private SpawnObstacle spawnObstacle;
 
@@ -21,6 +22,33 @@ namespace GameLogic
         /// </summary>
         void OnEnable() { FinishLine.OnPlayerFinished += ResetToStart; }
         void OnDisable() { FinishLine.OnPlayerFinished -= ResetToStart; }
+
+        public void SetupNewTrack()
+        {
+            CalculateTotalTimeComplexity();
+            
+            Timer timer = FindObjectOfType<Timer>();
+            if (timer != null)
+            {
+                timer.SetStartTime(totalTimeComplexity);
+            }
+        }
+
+        private void CalculateTotalTimeComplexity()
+        {
+            totalTimeComplexity = 0f;
+            if (mapGenerator.GeneratedPath == null) return;
+
+            foreach (var pos in mapGenerator.GeneratedPath)
+            {
+                var cell = mapGenerator.GetCell(pos.x, pos.y);
+                if (cell != null && cell.CollapsedVariant != null)
+                {
+                    totalTimeComplexity += cell.CollapsedVariant.Data.timeComplexity;
+                }
+            }
+            Debug.Log($"Total time to beat: {totalTimeComplexity} seconds.");
+        }
 
         /// <summary>
         /// Handles the logic when the player finishes the round.
@@ -40,6 +68,7 @@ namespace GameLogic
             if (timer != null)
             {
                 timer.ResetTimer();
+                timer.SetStartTime(totalTimeComplexity);
             }
 
             
