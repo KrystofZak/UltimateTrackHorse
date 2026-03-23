@@ -4,7 +4,9 @@ public class UIManager : MonoBehaviour
 {
     [Header("UI Views")]
     public GameObject mainMenuView;
-    public GameObject gameSelectionView;
+    public GameObject mapSelectionView;
+    public GameObject randomSelectionView;
+    public GameObject seededSelectionView;
     public GameObject gameView;
     public GameObject pauseView;
     public GameObject settingsView;
@@ -42,7 +44,7 @@ public class UIManager : MonoBehaviour
     public void OnPlayMenuClicked()
     {
         HideAllViews();
-        gameSelectionView.SetActive(true);
+        mapSelectionView.SetActive(true);
     }
 
     /// <summary>
@@ -94,6 +96,17 @@ public class UIManager : MonoBehaviour
         }
     }
 
+    public void OnRandomClicked()
+    {
+        HideAllViews();
+        randomSelectionView.SetActive(true);
+    }
+
+    public void OnSeededClicked()
+    {
+        HideAllViews();
+        seededSelectionView.SetActive(true);
+    }
     /// <summary>
     /// Quits the game or goes to Main Menu.
     /// Connect to QuitButton in Main Menu and Pause View.
@@ -119,7 +132,9 @@ public class UIManager : MonoBehaviour
     private void HideAllViews()
     {
         if (mainMenuView != null) mainMenuView.SetActive(false);
-        if (gameSelectionView != null) gameSelectionView.SetActive(false);
+        if (mapSelectionView != null) mapSelectionView.SetActive(false);
+        if (randomSelectionView != null) randomSelectionView.SetActive(false);
+        if (seededSelectionView != null) seededSelectionView.SetActive(false);
         if (gameView != null) gameView.SetActive(false);
         if (pauseView != null) pauseView.SetActive(false);
         if (settingsView != null) settingsView.SetActive(false);
