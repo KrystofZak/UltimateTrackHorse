@@ -1,21 +1,28 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
+using Random = UnityEngine.Random;
 
 namespace GameLogic
 {
     public class SpawnObstacle : MonoBehaviour
     {
-        [SerializeField] private KeyCode replaceKey = KeyCode.F;
-        [SerializeField] private ObstacleLibrary library;
+        [Header("Input")] [SerializeField] private KeyCode replaceKey = KeyCode.F;
 
-        [Header("What to spawn")]
-        [SerializeField] private ObstacleLibrary.ObstacleType obstacleType;
+        [Header("References")] [SerializeField]
+        private ObstacleLibrary library;
+
+        [SerializeField] private string placeholderTag = "Obstacle";
+
+        [Header("What to spawn")] [SerializeField]
+        private ObstacleLibrary.ObstacleType obstacleType;
+
         [SerializeField] private int prefabIndex;
 
-        [Header("Options")]
-        [SerializeField] private bool keepParent = true;
+        [Header("Options")] [SerializeField] private bool keepParent = true;
         [SerializeField] private bool keepScale = true;
 
-        private bool replaced = false;
+        private bool replaced;
+        private GameObject[] placeholders = Array.Empty<GameObject>();
 
         private void Update()
         {
@@ -23,63 +30,21 @@ namespace GameLogic
 
             if (Input.GetKeyDown(replaceKey))
             {
-                ReplaceWithSelectedPrefab();
+                ReplaceAllWithSelectedPrefab();
             }
         }
 
-        public void SpawnNewObstacles(int n)
+        private void RefreshPlaceholders()
         {
-            if (library == null)
-            {
-                Debug.LogError("ObstacleLibrary reference is missing.");
-                return;
-            }
+            placeholders = GameObject.FindGameObjectsWithTag(placeholderTag);
 
-            var cubes = GameObject.FindGameObjectsWithTag("Obstacle");
+            if (placeholders != null && placeholders.Length != 0) return;
 
-            if (cubes == null || cubes.Length == 0)
-            {
-                Debug.LogWarning("No objects with tag 'placeholder' were found.");
-                return;
-            }
-
-            n = Mathf.Clamp(n, 0, cubes.Length);
-            if (n == 0) return;
-
-            // Shuffle that bitch
-            for (int i = 0; i < n; i++)
-            {
-                int randomIndex = Random.Range(i, cubes.Length);
-                (cubes[i], cubes[randomIndex]) = (cubes[randomIndex], cubes[i]);
-            }
-
-            for (int i = 0; i < n; i++)
-            {
-                var cube = cubes[i];
-                var prefab = library.GetRandomPrefab();
-
-                if (prefab == null)
-                    continue;
-
-                var parent = keepParent ? cube.transform.parent : null;
-
-                var spawned = Instantiate(
-                    prefab,
-                    cube.transform.position,
-                    cube.transform.rotation,
-                    parent
-                );
-
-                if (keepScale)
-                {
-                    spawned.transform.localScale = cube.transform.localScale;
-                }
-
-                Destroy(cube);
-            }
+            Debug.LogWarning($"No objects with tag '{placeholderTag}' were found.");
+            placeholders = Array.Empty<GameObject>();
         }
 
-        private void ReplaceWithSelectedPrefab()
+        public void SpawnNewObstacles(int count)
         {
             if (!library)
             {
@@ -87,54 +52,78 @@ namespace GameLogic
                 return;
             }
 
-            var prefab = library.GetPrefab(obstacleType, prefabIndex);
-            if (!prefab) return;
+            RefreshPlaceholders();
 
-            var parent = keepParent ? transform.parent : null;
+            count = Mathf.Clamp(count, 0, placeholders.Length);
+            if (count == 0) return;
 
-            var spawned = Instantiate(prefab, transform.position, transform.rotation, parent);
+            Shuffle(placeholders);
 
-            if (keepScale)
+            for (var i = 0; i < count; i++)
             {
-                spawned.transform.localScale = transform.localScale;
+                var prefab = library.GetRandomPrefab();
+                ReplaceObject(placeholders[i], prefab);
             }
-
-            replaced = true;
-            Destroy(gameObject);
         }
 
-        private void ReplaceAll()
+        private void ReplaceAllWithSelectedPrefab()
         {
-            if (library == null)
+            RefreshPlaceholders();
+
+            foreach (var placeholder in placeholders)
             {
-                Debug.LogError("ObstacleLibrary reference is missing.");
-                return;
+                var prefab = GetSelectedPrefab();
+                if (!prefab) return;
+
+                ReplaceObject(placeholder, prefab);
+            }
+            
+            replaced = true;
+        }
+
+        private GameObject GetSelectedPrefab()
+        {
+            if (library) return library.GetPrefab(obstacleType, prefabIndex);
+
+            Debug.LogError("ObstacleLibrary reference is missing.");
+            return null;
+        }
+
+        private bool ReplaceObject(GameObject source, GameObject prefab)
+        {
+            if (!source || !prefab) return false;
+
+            var parent = keepParent ? source.transform.parent : null;
+
+            var rotation = source.transform.rotation * prefab.transform.rotation;
+            var position = source.transform.position + prefab.transform.position;
+            position.y -= 0.5f; // offset of a cube
+            
+            
+            var spawned = Instantiate(
+                prefab,
+                position,
+                rotation,
+                parent
+            );
+ 
+            
+            if (keepScale)
+            {
+                spawned.transform.localScale = keepParent ? source.transform.localScale : source.transform.lossyScale;
             }
 
-            var prefab = library.GetPrefab(obstacleType, prefabIndex);
-            if (prefab == null) return;
+            Destroy(source);
+            return true;
+        }
 
-            var cubes = GameObject.FindGameObjectsWithTag("placeholder");
-
-            foreach (var cube in cubes)
+        private static void Shuffle(GameObject[] array)
+        {
+            for (var i = 0; i < array.Length; i++)
             {
-                var parent = keepParent ? cube.transform.parent : null;
-
-                var spawned = Instantiate(
-                    prefab,
-                    cube.transform.position,
-                    cube.transform.rotation,
-                    parent
-                );
-
-                if (keepScale)
-                {
-                    spawned.transform.localScale = cube.transform.localScale;
-                }
-
-                Destroy(cube);
+                var randomIndex = Random.Range(i, array.Length);
+                (array[i], array[randomIndex]) = (array[randomIndex], array[i]);
             }
         }
     }
 }
-

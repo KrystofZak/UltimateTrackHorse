@@ -36,13 +36,7 @@ namespace GameLogic
 
         public GameObject GetPrefab(ObstacleType type, int index)
         {
-            var sourceArray = type switch
-            {
-                ObstacleType.Wall => walls,
-                ObstacleType.Fog => fogs,
-                ObstacleType.Surface => surfaces,
-                _ => null
-            };
+            var sourceArray = GetSourceArray(type);
 
             if (sourceArray == null || sourceArray.Length == 0)
             {
@@ -51,14 +45,14 @@ namespace GameLogic
             }
 
             if (index >= 0 && index < sourceArray.Length) return sourceArray[index];
-
+            
             Debug.LogError($"{type} index {index} is out of range. Valid range: 0 to {sourceArray.Length - 1}");
             return null;
         }
 
         public ObstacleType GetRandomType()
         {
-           return (ObstacleType)Random.Range(0, System.Enum.GetValues(typeof(ObstacleType)).Length);
+            return (ObstacleType)Random.Range(0, System.Enum.GetValues(typeof(ObstacleType)).Length);
         }
 
         public GameObject GetRandomPrefab()
@@ -70,21 +64,14 @@ namespace GameLogic
                 Debug.LogError("Obstacle array is empty. Make sure prefabs were loaded.");
                 return null;
             }
-            
-            var randomIndex = Random.Range(0, sourceArray.Length); // TODO: Ask - We can use the seed even here, to have consistent obstacles
-            
+
+            var randomIndex = Random.Range(0, sourceArray.Length);
             return sourceArray[randomIndex];
         }
 
         public GameObject GetRandomPrefab(ObstacleType type)
         {
-            var sourceArray = type switch
-            {
-                ObstacleType.Wall => walls,
-                ObstacleType.Fog => fogs,
-                ObstacleType.Surface => surfaces,
-                _ => null
-            };
+            var sourceArray = GetSourceArray(type);
 
             if (sourceArray == null || sourceArray.Length == 0)
             {
@@ -94,6 +81,17 @@ namespace GameLogic
 
             int randomIndex = Random.Range(0, sourceArray.Length);
             return sourceArray[randomIndex];
+        }
+
+        private GameObject[] GetSourceArray(ObstacleType type)
+        {
+            return type switch
+            {
+                ObstacleType.Wall => walls,
+                ObstacleType.Fog => fogs,
+                ObstacleType.Surface => surfaces,
+                _ => null
+            };
         }
     }
 }
