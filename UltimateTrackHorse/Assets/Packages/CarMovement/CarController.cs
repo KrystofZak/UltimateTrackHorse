@@ -185,7 +185,10 @@ public class CarController : MonoBehaviour
             else
             {
              
-                carRB.AddForceAtPosition(transform.forward * moveInput * effectiveAcceleration, accelerationPoint.position, ForceMode.Acceleration);
+                if (forwardSpeed > -effectiveMaxSpeed)
+                {
+                    carRB.AddForceAtPosition(transform.forward * moveInput * effectiveAcceleration, accelerationPoint.position, ForceMode.Acceleration);
+                }
             }
         }
       
@@ -237,6 +240,11 @@ public class CarController : MonoBehaviour
            
             float overSpeedForce = (forwardSpeed - effectiveMaxSpeed) * (deceleration * 5f);
             carRB.AddForceAtPosition(-transform.forward * overSpeedForce, accelerationPoint.position, ForceMode.Acceleration);
+        }
+        else if (forwardSpeed < -effectiveMaxSpeed && forwardSpeed < -1f)
+        {
+            float overSpeedForce = (-forwardSpeed - effectiveMaxSpeed) * (deceleration * 5f);
+            carRB.AddForceAtPosition(transform.forward * overSpeedForce, accelerationPoint.position, ForceMode.Acceleration);
         }
     }
 
