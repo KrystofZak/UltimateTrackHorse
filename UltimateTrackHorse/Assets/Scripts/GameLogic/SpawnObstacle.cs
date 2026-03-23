@@ -56,8 +56,7 @@ namespace GameLogic
             for (int i = 0; i < n; i++)
             {
                 var cube = cubes[i];
-                var randomType = library.GetRandomType();
-                var prefab = library.GetRandomPrefab(randomType);
+                var prefab = library.GetRandomPrefab();
 
                 if (prefab == null)
                     continue;

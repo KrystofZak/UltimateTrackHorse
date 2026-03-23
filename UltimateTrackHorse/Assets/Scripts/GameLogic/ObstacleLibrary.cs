@@ -1,80 +1,99 @@
-﻿using UnityEngine;
+﻿using System.Linq;
+using UnityEngine;
 
-public class ObstacleLibrary : MonoBehaviour
+namespace GameLogic
 {
-    public enum ObstacleType
+    public class ObstacleLibrary : MonoBehaviour
     {
-        Wall,
-        Fog,
-        Surface
-    }
-
-    [Header("Loaded prefabs")]
-    public GameObject[] walls;
-    public GameObject[] fogs;
-    public GameObject[] surfaces;
-
-    private void Awake()
-    {
-        LoadAllPrefabs();
-    }
-
-    [ContextMenu("Load All Prefabs")]
-    public void LoadAllPrefabs()
-    {
-        walls = Resources.LoadAll<GameObject>("Obstacles/Walls");
-        fogs = Resources.LoadAll<GameObject>("Obstacles/Fogs");
-        surfaces = Resources.LoadAll<GameObject>("Obstacles/Surfaces");
-
-        Debug.Log($"Loaded {walls.Length} wall prefabs");
-        Debug.Log($"Loaded {fogs.Length} fog prefabs");
-        Debug.Log($"Loaded {surfaces.Length} surface prefabs");
-    }
-
-    public GameObject GetPrefab(ObstacleType type, int index)
-    {
-        var sourceArray = type switch
+        public enum ObstacleType
         {
-            ObstacleType.Wall => walls,
-            ObstacleType.Fog => fogs,
-            ObstacleType.Surface => surfaces,
-            _ => null
-        };
+            Wall,
+            Fog,
+            Surface
+        }
 
-        if (sourceArray == null || sourceArray.Length == 0)
+        [Header("Loaded prefabs")]
+        public GameObject[] walls;
+        public GameObject[] fogs;
+        public GameObject[] surfaces;
+
+        private void Awake()
         {
-            Debug.LogError($"{type} array is empty. Make sure prefabs were loaded.");
+            LoadAllPrefabs();
+        }
+
+        [ContextMenu("Load All Prefabs")]
+        public void LoadAllPrefabs()
+        {
+            walls = Resources.LoadAll<GameObject>("Obstacles/Walls");
+            fogs = Resources.LoadAll<GameObject>("Obstacles/Fogs");
+            surfaces = Resources.LoadAll<GameObject>("Obstacles/Surfaces");
+
+            Debug.Log($"Loaded {walls.Length} wall prefabs");
+            Debug.Log($"Loaded {fogs.Length} fog prefabs");
+            Debug.Log($"Loaded {surfaces.Length} surface prefabs");
+        }
+
+        public GameObject GetPrefab(ObstacleType type, int index)
+        {
+            var sourceArray = type switch
+            {
+                ObstacleType.Wall => walls,
+                ObstacleType.Fog => fogs,
+                ObstacleType.Surface => surfaces,
+                _ => null
+            };
+
+            if (sourceArray == null || sourceArray.Length == 0)
+            {
+                Debug.LogError($"{type} array is empty. Make sure prefabs were loaded.");
+                return null;
+            }
+
+            if (index >= 0 && index < sourceArray.Length) return sourceArray[index];
+
+            Debug.LogError($"{type} index {index} is out of range. Valid range: 0 to {sourceArray.Length - 1}");
             return null;
         }
 
-        if (index >= 0 && index < sourceArray.Length) return sourceArray[index];
-
-        Debug.LogError($"{type} index {index} is out of range. Valid range: 0 to {sourceArray.Length - 1}");
-        return null;
-    }
-
-    public ObstacleType GetRandomType()
-    {
-        return (ObstacleType)Random.Range(0, System.Enum.GetValues(typeof(ObstacleType)).Length);
-    }
-
-    public GameObject GetRandomPrefab(ObstacleType type)
-    {
-        var sourceArray = type switch
+        public ObstacleType GetRandomType()
         {
-            ObstacleType.Wall => walls,
-            ObstacleType.Fog => fogs,
-            ObstacleType.Surface => surfaces,
-            _ => null
-        };
-
-        if (sourceArray == null || sourceArray.Length == 0)
-        {
-            Debug.LogError($"{type} array is empty. Make sure prefabs were loaded.");
-            return null;
+           return (ObstacleType)Random.Range(0, System.Enum.GetValues(typeof(ObstacleType)).Length);
         }
 
-        int randomIndex = Random.Range(0, sourceArray.Length);
-        return sourceArray[randomIndex];
+        public GameObject GetRandomPrefab()
+        {
+            var sourceArray = walls.Concat(fogs).Concat(surfaces).ToArray();
+
+            if (sourceArray.Length == 0)
+            {
+                Debug.LogError("Obstacle array is empty. Make sure prefabs were loaded.");
+                return null;
+            }
+            
+            var randomIndex = Random.Range(0, sourceArray.Length); // TODO: Ask - We can use the seed even here, to have consistent obstacles
+            
+            return sourceArray[randomIndex];
+        }
+
+        public GameObject GetRandomPrefab(ObstacleType type)
+        {
+            var sourceArray = type switch
+            {
+                ObstacleType.Wall => walls,
+                ObstacleType.Fog => fogs,
+                ObstacleType.Surface => surfaces,
+                _ => null
+            };
+
+            if (sourceArray == null || sourceArray.Length == 0)
+            {
+                Debug.LogError($"{type} array is empty. Make sure prefabs were loaded.");
+                return null;
+            }
+
+            int randomIndex = Random.Range(0, sourceArray.Length);
+            return sourceArray[randomIndex];
+        }
     }
 }
