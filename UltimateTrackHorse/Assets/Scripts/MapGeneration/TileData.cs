@@ -9,7 +9,7 @@ namespace MapGeneration
         public string tileName; // Name of the tile for identification
 
         [Header("Sockets (Neighbourhood Connections)")]
-        // Sockets for neighbouring connections 
+        // Sockets for neighboring connections 
         public string socketNorth; // Socket for the tile to the north
 
         public string socketEast; // Socket for the tile to the east
@@ -18,5 +18,8 @@ namespace MapGeneration
 
         [Header("WFC Settings")]
         public float baseWeight = 1f; // Frequency of the tile being chosen during the WFC process
+        
+        [Header("Time complexity")]
+        public float timeComplexity = 3f; // Time complexity of the tile
     }
 }

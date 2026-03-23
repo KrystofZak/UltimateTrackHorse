@@ -64,17 +64,15 @@ namespace GameLogic
 
                 var parent = keepParent ? cube.transform.parent : null;
 
+                var position = cube.transform.position;
+                position.y += prefab.transform.position.y - 0.5f; 
+
                 var spawned = Instantiate(
                     prefab,
-                    cube.transform.position,
+                    position,
                     cube.transform.rotation,
                     parent
                 );
-
-                if (keepScale)
-                {
-                    spawned.transform.localScale = cube.transform.localScale;
-                }
 
                 Destroy(cube);
             }

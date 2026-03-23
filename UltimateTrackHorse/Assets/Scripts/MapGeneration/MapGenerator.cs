@@ -45,6 +45,7 @@ namespace MapGeneration
 
         public int LastUsedSeed { get; private set; }
         public string LastGenerationSignature { get; private set; }
+        public List<Vector2Int> GeneratedPath { get; private set; }
 
         /// <summary>
         /// Initializes the map generator and generates a valid map with start and finish cells
@@ -55,7 +56,6 @@ namespace MapGeneration
         }
 
         #region UI Toggle Methods for Track Length
-        
         /// <summary>
         /// Sets a short track length. Connect this to the OnValueChanged event of a "Short Track" UI Toggle.
         /// </summary>
@@ -104,11 +104,19 @@ namespace MapGeneration
         public void OnPlayClicked()
         {
             GenerateMapWithCurrentSeed();
+            if (gameManager != null)
+            {
+                gameManager.SetupNewTrack();
+            }
+            
         }
 
         /// <summary>
         /// Overrides random seed generation with a specific seed string.
         /// Empty string disables override and switches back to random seeds.
+        /// The seed format is a string of numbers, where the first two digits
+        /// represent the track length, and the rest is the seed for generation.
+        /// E.g., "15238562" means track length 15 and seed 238562.
         /// </summary>
         public void SetSeed(string seed)
         {
@@ -120,39 +128,31 @@ namespace MapGeneration
             }
 
             string trimmedSeed = seed.Trim();
-            if (int.TryParse(trimmedSeed, out int parsedSeed))
+            if (trimmedSeed.Length > 2 && int.TryParse(trimmedSeed.Substring(0, 2), out int length) && int.TryParse(trimmedSeed.Substring(2), out int parsedSeed))
             {
+                targetTrackLength = Mathf.Clamp(length, 3, 100);
                 manualSeed = parsedSeed;
+                useManualSeed = true;
+                Debug.Log($"Manual seed set. Track length: {targetTrackLength}, Seed: {manualSeed}.");
             }
             else
             {
-                // Stable hash ensures same text input always maps to the same seed.
-                manualSeed = ComputeStableSeedFromString(trimmedSeed);
+                useManualSeed = false;
+                Debug.LogWarning($"Invalid seed format: '{trimmedSeed}'. Seed must be a number where the first 2 digits are track length (e.g., '15238562'). Using random seed instead.");
             }
-
-            useManualSeed = true;
-            Debug.Log($"Manual seed set to {manualSeed} (input: '{trimmedSeed}').");
         }
 
         private void GenerateMapWithCurrentSeed()
         {
-            int seed = useManualSeed ? manualSeed : unchecked((int)System.DateTime.UtcNow.Ticks);
-            GenerateMapFromSeed(seed);
-        }
-
-        private int ComputeStableSeedFromString(string seedText)
-        {
-            unchecked
+            if (useManualSeed)
             {
-                // FNV-1a 32-bit hash for deterministic string-to-seed conversion.
-                uint hash = 2166136261;
-                for (int i = 0; i < seedText.Length; i++)
-                {
-                    hash ^= seedText[i];
-                    hash *= 16777619;
-                }
-
-                return (int)hash;
+                GenerateMapFromSeed(manualSeed);
+            }
+            else
+            {
+                // When using a random seed, still respect the currently set targetTrackLength.
+                int randomPart = Random.Range(0, 1000000); // Generate a random part for the seed
+                GenerateMapFromSeed(randomPart);
             }
         }
 
@@ -683,20 +683,20 @@ namespace MapGeneration
             ClearScene();
             InitializeGrid(); 
             
-            List<Vector2Int> generatedPath = GenerateRandomPath(new Vector2Int(1, 1), targetTrackLength);
+            GeneratedPath = GenerateRandomPath(new Vector2Int(1, 1), targetTrackLength);
 
-            if (generatedPath != null)
+            if (GeneratedPath != null)
             {
-                ApplyPathToWFC(generatedPath);
+                ApplyPathToWFC(GeneratedPath);
                 RunWFC(); 
-                InstantiatePathAndScenery(generatedPath);
+                InstantiatePathAndScenery(GeneratedPath);
 
                 if (gameManager != null)
                 {
                     gameManager.PlaceCarOnStart();
                 }
                 
-                Debug.Log($"Track generated with length {generatedPath.Count}. Seed: {LastUsedSeed}");
+                Debug.Log($"Track generated with length {GeneratedPath.Count}. Seed: {LastUsedSeed}");
                 return true;
             }
 
@@ -717,3 +717,4 @@ namespace MapGeneration
         
     }
 }
+

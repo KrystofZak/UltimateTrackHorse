@@ -46,6 +46,8 @@ public class CarController : MonoBehaviour
     private bool isBraking = false;
     private bool preventReverse = false;
     public float reverseSpeedThreshold = 1f;
+    public bool isInputEnabled = true;
+
 
     [Header("Car Settings")]
     [SerializeField] private float acceleration = 25f;
@@ -137,7 +139,7 @@ public class CarController : MonoBehaviour
 
         if (moveInput > 0.1f)
         {
-            
+
             if (forwardSpeed < -0.5f)
             {
                 carRB.AddForceAtPosition(transform.forward * moveInput * effectiveDeceleration, accelerationPoint.position, ForceMode.Acceleration);
@@ -151,7 +153,7 @@ public class CarController : MonoBehaviour
         {
             if (preventReverse)
             {
-                
+
                 if (forwardSpeed > 0.5f)
                 {
                     carRB.AddForceAtPosition(transform.forward * moveInput * effectiveDeceleration, accelerationPoint.position, ForceMode.Acceleration);
@@ -163,22 +165,22 @@ public class CarController : MonoBehaviour
             }
             else
             {
-                
+
                 carRB.AddForceAtPosition(transform.forward * moveInput * effectiveAcceleration, accelerationPoint.position, ForceMode.Acceleration);
             }
         }
-    
+
     }
 
     private void BrakeToStop()
     {
-        
+
         float stoppingForce = -currentCarLocalVelocity.z * deceleration;
         carRB.AddForceAtPosition(transform.forward * stoppingForce, accelerationPoint.position, ForceMode.Acceleration);
     }
     private void LongitudinalDrag()
     {
-        
+
         if (Mathf.Abs(moveInput) < 0.1f)
         {
             float dragForce = -currentCarLocalVelocity.z * (deceleration * 0.5f);
@@ -192,7 +194,7 @@ public class CarController : MonoBehaviour
 
     private void Steer()
     {
-        
+
         float speedRatioAbs = Mathf.Abs(carVelocityRatio);
 
         float direction = currentCarLocalVelocity.z >= -0.1f ? 1f : -1f;
@@ -234,7 +236,7 @@ public class CarController : MonoBehaviour
 
     private void Vfx()
     {
-       
+
         if (isGrounded && Mathf.Abs(currentCarLocalVelocity.x) > minSkidVelocity)
         {
             ToggleSkidMarks(true);
@@ -246,7 +248,7 @@ public class CarController : MonoBehaviour
             ToggleSkidSmokes(false);
         }
     }
-    private void ToggleSkidMarks(bool toggle) 
+    private void ToggleSkidMarks(bool toggle)
     {
         foreach (TrailRenderer skid in skidMarks)
         {
@@ -310,13 +312,22 @@ public class CarController : MonoBehaviour
     #region Input Handeling
     private void GetInput()
     {
+        if (!isInputEnabled)
+        {
+            moveInput = 0f;
+            steerInput = 0f;
+            isBraking = false;
+            preventReverse = false;
+            return;
+        }
+        
         moveInput = Input.GetAxisRaw("Vertical");
         steerInput = Input.GetAxisRaw("Horizontal");
         bool pressingBrake = moveInput < -0.1f;
 
         if (pressingBrake && !isBraking)
         {
-            
+
             isBraking = true;
             if (currentCarLocalVelocity.z > reverseSpeedThreshold)
             {
@@ -329,7 +340,7 @@ public class CarController : MonoBehaviour
         }
         else if (!pressingBrake)
         {
-            
+
             isBraking = false;
             preventReverse = false;
         }
