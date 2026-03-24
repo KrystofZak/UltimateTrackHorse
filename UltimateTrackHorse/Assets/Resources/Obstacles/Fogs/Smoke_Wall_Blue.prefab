@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 4973558526958755185}
   - component: {fileID: 6658527702640158382}
   - component: {fileID: 2491153016816536846}
-  m_Layer: 0
+  m_Layer: 2
   m_Name: Smoke_Wall_Blue
   m_TagString: Trap
   m_Icon: {fileID: 0}
