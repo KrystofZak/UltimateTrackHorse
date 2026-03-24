@@ -12,7 +12,8 @@ GameObject:
   - component: {fileID: 4973558526958755185}
   - component: {fileID: 6658527702640158382}
   - component: {fileID: 2491153016816536846}
-  m_Layer: 0
+  - component: {fileID: -8235114076449776925}
+  m_Layer: 2
   m_Name: Smoke_Wall_Red
   m_TagString: Trap
   m_Icon: {fileID: 0}
@@ -28,7 +29,7 @@ Transform:
   m_GameObject: {fileID: 9217475310159705389}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -0.819, y: 0, z: 0.21999979}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 0.73, y: 0.73, z: 0.73}
   m_ConstrainProportionsScale: 1
   m_Children: []
@@ -4640,3 +4641,21 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 2.1627662, y: 1.1288167, z: 0.2769303}
   m_Center: {x: -0.018454006, y: 0.5633231, z: 0.0208856}
+--- !u!114 &-8235114076449776925
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9217475310159705389}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 212cda3959394df2a7cbb8b3dfdd1957, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GameLogic.SmokeScreenTrigger
+  carTag: Player
+  smokeColor: {r: 1, g: 0.039215688, b: 0, a: 1}
+  alpha: 0.35
+  fadeIn: 0.15
+  hold: 1
+  fadeOut: 1.2

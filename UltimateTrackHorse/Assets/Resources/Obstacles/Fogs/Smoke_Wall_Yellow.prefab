@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 4973558526958755185}
   - component: {fileID: 6658527702640158382}
   - component: {fileID: 2491153016816536846}
-  m_Layer: 0
+  m_Layer: 2
   m_Name: Smoke_Wall_Yellow
   m_TagString: Trap
   m_Icon: {fileID: 0}
@@ -28,7 +28,7 @@ Transform:
   m_GameObject: {fileID: 9217475310159705389}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -0.819, y: 0, z: 2.2199998}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 0.73, y: 0.73, z: 0.73}
   m_ConstrainProportionsScale: 1
   m_Children: []
