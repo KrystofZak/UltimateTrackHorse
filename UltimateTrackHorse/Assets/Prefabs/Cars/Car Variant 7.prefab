@@ -1,0 +1,161 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1001 &6639778542708969714
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 2813353242786893272, guid: 240da73542f29034b8fc2bc8fd5bb9e2, type: 3}
+      propertyPath: surfaceSettings.Array.size
+      value: 4
+      objectReference: {fileID: 0}
+    - target: {fileID: 2813353242786893272, guid: 240da73542f29034b8fc2bc8fd5bb9e2, type: 3}
+      propertyPath: surfaceSettings.Array.data[2].name
+      value: Honey
+      objectReference: {fileID: 0}
+    - target: {fileID: 2813353242786893272, guid: 240da73542f29034b8fc2bc8fd5bb9e2, type: 3}
+      propertyPath: surfaceSettings.Array.data[3].name
+      value: Oil
+      objectReference: {fileID: 0}
+    - target: {fileID: 2813353242786893272, guid: 240da73542f29034b8fc2bc8fd5bb9e2, type: 3}
+      propertyPath: surfaceSettings.Array.data[3].lingerTime
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 2813353242786893272, guid: 240da73542f29034b8fc2bc8fd5bb9e2, type: 3}
+      propertyPath: surfaceSettings.Array.data[2].killMomentum
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2813353242786893272, guid: 240da73542f29034b8fc2bc8fd5bb9e2, type: 3}
+      propertyPath: surfaceSettings.Array.data[2].layer.m_Bits
+      value: 64
+      objectReference: {fileID: 0}
+    - target: {fileID: 2813353242786893272, guid: 240da73542f29034b8fc2bc8fd5bb9e2, type: 3}
+      propertyPath: surfaceSettings.Array.data[3].layer.m_Bits
+      value: 128
+      objectReference: {fileID: 0}
+    - target: {fileID: 2813353242786893272, guid: 240da73542f29034b8fc2bc8fd5bb9e2, type: 3}
+      propertyPath: surfaceSettings.Array.data[2].maxSpeedMultiplier
+      value: 0.2
+      objectReference: {fileID: 0}
+    - target: {fileID: 2813353242786893272, guid: 240da73542f29034b8fc2bc8fd5bb9e2, type: 3}
+      propertyPath: surfaceSettings.Array.data[3].maxSpeedMultiplier
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2813353242786893272, guid: 240da73542f29034b8fc2bc8fd5bb9e2, type: 3}
+      propertyPath: surfaceSettings.Array.data[2].accelerationMultiplier
+      value: 0.3
+      objectReference: {fileID: 0}
+    - target: {fileID: 2813353242786893272, guid: 240da73542f29034b8fc2bc8fd5bb9e2, type: 3}
+      propertyPath: surfaceSettings.Array.data[3].accelerationMultiplier
+      value: 0.8
+      objectReference: {fileID: 0}
+    - target: {fileID: 2813353242786893272, guid: 240da73542f29034b8fc2bc8fd5bb9e2, type: 3}
+      propertyPath: surfaceSettings.Array.data[2].dragCoefficientMultiplier
+      value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 2813353242786893272, guid: 240da73542f29034b8fc2bc8fd5bb9e2, type: 3}
+      propertyPath: surfaceSettings.Array.data[3].dragCoefficientMultiplier
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3557543197106714043, guid: 240da73542f29034b8fc2bc8fd5bb9e2, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 20
+      objectReference: {fileID: 0}
+    - target: {fileID: 3557543197106714043, guid: 240da73542f29034b8fc2bc8fd5bb9e2, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 1.712
+      objectReference: {fileID: 0}
+    - target: {fileID: 3557543197106714043, guid: 240da73542f29034b8fc2bc8fd5bb9e2, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 20
+      objectReference: {fileID: 0}
+    - target: {fileID: 3557543197106714043, guid: 240da73542f29034b8fc2bc8fd5bb9e2, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3557543197106714043, guid: 240da73542f29034b8fc2bc8fd5bb9e2, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3557543197106714043, guid: 240da73542f29034b8fc2bc8fd5bb9e2, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3557543197106714043, guid: 240da73542f29034b8fc2bc8fd5bb9e2, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3557543197106714043, guid: 240da73542f29034b8fc2bc8fd5bb9e2, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3557543197106714043, guid: 240da73542f29034b8fc2bc8fd5bb9e2, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3557543197106714043, guid: 240da73542f29034b8fc2bc8fd5bb9e2, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3868901914986951739, guid: 240da73542f29034b8fc2bc8fd5bb9e2, type: 3}
+      propertyPath: m_Mesh
+      value: 
+      objectReference: {fileID: 4711208715938537054, guid: 7f2eb32a90aace349adccd6efbc6bd9b, type: 3}
+    - target: {fileID: 3868901914986951739, guid: 240da73542f29034b8fc2bc8fd5bb9e2, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: dd3838b8223e51b488c55db2735d498e, type: 2}
+    - target: {fileID: 3925685494562289207, guid: 240da73542f29034b8fc2bc8fd5bb9e2, type: 3}
+      propertyPath: ShapeModule.radiusThickness
+      value: 0.001
+      objectReference: {fileID: 0}
+    - target: {fileID: 3925685494562289207, guid: 240da73542f29034b8fc2bc8fd5bb9e2, type: 3}
+      propertyPath: SizeModule.curve.maxCurve.m_Curve.Array.data[1].time
+      value: 0.5966933
+      objectReference: {fileID: 0}
+    - target: {fileID: 3925685494562289207, guid: 240da73542f29034b8fc2bc8fd5bb9e2, type: 3}
+      propertyPath: SizeModule.curve.maxCurve.m_Curve.Array.data[1].value
+      value: 0.69887733
+      objectReference: {fileID: 0}
+    - target: {fileID: 3925685494562289207, guid: 240da73542f29034b8fc2bc8fd5bb9e2, type: 3}
+      propertyPath: EmissionModule.m_Bursts.Array.data[0].countCurve.scalar
+      value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 5505105861667737132, guid: 240da73542f29034b8fc2bc8fd5bb9e2, type: 3}
+      propertyPath: ShapeModule.radiusThickness
+      value: 0.001
+      objectReference: {fileID: 0}
+    - target: {fileID: 5505105861667737132, guid: 240da73542f29034b8fc2bc8fd5bb9e2, type: 3}
+      propertyPath: SizeModule.curve.maxCurve.m_Curve.Array.data[1].time
+      value: 0.5966933
+      objectReference: {fileID: 0}
+    - target: {fileID: 5505105861667737132, guid: 240da73542f29034b8fc2bc8fd5bb9e2, type: 3}
+      propertyPath: SizeModule.curve.maxCurve.m_Curve.Array.data[1].value
+      value: 0.69887733
+      objectReference: {fileID: 0}
+    - target: {fileID: 5505105861667737132, guid: 240da73542f29034b8fc2bc8fd5bb9e2, type: 3}
+      propertyPath: EmissionModule.m_Bursts.Array.data[0].countCurve.scalar
+      value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 8057370949337415672, guid: 240da73542f29034b8fc2bc8fd5bb9e2, type: 3}
+      propertyPath: m_Name
+      value: Car Variant 7
+      objectReference: {fileID: 0}
+    - target: {fileID: 8118047521934545290, guid: 240da73542f29034b8fc2bc8fd5bb9e2, type: 3}
+      propertyPath: m_Mesh
+      value: 
+      objectReference: {fileID: 4711208715938537054, guid: 7f2eb32a90aace349adccd6efbc6bd9b, type: 3}
+    - target: {fileID: 8118047521934545290, guid: 240da73542f29034b8fc2bc8fd5bb9e2, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: dd3838b8223e51b488c55db2735d498e, type: 2}
+    m_RemovedComponents:
+    - {fileID: 1967871582694339708, guid: 240da73542f29034b8fc2bc8fd5bb9e2, type: 3}
+    - {fileID: 4498503364632162240, guid: 240da73542f29034b8fc2bc8fd5bb9e2, type: 3}
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 240da73542f29034b8fc2bc8fd5bb9e2, type: 3}
