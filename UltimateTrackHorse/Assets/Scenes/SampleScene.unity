@@ -1745,7 +1745,7 @@ PrefabInstance:
     - target: {fileID: 77704331816611135, guid: 2103c832dfa896647b7482f065e54a34, type: 3}
       propertyPath: timerText
       value: 
-      objectReference: {fileID: 0}
+      objectReference: {fileID: 2148562314618703733}
     - target: {fileID: 1795032095160127584, guid: 2103c832dfa896647b7482f065e54a34, type: 3}
       propertyPath: m_Name
       value: UIManager
@@ -1757,23 +1757,35 @@ PrefabInstance:
     - target: {fileID: 2970179288785032643, guid: 2103c832dfa896647b7482f065e54a34, type: 3}
       propertyPath: speedText
       value: 
-      objectReference: {fileID: 0}
+      objectReference: {fileID: 2259506953575326591}
     - target: {fileID: 3641452086535046106, guid: 2103c832dfa896647b7482f065e54a34, type: 3}
       propertyPath: gameView
       value: 
-      objectReference: {fileID: 0}
+      objectReference: {fileID: 294970014439615073}
     - target: {fileID: 3641452086535046106, guid: 2103c832dfa896647b7482f065e54a34, type: 3}
       propertyPath: pauseView
       value: 
-      objectReference: {fileID: 0}
+      objectReference: {fileID: 2951746533749805636}
     - target: {fileID: 3641452086535046106, guid: 2103c832dfa896647b7482f065e54a34, type: 3}
       propertyPath: mainMenuView
       value: 
-      objectReference: {fileID: 0}
+      objectReference: {fileID: 5442558778321369876}
     - target: {fileID: 3641452086535046106, guid: 2103c832dfa896647b7482f065e54a34, type: 3}
       propertyPath: settingsView
       value: 
-      objectReference: {fileID: 0}
+      objectReference: {fileID: 6742499085264967227}
+    - target: {fileID: 3641452086535046106, guid: 2103c832dfa896647b7482f065e54a34, type: 3}
+      propertyPath: mapSelectionView
+      value: 
+      objectReference: {fileID: 1894331821}
+    - target: {fileID: 3641452086535046106, guid: 2103c832dfa896647b7482f065e54a34, type: 3}
+      propertyPath: randomSelectionView
+      value: 
+      objectReference: {fileID: 5232205889972060070}
+    - target: {fileID: 3641452086535046106, guid: 2103c832dfa896647b7482f065e54a34, type: 3}
+      propertyPath: seededSelectionView
+      value: 
+      objectReference: {fileID: 1744025229}
     - target: {fileID: 8352404867310764486, guid: 2103c832dfa896647b7482f065e54a34, type: 3}
       propertyPath: m_LocalPosition.x
       value: -83.72123
