@@ -807,6 +807,11 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 7889134294781322569, guid: 1eaeeeb0fc85b47499a11b348531a27b, type: 3}
   m_PrefabInstance: {fileID: 4919657774978311487}
   m_PrefabAsset: {fileID: 0}
+--- !u!4 &762360250 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 7889134294781322569, guid: 1eaeeeb0fc85b47499a11b348531a27b, type: 3}
+  m_PrefabInstance: {fileID: 4919657774978311487}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &832575517
 GameObject:
   m_ObjectHideFlags: 0
