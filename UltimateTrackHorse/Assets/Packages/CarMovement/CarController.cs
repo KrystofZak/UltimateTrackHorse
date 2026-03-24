@@ -328,21 +328,14 @@ public class CarController : MonoBehaviour
     {
         foreach (ParticleSystem skid in skidSmokes)
         {
-            if (toggle)
+          
+            var emission = skid.emission;
+
+            emission.enabled = toggle;
+
+            if (toggle && !skid.isPlaying)
             {
-               
-                if (!skid.isPlaying)
-                {
-                    skid.Play();
-                }
-            }
-            else
-            {
-               
-                if (skid.isPlaying)
-                {
-                    skid.Stop();
-                }
+                skid.Play();
             }
         }
     }
