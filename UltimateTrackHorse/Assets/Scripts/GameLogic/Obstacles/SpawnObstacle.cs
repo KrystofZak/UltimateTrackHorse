@@ -2,23 +2,24 @@
 using UnityEngine;
 using Random = UnityEngine.Random;
 
-namespace GameLogic
+namespace GameLogic.Obstacles
 {
     public class SpawnObstacle : MonoBehaviour
     {
         [Header("Input")] [SerializeField] private KeyCode replaceKey = KeyCode.F;
 
-        [Header("References")] [SerializeField]
-        private ObstacleLibrary library;
+        [Header("References")] 
+        [SerializeField] private ObstacleLibrary library;
+        [SerializeField] private ScreenTintController screenTintController;
 
         [SerializeField] private string placeholderTag = "Obstacle";
 
-        [Header("What to spawn")] [SerializeField]
-        private ObstacleLibrary.ObstacleType obstacleType;
-
+        [Header("What to spawn")] 
+        [SerializeField] private ObstacleLibrary.ObstacleType obstacleType;
         [SerializeField] private int prefabIndex;
 
-        [Header("Options")] [SerializeField] private bool keepParent = true;
+        [Header("Options")] 
+        [SerializeField] private bool keepParent = true;
         [SerializeField] private bool keepScale = true;
 
         private bool replaced;
@@ -77,7 +78,7 @@ namespace GameLogic
 
                 ReplaceObject(placeholder, prefab);
             }
-            
+
             replaced = true;
         }
 
@@ -97,24 +98,31 @@ namespace GameLogic
 
             var rotation = source.transform.rotation * prefab.transform.rotation;
             var position = source.transform.position + prefab.transform.position;
-            position.y -= 0.5f; // offset of a cube
-            
-            
-            var spawned = Instantiate(
-                prefab,
-                position,
-                rotation,
-                parent
-            );
- 
-            
+            position.y -= 0.5f;
+
+            var spawned = Instantiate(prefab, position, rotation, parent);
+
             if (keepScale)
             {
-                spawned.transform.localScale = keepParent ? source.transform.localScale : source.transform.lossyScale;
+                spawned.transform.localScale = keepParent
+                    ? source.transform.localScale
+                    : source.transform.lossyScale;
             }
+
+            InjectServices(spawned);
 
             Destroy(source);
             return true;
+        }
+
+        private void InjectServices(GameObject spawned)
+        {
+            if (!screenTintController) return;
+
+            foreach (var injectable in spawned.GetComponentsInChildren<IScreenTintInjectable>(true))
+            {
+                injectable.InjectScreenTint(screenTintController);
+            }
         }
 
         private static void Shuffle(GameObject[] array)
