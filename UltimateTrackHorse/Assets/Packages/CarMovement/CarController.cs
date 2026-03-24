@@ -425,30 +425,26 @@ public class CarController : MonoBehaviour
         {
             float maxDistance = restLength;
 
-            // Vystøelíme RaycastAll místo bìžného Raycastu
             RaycastHit[] hits = Physics.RaycastAll(rayPoints[i].position, -rayPoints[i].up, maxDistance + wheelRadius);
 
             if (hits.Length > 0)
             {
-                // Musíme výsledky seøadit, abychom mìli jistotu, že jedeme odshora dolù (od nejbližšího)
+                
                 Array.Sort(hits, (a, b) => a.distance.CompareTo(b.distance));
 
                 int surfaceLayer = -1;
                 bool foundDrivable = false;
                 RaycastHit groundHit = new RaycastHit();
 
-                // Projdeme vše, co paprsek trefil
                 foreach (RaycastHit hit in hits)
                 {
                     int hitLayer = hit.collider.gameObject.layer;
 
-                    // PRVNÍ trefený objekt si zapamatujeme pro SurfaceSettings (tohle bude ta trapa/olej)
                     if (surfaceLayer == -1)
                     {
                         surfaceLayer = hitLayer;
                     }
 
-                    // Pokud objekt patøí do Drivable masky, je to silnice a tady se zastavíme pro výpoèet tlumièù
                     if ((drivable.value & (1 << hitLayer)) != 0)
                     {
                         groundHit = hit;
@@ -457,19 +453,16 @@ public class CarController : MonoBehaviour
                     }
                 }
 
-                // Pokud jsme pod trapou (nebo rovnou) trefili pevnou zem
                 if (foundDrivable)
                 {
                     wheelIsGrounded[i] = 1;
 
-                    // Tady je ten hlavní trik: Uložíme si surfaceLayer (olej), i když se odrážíme od groundHit (silnice)
                     if (mostGroundedIndex == -1 || foundDrivable)
                     {
                         dominantLayer = surfaceLayer;
                         mostGroundedIndex = i;
                     }
 
-                    // --- VÝPOÈET FYZIKY POUŽÍVÁ groundHit ---
                     float currentSpringLength = groundHit.distance - wheelRadius;
                     float springCompression = (restLength - currentSpringLength) / springTravel;
 
@@ -499,7 +492,7 @@ public class CarController : MonoBehaviour
                 }
                 else
                 {
-                    // Trefili jsme nìco, ale nic z toho není "Drivable" (auto visí ve vzduchu, nebo je pod ním jen propadlištì)
+                   
                     wheelIsGrounded[i] = 0;
                     SetTirePosition(tires[i], rayPoints[i].position - rayPoints[i].up * maxDistance);
                     Debug.DrawLine(rayPoints[i].position, rayPoints[i].position - rayPoints[i].up * maxDistance, Color.green);
@@ -507,7 +500,7 @@ public class CarController : MonoBehaviour
             }
             else
             {
-                // Netrefili jsme vùbec nic
+               
                 wheelIsGrounded[i] = 0;
                 SetTirePosition(tires[i], rayPoints[i].position - rayPoints[i].up * maxDistance);
                 Debug.DrawLine(rayPoints[i].position, rayPoints[i].position - rayPoints[i].up * maxDistance, Color.green);
