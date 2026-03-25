@@ -115,7 +115,16 @@ public class CarController : MonoBehaviour
 
     private void Update()
     {
-        GetInput();
+        if (isInputEnabled)
+        {
+            GetInput();
+        }
+        else
+        {
+            moveInput = 0;
+            steerInput = 0;
+            isBraking = false;
+        }
     }
     #endregion
 
@@ -155,7 +164,7 @@ public class CarController : MonoBehaviour
 
         if (moveInput > 0.1f)
         {
-
+           
             if (forwardSpeed < -0.5f)
             {
                 carRB.AddForceAtPosition(transform.forward * moveInput * effectiveDeceleration, accelerationPoint.position, ForceMode.Acceleration);
@@ -173,7 +182,7 @@ public class CarController : MonoBehaviour
         {
             if (preventReverse)
             {
-
+               
                 if (forwardSpeed > 0.5f)
                 {
                     carRB.AddForceAtPosition(transform.forward * moveInput * effectiveDeceleration, accelerationPoint.position, ForceMode.Acceleration);
@@ -186,17 +195,30 @@ public class CarController : MonoBehaviour
             }
             else
             {
-
-                carRB.AddForceAtPosition(transform.forward * moveInput * effectiveAcceleration, accelerationPoint.position, ForceMode.Acceleration);
+             
+                if (forwardSpeed > -effectiveMaxSpeed)
+                {
+                    carRB.AddForceAtPosition(transform.forward * moveInput * effectiveAcceleration, accelerationPoint.position, ForceMode.Acceleration);
+                }
             }
         }
-
+      
+        else
+        {
+            
+            if (Mathf.Abs(forwardSpeed) < 1.0f)
+            {
+               
+                carRB.linearVelocity = Vector3.Lerp(carRB.linearVelocity, new Vector3(0, carRB.linearVelocity.y, 0), Time.fixedDeltaTime * 10f);
+            }
+        }
     }
 
     private void BrakeToStop()
     {
-
-        float stoppingForce = -currentCarLocalVelocity.z * deceleration;
+        float forwardSpeed = currentCarLocalVelocity.z;
+        
+        float stoppingForce = -forwardSpeed * (deceleration * 1.2f);
         carRB.AddForceAtPosition(transform.forward * stoppingForce, accelerationPoint.position, ForceMode.Acceleration);
 
         if (Mathf.Abs(forwardSpeed) < 0.2f)
@@ -364,15 +386,7 @@ public class CarController : MonoBehaviour
     #region Input Handeling
     private void GetInput()
     {
-        if (!isInputEnabled)
-        {
-            moveInput = 0f;
-            steerInput = 0f;
-            isBraking = false;
-            preventReverse = false;
-            return;
-        }
-        
+        float lastInput = moveInput;
         moveInput = Input.GetAxisRaw("Vertical");
         steerInput = Input.GetAxisRaw("Horizontal");
 
@@ -380,7 +394,6 @@ public class CarController : MonoBehaviour
 
         if (pressingBrake && !isBraking)
         {
-
             isBraking = true;
            
             if (currentCarLocalVelocity.z > reverseSpeedThreshold)
@@ -394,7 +407,6 @@ public class CarController : MonoBehaviour
         }
         else if (!pressingBrake)
         {
-
             isBraking = false;
             
             preventReverse = false;
@@ -422,61 +434,90 @@ public class CarController : MonoBehaviour
 
         for (int i = 0; i < rayPoints.Length; i++)
         {
-            RaycastHit hit;
-
             float maxDistance = restLength;
 
-            if (Physics.Raycast(rayPoints[i].position, -rayPoints[i].up, out hit, maxDistance + wheelRadius))
+            RaycastHit[] hits = Physics.RaycastAll(rayPoints[i].position, -rayPoints[i].up, maxDistance + wheelRadius);
+
+            if (hits.Length > 0)
             {
-                int hitLayer = hit.collider.gameObject.layer;
-                bool isDrivable = (drivable.value & (1 << hitLayer)) != 0;
+                
+                Array.Sort(hits, (a, b) => a.distance.CompareTo(b.distance));
 
-                wheelIsGrounded[i] = 1;
+                int surfaceLayer = -1;
+                bool foundDrivable = false;
+                RaycastHit groundHit = new RaycastHit();
 
-                if (mostGroundedIndex == -1 || isDrivable)
+                foreach (RaycastHit hit in hits)
                 {
-                    dominantLayer = hitLayer;
-                    mostGroundedIndex = i;
+                    int hitLayer = hit.collider.gameObject.layer;
+
+                    if (surfaceLayer == -1)
+                    {
+                        surfaceLayer = hitLayer;
+                    }
+
+                    if ((drivable.value & (1 << hitLayer)) != 0)
+                    {
+                        groundHit = hit;
+                        foundDrivable = true;
+                        break;
+                    }
                 }
 
-                float currentSpringLength = hit.distance - wheelRadius;
-                float springCompression = (restLength - currentSpringLength) / springTravel;
+                if (foundDrivable)
+                {
+                    wheelIsGrounded[i] = 1;
 
-                float springForce = springCompression * springStiffness;
+                    if (mostGroundedIndex == -1 || foundDrivable)
+                    {
+                        dominantLayer = surfaceLayer;
+                        mostGroundedIndex = i;
+                    }
 
-                if (springCompression > 0.7f)
+                    float currentSpringLength = groundHit.distance - wheelRadius;
+                    float springCompression = (restLength - currentSpringLength) / springTravel;
+
+                    float springForce = springCompression * springStiffness;
+
+                    if (springCompression > 0.7f)
+                    {
+                        float bumpFactor = Mathf.Pow(springCompression, 4f);
+                        springForce += springStiffness * bumpFactor;
+                    }
+
+                    float springVelocity = Vector3.Dot(carRB.GetPointVelocity(rayPoints[i].position), rayPoints[i].up);
+                    float damperForce = springVelocity * damperStiffness;
+
+                    if (springVelocity < -1.5f && springCompression > 0.5f)
+                    {
+                        damperForce *= 2.5f;
+                    }
+
+                    float netForce = springForce - damperForce;
+
+                    carRB.AddForceAtPosition(rayPoints[i].up * netForce, rayPoints[i].position);
+
+                    SetTirePosition(tires[i], groundHit.point + rayPoints[i].up * wheelRadius);
+
+                    Debug.DrawLine(rayPoints[i].position, groundHit.point, Color.red);
+                }
+                else
                 {
                    
-                    float bumpFactor = Mathf.Pow(springCompression, 4f);
-                    springForce += springStiffness * bumpFactor;
+                    wheelIsGrounded[i] = 0;
+                    SetTirePosition(tires[i], rayPoints[i].position - rayPoints[i].up * maxDistance);
+                    Debug.DrawLine(rayPoints[i].position, rayPoints[i].position - rayPoints[i].up * maxDistance, Color.green);
                 }
-
-                
-                float springVelocity = Vector3.Dot(carRB.GetPointVelocity(rayPoints[i].position), rayPoints[i].up);
-                float damperForce = springVelocity * damperStiffness;
-
-                if (springVelocity < -1.5f && springCompression > 0.5f)
-                {
-                    damperForce *= 2.5f; 
-                }
-
-                float netForce = springForce - damperForce;
-
-                carRB.AddForceAtPosition(rayPoints[i].up * netForce, rayPoints[i].position);
-
-                SetTirePosition(tires[i], hit.point + rayPoints[i].up * wheelRadius);
-
-                Debug.DrawLine(rayPoints[i].position, hit.point, isDrivable ? Color.red : Color.yellow);
             }
             else
             {
+               
                 wheelIsGrounded[i] = 0;
-
                 SetTirePosition(tires[i], rayPoints[i].position - rayPoints[i].up * maxDistance);
-
                 Debug.DrawLine(rayPoints[i].position, rayPoints[i].position - rayPoints[i].up * maxDistance, Color.green);
             }
         }
+
         SurfaceSettings lastSettings = activeSurface;
         SurfaceSettings detectedSurface = dominantLayer >= 0 ? GetSurfaceForLayer(dominantLayer) : SurfaceSettings.Default;
 
@@ -489,11 +530,10 @@ public class CarController : MonoBehaviour
         if (activeLingerTimer > 0f)
         {
             activeLingerTimer -= Time.fixedDeltaTime;
-            activeSurface = lingeringSurface; 
+            activeSurface = lingeringSurface;
         }
         else
         {
-            
             activeSurface = detectedSurface;
         }
 
