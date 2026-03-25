@@ -8,6 +8,7 @@ public class UIManager : MonoBehaviour
     public GameObject randomSelectionView;
     public GameObject seededSelectionView;
     public GameObject gameView;
+    public GameObject obstacleChoiceView;
     public GameObject pauseView;
     public GameObject settingsView;
 
@@ -39,6 +40,11 @@ public class UIManager : MonoBehaviour
 
         gameView.SetActive(true);
         Time.timeScale = 1f; // Ensure time is running
+    }
+
+    public void OnChoiceClicked()
+    {
+        if (obstacleChoiceView != null) obstacleChoiceView.SetActive(false);
     }
 
     public void OnPlayMenuClicked()
@@ -136,6 +142,7 @@ public class UIManager : MonoBehaviour
         if (randomSelectionView != null) randomSelectionView.SetActive(false);
         if (seededSelectionView != null) seededSelectionView.SetActive(false);
         if (gameView != null) gameView.SetActive(false);
+        if (obstacleChoiceView != null) obstacleChoiceView.SetActive(false);
         if (pauseView != null) pauseView.SetActive(false);
         if (settingsView != null) settingsView.SetActive(false);
     }
