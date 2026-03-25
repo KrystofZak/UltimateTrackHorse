@@ -5,6 +5,7 @@ namespace GameLogic
     public class SpawnObstacle : MonoBehaviour
     {
         [SerializeField] private KeyCode replaceKey = KeyCode.F;
+        [SerializeField] private KeyCode resetKey = KeyCode.R;
         [SerializeField] private ObstacleLibrary library;
 
         [Header("What to spawn")]
@@ -24,6 +25,11 @@ namespace GameLogic
             if (Input.GetKeyDown(replaceKey))
             {
                 ReplaceWithSelectedPrefab();
+            }
+
+            if (Input.GetKeyDown(resetKey))
+            {
+                ObstacleManager.Instance.ResetObstacles();
             }
         }
 
@@ -73,6 +79,8 @@ namespace GameLogic
                     cube.transform.rotation,
                     parent
                 );
+                
+                ObstacleManager.Instance.RegisterObstacle(prefab, position, cube.transform.rotation, spawned.transform.localScale, parent, spawned);
 
                 Destroy(cube);
             }
@@ -97,6 +105,8 @@ namespace GameLogic
             {
                 spawned.transform.localScale = transform.localScale;
             }
+            
+            ObstacleManager.Instance.RegisterObstacle(prefab, transform.position, transform.rotation, spawned.transform.localScale, parent, spawned);
 
             replaced = true;
             Destroy(gameObject);
@@ -130,10 +140,11 @@ namespace GameLogic
                 {
                     spawned.transform.localScale = cube.transform.localScale;
                 }
+                
+                ObstacleManager.Instance.RegisterObstacle(prefab, cube.transform.position, cube.transform.rotation, spawned.transform.localScale, parent, spawned);
 
                 Destroy(cube);
             }
         }
     }
 }
-
