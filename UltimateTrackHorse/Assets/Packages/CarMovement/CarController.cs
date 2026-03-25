@@ -14,13 +14,17 @@ public class CarController : MonoBehaviour
         public float maxSpeedMultiplier;
         [Tooltip("Multiplier applied to dragCoefficient on this surface (higher = more sideways grip loss)")]
         public float dragCoefficientMultiplier;
+        public bool killMomentum;
+        public float lingerTime;
 
         public static SurfaceSettings Default => new SurfaceSettings
         {
             name = "Default",
             accelerationMultiplier = 1f,
             maxSpeedMultiplier = 1f,
-            dragCoefficientMultiplier = 1f
+            dragCoefficientMultiplier = 1f,
+            killMomentum = false,
+            lingerTime = 0f
         };
     }
 
@@ -64,7 +68,14 @@ public class CarController : MonoBehaviour
     [Header("Visuals")]
     [SerializeField] private float tireRotationSpeed = 3000f;
     [SerializeField] private float minSkidVelocity = 10f;
+    [SerializeField] private float maxVisualSteerAngle = 35f;
+    [SerializeField] private float visualSteerSpeed = 10f;
 
+    private float activeLingerTimer = 0f;
+    private SurfaceSettings lingeringSurface;
+
+    private float currentTireSpinAngle = 0f;
+    private float currentVisualSteerAngle = 0f;
 
     private Vector3 currentCarLocalVelocity = Vector3.zero;
     private float carVelocityRatio = 0f;
@@ -74,6 +85,9 @@ public class CarController : MonoBehaviour
 
     private SurfaceSettings activeSurface = SurfaceSettings.Default;
 
+
+    private bool isStopping = false;
+    private float lastMoveInput = 0;
 
     #region Unity Methods
     private void Start()
@@ -111,6 +125,7 @@ public class CarController : MonoBehaviour
     {
         if (isGrounded)
         {
+            EnforceSurfaceMaxSpeed();
             HandleMotor();
             //Acceleration();
             //Deceleration();
@@ -136,47 +151,73 @@ public class CarController : MonoBehaviour
         float forwardSpeed = currentCarLocalVelocity.z;
         float effectiveAcceleration = acceleration * activeSurface.accelerationMultiplier;
         float effectiveDeceleration = deceleration * activeSurface.accelerationMultiplier;
+        float effectiveMaxSpeed = maxSpeed * activeSurface.maxSpeedMultiplier;
 
         if (moveInput > 0.1f)
         {
-
+           
             if (forwardSpeed < -0.5f)
             {
                 carRB.AddForceAtPosition(transform.forward * moveInput * effectiveDeceleration, accelerationPoint.position, ForceMode.Acceleration);
             }
-            else
+            
+            else if (forwardSpeed < effectiveMaxSpeed)
             {
-                carRB.AddForceAtPosition(transform.forward * moveInput * effectiveAcceleration, accelerationPoint.position, ForceMode.Acceleration);
+               
+                float startAssist = (forwardSpeed < 1f) ? 1.5f : 1f;
+                carRB.AddForceAtPosition(transform.forward * moveInput * effectiveAcceleration * startAssist, accelerationPoint.position, ForceMode.Acceleration);
             }
         }
+       
         else if (moveInput < -0.1f)
         {
             if (preventReverse)
             {
-
+               
                 if (forwardSpeed > 0.5f)
                 {
                     carRB.AddForceAtPosition(transform.forward * moveInput * effectiveDeceleration, accelerationPoint.position, ForceMode.Acceleration);
                 }
                 else
                 {
+                   
                     BrakeToStop();
                 }
             }
             else
             {
-
-                carRB.AddForceAtPosition(transform.forward * moveInput * effectiveAcceleration, accelerationPoint.position, ForceMode.Acceleration);
+             
+                if (forwardSpeed > -effectiveMaxSpeed)
+                {
+                    carRB.AddForceAtPosition(transform.forward * moveInput * effectiveAcceleration, accelerationPoint.position, ForceMode.Acceleration);
+                }
             }
         }
-
+      
+        else
+        {
+            
+            if (Mathf.Abs(forwardSpeed) < 1.0f)
+            {
+               
+                carRB.linearVelocity = Vector3.Lerp(carRB.linearVelocity, new Vector3(0, carRB.linearVelocity.y, 0), Time.fixedDeltaTime * 10f);
+            }
+        }
     }
 
     private void BrakeToStop()
     {
-
-        float stoppingForce = -currentCarLocalVelocity.z * deceleration;
+        float forwardSpeed = currentCarLocalVelocity.z;
+        
+        float stoppingForce = -forwardSpeed * (deceleration * 1.2f);
         carRB.AddForceAtPosition(transform.forward * stoppingForce, accelerationPoint.position, ForceMode.Acceleration);
+
+        if (Mathf.Abs(forwardSpeed) < 0.2f)
+        {
+            Vector3 localVel = transform.InverseTransformDirection(carRB.linearVelocity);
+            localVel.z = 0;
+            carRB.linearVelocity = transform.TransformDirection(localVel);
+        }
     }
     private void LongitudinalDrag()
     {
@@ -188,6 +229,26 @@ public class CarController : MonoBehaviour
         }
     }
 
+    private void EnforceSurfaceMaxSpeed()
+    {
+        
+        if (!activeSurface.killMomentum) return;
+
+        float forwardSpeed = currentCarLocalVelocity.z;
+        float effectiveMaxSpeed = maxSpeed * activeSurface.maxSpeedMultiplier;
+
+        if (forwardSpeed > effectiveMaxSpeed && forwardSpeed > 1f)
+        {
+           
+            float overSpeedForce = (forwardSpeed - effectiveMaxSpeed) * (deceleration * 5f);
+            carRB.AddForceAtPosition(-transform.forward * overSpeedForce, accelerationPoint.position, ForceMode.Acceleration);
+        }
+        else if (forwardSpeed < -effectiveMaxSpeed && forwardSpeed < -1f)
+        {
+            float overSpeedForce = (-forwardSpeed - effectiveMaxSpeed) * (deceleration * 5f);
+            carRB.AddForceAtPosition(transform.forward * overSpeedForce, accelerationPoint.position, ForceMode.Acceleration);
+        }
+    }
 
 
 
@@ -223,9 +284,19 @@ public class CarController : MonoBehaviour
     }
     private void RotateTires()
     {
+        
+        currentTireSpinAngle += tireRotationSpeed * carVelocityRatio * Time.deltaTime;
+
+        float targetSteerAngle = steerInput * maxVisualSteerAngle;
+
+        currentVisualSteerAngle = Mathf.Lerp(currentVisualSteerAngle, targetSteerAngle, Time.deltaTime * visualSteerSpeed);
+
         for (int i = 0; i < tires.Length; i++)
         {
-            tires[i].transform.Rotate(Vector3.right, tireRotationSpeed * carVelocityRatio * Time.deltaTime, Space.Self);
+           
+            float applySteer = (i < 2) ? currentVisualSteerAngle : 0f;
+
+            tires[i].transform.localRotation = Quaternion.Euler(currentTireSpinAngle, applySteer, 0f);
         }
     }
 
@@ -259,21 +330,14 @@ public class CarController : MonoBehaviour
     {
         foreach (ParticleSystem skid in skidSmokes)
         {
-            if (toggle)
+          
+            var emission = skid.emission;
+
+            emission.enabled = toggle;
+
+            if (toggle && !skid.isPlaying)
             {
-               
-                if (!skid.isPlaying)
-                {
-                    skid.Play();
-                }
-            }
-            else
-            {
-               
-                if (skid.isPlaying)
-                {
-                    skid.Stop();
-                }
+                skid.Play();
             }
         }
     }
@@ -305,6 +369,7 @@ public class CarController : MonoBehaviour
         currentCarLocalVelocity = transform.InverseTransformDirection(carRB.linearVelocity);
         float effectiveMaxSpeed = maxSpeed * activeSurface.maxSpeedMultiplier;
         carVelocityRatio = currentCarLocalVelocity.z / effectiveMaxSpeed;
+
     }
 
     #endregion
@@ -312,23 +377,16 @@ public class CarController : MonoBehaviour
     #region Input Handeling
     private void GetInput()
     {
-        if (!isInputEnabled)
-        {
-            moveInput = 0f;
-            steerInput = 0f;
-            isBraking = false;
-            preventReverse = false;
-            return;
-        }
-        
+        float lastInput = moveInput;
         moveInput = Input.GetAxisRaw("Vertical");
         steerInput = Input.GetAxisRaw("Horizontal");
+
         bool pressingBrake = moveInput < -0.1f;
 
         if (pressingBrake && !isBraking)
         {
-
             isBraking = true;
+           
             if (currentCarLocalVelocity.z > reverseSpeedThreshold)
             {
                 preventReverse = true;
@@ -340,8 +398,8 @@ public class CarController : MonoBehaviour
         }
         else if (!pressingBrake)
         {
-
             isBraking = false;
+            
             preventReverse = false;
         }
     }
@@ -385,13 +443,25 @@ public class CarController : MonoBehaviour
                 }
 
                 float currentSpringLength = hit.distance - wheelRadius;
-
                 float springCompression = (restLength - currentSpringLength) / springTravel;
 
+                float springForce = springCompression * springStiffness;
+
+                if (springCompression > 0.7f)
+                {
+                   
+                    float bumpFactor = Mathf.Pow(springCompression, 4f);
+                    springForce += springStiffness * bumpFactor;
+                }
+
+                
                 float springVelocity = Vector3.Dot(carRB.GetPointVelocity(rayPoints[i].position), rayPoints[i].up);
                 float damperForce = springVelocity * damperStiffness;
 
-                float springForce = springCompression * springStiffness;
+                if (springVelocity < -1.5f && springCompression > 0.5f)
+                {
+                    damperForce *= 2.5f; 
+                }
 
                 float netForce = springForce - damperForce;
 
@@ -410,8 +480,30 @@ public class CarController : MonoBehaviour
                 Debug.DrawLine(rayPoints[i].position, rayPoints[i].position - rayPoints[i].up * maxDistance, Color.green);
             }
         }
+        SurfaceSettings lastSettings = activeSurface;
+        SurfaceSettings detectedSurface = dominantLayer >= 0 ? GetSurfaceForLayer(dominantLayer) : SurfaceSettings.Default;
 
-        activeSurface = dominantLayer >= 0 ? GetSurfaceForLayer(dominantLayer) : SurfaceSettings.Default;
+        if (detectedSurface.lingerTime > 0f)
+        {
+            lingeringSurface = detectedSurface;
+            activeLingerTimer = detectedSurface.lingerTime;
+        }
+
+        if (activeLingerTimer > 0f)
+        {
+            activeLingerTimer -= Time.fixedDeltaTime;
+            activeSurface = lingeringSurface; 
+        }
+        else
+        {
+            
+            activeSurface = detectedSurface;
+        }
+
+        if (lastSettings.name != activeSurface.name)
+        {
+            Debug.Log($"Active Surface: {activeSurface.name}");
+        }
     }
     #endregion
 }

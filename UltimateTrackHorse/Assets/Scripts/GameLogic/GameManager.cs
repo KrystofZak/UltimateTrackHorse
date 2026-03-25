@@ -1,5 +1,6 @@
 using UnityEngine;
 using Cinemachine;
+using GameLogic.Obstacles;
 using MapGeneration;
 
 namespace GameLogic
