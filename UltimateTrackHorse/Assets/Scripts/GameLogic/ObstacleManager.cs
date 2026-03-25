@@ -1,3 +1,4 @@
+using GameLogic.Obstacles;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -6,6 +7,7 @@ namespace GameLogic
     public class ObstacleManager : MonoBehaviour
     {
         private static ObstacleManager _instance;
+
         public static ObstacleManager Instance
         {
             get
@@ -61,6 +63,19 @@ namespace GameLogic
             _activeObstacles.Add(instance);
         }
 
+        public void ClearAllObstacles()
+        {
+            foreach (var obstacle in _activeObstacles)
+            {
+                if (obstacle != null)
+                {
+                    Destroy(obstacle);
+                }
+            }
+            _activeObstacles.Clear();
+            _initialObstacleStates.Clear();
+        }
+
         public void ResetObstacles()
         {
             foreach (var obstacle in _activeObstacles)
@@ -77,6 +92,17 @@ namespace GameLogic
                 var spawned = Instantiate(state.Prefab, state.Position, state.Rotation, state.Parent);
                 spawned.transform.localScale = state.Scale;
                 _activeObstacles.Add(spawned);
+
+                //TODO: you assholes!!!you need to redo this shit!!
+                var screenTintController = GameObject.Find("GameManager").GetComponent<ScreenTintController>();
+
+                if (!screenTintController) return;
+
+                foreach (var injectable in spawned.GetComponentsInChildren<IScreenTintInjectable>(true))
+                {
+                    injectable.InjectScreenTint(screenTintController);
+                }
+                //-----------------
             }
         }
     }

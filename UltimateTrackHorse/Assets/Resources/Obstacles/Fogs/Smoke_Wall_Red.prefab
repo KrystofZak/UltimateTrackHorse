@@ -4639,8 +4639,8 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 2.1627662, y: 1.8365507, z: 0.55}
-  m_Center: {x: -0.018454006, y: 0.07, z: -0.19}
+  m_Size: {x: 2.1627662, y: 1.8365507, z: 0.9684373}
+  m_Center: {x: -0.018454006, y: 0.07000002, z: 0.019218028}
 --- !u!114 &6045309010617643885
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4655,7 +4655,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::GameLogic.Obstacles.SmokeScreenTrigger
   carTag: Player
   smokeColor: {r: 0.8509804, g: 0.20392157, b: 0.08627451, a: 1}
-  alpha: 0.35
+  alpha: 0.99
   fadeIn: 0.15
-  hold: 0.8
+  hold: 2
   fadeOut: 1
+  tintController: {fileID: 0}

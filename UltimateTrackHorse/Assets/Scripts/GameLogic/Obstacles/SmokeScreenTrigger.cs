@@ -22,12 +22,15 @@ namespace GameLogic.Obstacles
 
         private void OnTriggerEnter(Collider other)
         {
+            Debug.Log("SmokeScreenTrigger: OnTriggerEnter with " + other.gameObject.name);
+
             if (!other.CompareTag(carTag))
                 return;
 
             if (tintController != null)
                 tintController.PlayTint(smokeColor, alpha, fadeIn, hold, fadeOut);
-            
+
+            Debug.Log($"{tintController.gameObject.name}");
         }
 
         public void InjectScreenTint(ScreenTintController controller)

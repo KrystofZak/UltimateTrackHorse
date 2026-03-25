@@ -147,6 +147,7 @@ namespace MapGeneration
             if (useManualSeed)
             {
                 GenerateMapFromSeed(manualSeed);
+                useManualSeed = false; // Reset after use to avoid accidental reuse on next generation
             }
             else
             {
@@ -681,6 +682,7 @@ namespace MapGeneration
         private bool GenerateValidMap()
         {
             ClearScene();
+            ObstacleManager.Instance.ClearAllObstacles();
             InitializeGrid(); 
             
             GeneratedPath = GenerateRandomPath(new Vector2Int(1, 1), targetTrackLength);

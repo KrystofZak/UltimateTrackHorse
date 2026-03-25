@@ -121,7 +121,7 @@ namespace GameLogic.Obstacles
             return true;
         }
 
-        private void InjectServices(GameObject spawned)
+        public void InjectServices(GameObject spawned)
         {
             if (!screenTintController) return;
 

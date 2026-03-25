@@ -9,6 +9,7 @@ public class Timer : MonoBehaviour
     [SerializeField] private TMP_Text timerText;
     public float timeElapsed { get; private set; } = 0f;
     private float timeRemaining = 30f;
+    private float incrementAmount = 0f;
     private bool timerIsRunning = false;
     private bool timeUp = false;
 
@@ -36,6 +37,7 @@ public class Timer : MonoBehaviour
     public void SetStartTime(float startTime)
     {
         timeRemaining = startTime;
+        timeRemaining += incrementAmount;
         timeElapsed = 0f;
         timeUp = false;
         DisplayTime(timeRemaining);
@@ -63,12 +65,12 @@ public class Timer : MonoBehaviour
 
     public void NoObstaclesTimeHandler()
     {
-        timeRemaining -= 2f;
+        incrementAmount -= 2f;
     }
 
     public void TwoObstaclesTimeHandler()
     {
-        timeRemaining += 2f;
+        incrementAmount += 2f;
     }
 
     private void DisplayTime(float timeToDisplay)

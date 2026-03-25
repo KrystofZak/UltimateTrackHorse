@@ -2,6 +2,7 @@ using UnityEngine;
 using Cinemachine;
 using GameLogic.Obstacles;
 using MapGeneration;
+using UI;
 
 namespace GameLogic
 {
@@ -17,6 +18,7 @@ namespace GameLogic
         private Timer timer;
 
         [SerializeField] private SpawnObstacle spawnObstacle;
+        [SerializeField] private UIManager uiManager;
 
         /// <summary>
         /// Subscribe to the finish line event when the game manager is enabled, and unsubscribe when disabled.
@@ -40,6 +42,14 @@ namespace GameLogic
             {
                 RestartCurrentLap();
             }
+            if (uiManager.obstacleChoiceView.active)
+            {
+                CarController carController = playerCar.GetComponent<CarController>();
+                if (carController != null)
+                {
+                    carController.isInputEnabled = false;
+                }
+            }
         }
 
         public void RestartCurrentLap()
@@ -59,6 +69,11 @@ namespace GameLogic
             {
                 carController.isInputEnabled = true;
             }
+        }
+
+        public void DestroyTrack()
+        {
+            
         }
 
         public void SetupNewTrack()
@@ -99,31 +114,36 @@ namespace GameLogic
             Debug.Log($"Total time to beat: {totalTimeComplexity} seconds.");
         }
 
+        public void OnChoiceClicked()
+        {
+            if (timer != null)
+            {
+                timer.ResetTimer();
+                timer.SetStartTime(totalTimeComplexity);
+            }
+
+            CarController carController = playerCar.GetComponent<CarController>();
+            if (carController != null)
+            {
+                carController.isInputEnabled = true;
+            }
+        }
+
         /// <summary>
         /// Handles the logic when the player finishes the round.
         /// Place the player's car at the starting position (1,1) on the map.
         /// </summary>
         private void ResetToStart()
         {
+            uiManager.obstacleChoiceView.SetActive(true);
+            timer.StopTimer();
             lapCount++;
+
             Debug.Log("Completed laps: " + lapCount);
             PlaceCarOnStart();
             ObstacleManager.Instance.ResetObstacles();
-            spawnObstacle.SpawnNewObstacles(1); 
-
             Debug.Log("Lap time: " + timer.timeElapsed);
-
-            if (timer != null)
-            {
-                timer.ResetTimer();
-                timer.SetStartTime(totalTimeComplexity);
-            }
             
-            CarController carController = playerCar.GetComponent<CarController>();
-            if (carController != null)
-            {
-                carController.isInputEnabled = true;
-            }
         }
         
         /// <summary>
