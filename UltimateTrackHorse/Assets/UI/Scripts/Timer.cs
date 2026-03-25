@@ -61,6 +61,16 @@ public class Timer : MonoBehaviour
         DisplayTime(timeRemaining);
     }
 
+    public void NoObstaclesTimeHandler()
+    {
+        timeRemaining -= 2f;
+    }
+
+    public void TwoObstaclesTimeHandler()
+    {
+        timeRemaining += 2f;
+    }
+
     private void DisplayTime(float timeToDisplay)
     {
         // Calculate seconds
