@@ -19,4 +19,4 @@ MonoBehaviour:
   socketSouth: road
   socketWest: grass
   baseWeight: 1
-  timeComplexity: 2
+  timeComplexity: 3
