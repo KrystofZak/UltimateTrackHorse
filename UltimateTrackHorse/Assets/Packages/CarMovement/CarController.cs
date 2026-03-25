@@ -115,7 +115,16 @@ public class CarController : MonoBehaviour
 
     private void Update()
     {
-        GetInput();
+        if (isInputEnabled)
+        {
+            GetInput();
+        }
+        else
+        {
+            moveInput = 0;
+            steerInput = 0;
+            isBraking = false;
+        }
     }
     #endregion
 
