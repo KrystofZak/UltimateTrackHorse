@@ -1,7 +1,7 @@
 ﻿using System.Linq;
 using UnityEngine;
 
-namespace GameLogic
+namespace GameLogic.Obstacles
 {
     public class ObstacleLibrary : MonoBehaviour
     {

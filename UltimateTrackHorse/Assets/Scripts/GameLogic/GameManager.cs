@@ -5,7 +5,6 @@ using MapGeneration;
 
 namespace GameLogic
 {
-
     /// <summary>
     /// Class that manages the game logic and interactions between the player and the map.
     /// </summary>
@@ -13,15 +12,92 @@ namespace GameLogic
     {
         public GameObject playerCar;
         public MapGenerator mapGenerator;
-        private int lapCount = 0;
+        private int lapCount;
+        private float totalTimeComplexity;
+        private Timer timer;
 
         [SerializeField] private SpawnObstacle spawnObstacle;
 
         /// <summary>
         /// Subscribe to the finish line event when the game manager is enabled, and unsubscribe when disabled.
         /// </summary>
-        void OnEnable() { FinishLine.OnPlayerFinished += ResetToStart; }
-        void OnDisable() { FinishLine.OnPlayerFinished -= ResetToStart; }
+        void OnEnable() 
+        { 
+            FinishLine.OnPlayerFinished += ResetToStart; 
+        }
+        void OnDisable() 
+        { 
+            FinishLine.OnPlayerFinished -= ResetToStart;
+            if (timer != null)
+            {
+                timer.OnTimeUp -= HandleTimeUp;
+            }
+        }
+
+        void Update()
+        {
+            if (Input.GetKeyDown(KeyCode.R))
+            {
+                RestartCurrentLap();
+            }
+        }
+
+        public void RestartCurrentLap()
+        {
+            Debug.Log("Restarting lap...");
+            PlaceCarOnStart();
+            ObstacleManager.Instance.ResetObstacles();
+
+            if (timer != null)
+            {
+                timer.ResetTimer();
+                timer.SetStartTime(totalTimeComplexity);
+            }
+            
+            CarController carController = playerCar.GetComponent<CarController>();
+            if (carController != null)
+            {
+                carController.isInputEnabled = true;
+            }
+        }
+
+        public void SetupNewTrack()
+        {
+            CalculateTotalTimeComplexity();
+            
+            timer = FindFirstObjectByType<Timer>();
+            if (timer != null)
+            {
+                timer.SetStartTime(totalTimeComplexity);
+                timer.OnTimeUp += HandleTimeUp;
+            }
+        }
+
+        private void HandleTimeUp()
+        {
+            Debug.Log("game over, time is up");
+            CarController carController = playerCar.GetComponent<CarController>();
+            if (carController != null)
+            {
+                carController.isInputEnabled = false;
+            }
+        }
+
+        private void CalculateTotalTimeComplexity()
+        {
+            totalTimeComplexity = 0f;
+            if (mapGenerator.GeneratedPath == null) return;
+
+            foreach (var pos in mapGenerator.GeneratedPath)
+            {
+                var cell = mapGenerator.GetCell(pos.x, pos.y);
+                if (cell != null && cell.CollapsedVariant != null)
+                {
+                    totalTimeComplexity += cell.CollapsedVariant.Data.timeComplexity;
+                }
+            }
+            Debug.Log($"Total time to beat: {totalTimeComplexity} seconds.");
+        }
 
         /// <summary>
         /// Handles the logic when the player finishes the round.
@@ -32,18 +108,22 @@ namespace GameLogic
             lapCount++;
             Debug.Log("Completed laps: " + lapCount);
             PlaceCarOnStart();
+            ObstacleManager.Instance.ResetObstacles();
             spawnObstacle.SpawnNewObstacles(1); 
-            
-            Timer timer = FindObjectOfType<Timer>();
 
             Debug.Log("Lap time: " + timer.timeElapsed);
 
             if (timer != null)
             {
                 timer.ResetTimer();
+                timer.SetStartTime(totalTimeComplexity);
             }
-
             
+            CarController carController = playerCar.GetComponent<CarController>();
+            if (carController != null)
+            {
+                carController.isInputEnabled = true;
+            }
         }
         
         /// <summary>
@@ -64,12 +144,12 @@ namespace GameLogic
 
                 if (rb != null)
                 {
-                    // Vypneme fyziku, teleportujeme a zase zapneme
+                    // Disable physics for the player car while setting position and rotation
                     rb.isKinematic = true;
                     rb.position = startPos;
                     rb.rotation = startRot;
 
-                    // Důležité: Resetujeme transformaci i skrze Rigidbody
+                    // Set position and rotation of the player car
                     playerCar.transform.SetPositionAndRotation(startPos, startRot);
 
                     rb.isKinematic = false;
@@ -82,16 +162,19 @@ namespace GameLogic
                 }
                 Physics.SyncTransforms();
 
-                // 2. Najdeme virtuální kameru ve scéně
-                CinemachineVirtualCamera vcam = FindObjectOfType<CinemachineVirtualCamera>();
+                CarController carController = playerCar.GetComponent<CarController>();
+                if (carController != null)
+                {
+                    carController.isInputEnabled = true;
+                }
+
+                CinemachineVirtualCamera vcam = FindFirstObjectByType<CinemachineVirtualCamera>();
 
                 if (vcam != null)
                 {
-                    // 3. Řekneme jí, ať nepočítá přechod
                     vcam.PreviousStateIsValid = false;
 
-                    // 4. Ultimátní reset: vypnout a zapnout. Cinemachine se díky tomu
-                    // postaví přesně na pozici Follow/LookAt jako by hra teprve začala.
+                    // Restart Cinemachine
                     vcam.enabled = false;
                     vcam.enabled = true;
                 }

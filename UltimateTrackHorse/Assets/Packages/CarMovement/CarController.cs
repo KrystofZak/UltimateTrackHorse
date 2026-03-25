@@ -50,6 +50,8 @@ public class CarController : MonoBehaviour
     private bool isBraking = false;
     private bool preventReverse = false;
     public float reverseSpeedThreshold = 1f;
+    public bool isInputEnabled = true;
+
 
     [Header("Car Settings")]
     [SerializeField] private float acceleration = 25f;
@@ -219,7 +221,7 @@ public class CarController : MonoBehaviour
     }
     private void LongitudinalDrag()
     {
-        
+
         if (Mathf.Abs(moveInput) < 0.1f)
         {
             float dragForce = -currentCarLocalVelocity.z * (deceleration * 0.5f);
@@ -253,7 +255,7 @@ public class CarController : MonoBehaviour
 
     private void Steer()
     {
-        
+
         float speedRatioAbs = Mathf.Abs(carVelocityRatio);
 
         float direction = currentCarLocalVelocity.z >= -0.1f ? 1f : -1f;
@@ -305,7 +307,7 @@ public class CarController : MonoBehaviour
 
     private void Vfx()
     {
-       
+
         if (isGrounded && Mathf.Abs(currentCarLocalVelocity.x) > minSkidVelocity)
         {
             ToggleSkidMarks(true);
@@ -317,7 +319,7 @@ public class CarController : MonoBehaviour
             ToggleSkidSmokes(false);
         }
     }
-    private void ToggleSkidMarks(bool toggle) 
+    private void ToggleSkidMarks(bool toggle)
     {
         foreach (TrailRenderer skid in skidMarks)
         {

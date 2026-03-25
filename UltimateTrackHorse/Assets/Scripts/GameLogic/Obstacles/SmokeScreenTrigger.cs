@@ -1,4 +1,6 @@
-﻿using UnityEngine;
+﻿using System.Diagnostics;
+using UnityEngine;
+using Debug = UnityEngine.Debug;
 
 namespace GameLogic.Obstacles
 {
@@ -11,7 +13,7 @@ namespace GameLogic.Obstacles
         [SerializeField] private float hold = 0.8f;
         [SerializeField] private float fadeOut = 1.0f;
 
-        private ScreenTintController tintController;
+        [SerializeField] private ScreenTintController tintController;
 
         public void Initialize(ScreenTintController controller)
         {
@@ -25,6 +27,7 @@ namespace GameLogic.Obstacles
 
             if (tintController != null)
                 tintController.PlayTint(smokeColor, alpha, fadeIn, hold, fadeOut);
+            
         }
 
         public void InjectScreenTint(ScreenTintController controller)

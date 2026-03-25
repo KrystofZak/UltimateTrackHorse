@@ -98,7 +98,6 @@ namespace GameLogic.Obstacles
 
             var rotation = source.transform.rotation * prefab.transform.rotation;
             var position = source.transform.position + prefab.transform.position;
-            position.y -= 0.5f;
 
             var spawned = Instantiate(prefab, position, rotation, parent);
 
