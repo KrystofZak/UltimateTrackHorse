@@ -283,7 +283,7 @@ GameObject:
   - component: {fileID: 2536672712206568769}
   - component: {fileID: 1467746259793254992}
   m_Layer: 0
-  m_Name: Dirty Yellow oil Barrel
+  m_Name: Oil_Barell
   m_TagString: Trap
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

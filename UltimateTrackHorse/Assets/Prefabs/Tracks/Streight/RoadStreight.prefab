@@ -1286,7 +1286,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9fde99fc4ee117c4fa9c38dbc2bf15f5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AK.MapEditorTools.RoadEditor
-  currentMode: 2
+  currentMode: 0
   selectedPointIndex: 5
   showControlPoints: 1
   curveResolution: 10
