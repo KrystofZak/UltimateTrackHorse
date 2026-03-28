@@ -342,7 +342,6 @@ public class CarController : MonoBehaviour
 
     private void Vfx()
     {
-
         if (isGrounded && Mathf.Abs(currentCarLocalVelocity.x) > minSkidVelocity)
         {
             ToggleSkidMarks(true);
@@ -354,27 +353,63 @@ public class CarController : MonoBehaviour
             ToggleSkidSmokes(false);
         }
     }
+
     private void ToggleSkidMarks(bool toggle)
     {
         foreach (TrailRenderer skid in skidMarks)
         {
-            skid.emitting = toggle;
+            bool shouldEmit = toggle;
+
+            if (toggle && IsWheelFlatNearEffect(skid.transform))
+            {
+                shouldEmit = false;
+            }
+
+            skid.emitting = shouldEmit;
         }
     }
+
     private void ToggleSkidSmokes(bool toggle)
     {
         foreach (ParticleSystem skid in skidSmokes)
         {
-          
+            bool shouldEmit = toggle;
+
+            if (toggle && IsWheelFlatNearEffect(skid.transform))
+            {
+                shouldEmit = false;
+            }
+
             var emission = skid.emission;
+            emission.enabled = shouldEmit;
 
-            emission.enabled = toggle;
-
-            if (toggle && !skid.isPlaying)
+            if (shouldEmit && !skid.isPlaying)
             {
                 skid.Play();
             }
         }
+    }
+
+    private bool IsWheelFlatNearEffect(Transform effectTransform)
+    {
+        int closestTireIndex = -1;
+        float minDist = float.MaxValue;
+
+        for (int i = 0; i < rayPoints.Length; i++)
+        {
+            float dist = Vector3.Distance(effectTransform.position, rayPoints[i].position);
+            if (dist < minDist)
+            {
+                minDist = dist;
+                closestTireIndex = i;
+            }
+        }
+
+        if (closestTireIndex != -1)
+        {
+            return isTireFlat[closestTireIndex];
+        }
+        return false;
     }
 
     #endregion
