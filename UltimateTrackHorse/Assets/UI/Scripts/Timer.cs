@@ -61,6 +61,21 @@ public class Timer : MonoBehaviour
         StartTimer();
     }
 
+    public void SetStartTime(float startTime, bool startAutomatically = true)
+    {
+        timeRemaining = startTime;
+        timeRemaining += incrementAmount;
+        timeElapsed = 0f;
+        timeUp = false;
+        DisplayTime(timeRemaining);
+        
+        // Allowed us to start exactly on 'GO!' rather than immediately during "3, 2, 1"
+        if (startAutomatically)
+        {
+            StartTimer();
+        }
+    }
+
     public void StartTimer()
     {
         timerIsRunning = true;

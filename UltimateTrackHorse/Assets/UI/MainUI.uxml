@@ -95,6 +95,11 @@
                 </ui:VisualElement>
             </ui:VisualElement>
             
+            <!-- NEW COUNTDOWN BOX -->
+            <ui:VisualElement name="CountdownBox" class="countdown-container hidden" style="pointer-events: none;">
+                <ui:Label text="3" name="CountdownText" class="countdown-text"/>
+            </ui:VisualElement>
+
         </ui:VisualElement>
         <ui:VisualElement name="pauseView" class="view-container hidden">
             <ui:VisualElement class="panel">

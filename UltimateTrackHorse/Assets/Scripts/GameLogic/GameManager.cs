@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Collections; // Added for Coroutines
 using UnityEngine;
 using Cinemachine;
 using GameLogic.Obstacles;
@@ -74,14 +75,11 @@ namespace GameLogic
             if (timer != null)
             {
                 timer.ResetTimer();
-                timer.SetStartTime(totalTimeComplexity);
+                timer.SetStartTime(totalTimeComplexity, false); // Don't tick down yet!
             }
             
-            CarController carController = playerCar.GetComponent<CarController>();
-            if (carController != null)
-            {
-                carController.isInputEnabled = true;
-            }
+            // Commence the 3.. 2.. 1.. Sequence
+            StartCoroutine(RaceCountdownCoroutine());
         }
 
         public void DestroyTrack()
@@ -108,7 +106,7 @@ namespace GameLogic
                 // bonus/penalty stack completely before starting.
                 timer.ResetIncrement();
                 
-                timer.SetStartTime(totalTimeComplexity);
+                timer.SetStartTime(totalTimeComplexity, false); // Don't tick down yet!
                 timer.OnTimeUp += HandleTimeUp;
             }
             else
@@ -119,12 +117,8 @@ namespace GameLogic
             // A fallback to ensure UI sets to unpaused correctly
             Time.timeScale = 1f;
 
-            // Enforce car controls correctly initialized
-            CarController carController = playerCar.GetComponent<CarController>();
-            if (carController != null)
-            {
-                carController.isInputEnabled = true;
-            }
+            // Commence the 3.. 2.. 1.. Sequence
+            StartCoroutine(RaceCountdownCoroutine());
         }
 
         private void HandleTimeUp()
@@ -158,14 +152,49 @@ namespace GameLogic
             if (timer != null)
             {
                 timer.ResetTimer();
-                timer.SetStartTime(totalTimeComplexity);
+                timer.SetStartTime(totalTimeComplexity, false); // Don't tick down yet!
             }
 
+            // Commence the 3.. 2.. 1.. Sequence
+            StartCoroutine(RaceCountdownCoroutine());
+        }
+
+        /// <summary>
+        /// The main Sequence Controller that perfectly hooks up holding the player input, counting down visually on screen, 
+        /// and unleashing them and the official clock precisely when it strikes "GO!".
+        /// </summary>
+        private IEnumerator RaceCountdownCoroutine()
+        {
+            // Specifically disable the heavy physical car controls
             CarController carController = playerCar.GetComponent<CarController>();
-            if (carController != null)
+            if (carController != null) carController.isInputEnabled = false;
+
+            if (uiController != null) uiController.ShowCountdown(true);
+            
+            // Wait for 3, 2, 1
+            for (int i = 3; i > 0; i--)
             {
-                carController.isInputEnabled = true;
+                if (uiController != null) uiController.UpdateCountdownText(i.ToString());
+                // Crucial to use real time just in case TimeScale somehow locked up
+                yield return new WaitForSecondsRealtime(1f); 
             }
+
+            // "GO!" state
+            if (uiController != null) uiController.UpdateCountdownText("GO!");
+            
+            // Release the physical brakes
+            if (carController != null) carController.isInputEnabled = true;
+            
+            // Begin counting down the real time clock!
+            if (timer != null)
+            {
+                timer.StartTimer();
+            }
+
+            // Hold the "GO!" sign on screen for just one final second before hiding it
+            yield return new WaitForSecondsRealtime(1f);
+            
+            if (uiController != null) uiController.ShowCountdown(false);
         }
 
         /// <summary>

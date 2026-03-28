@@ -51,6 +51,10 @@ namespace UI
         private VisualElement lapHistoryBox;
         private VisualElement lapListContainer;
 
+        // References for Countdown UI
+        private VisualElement countdownBox;
+        private Label countdownText;
+
         /// <summary>
         /// Stores the last active view so that the "Back" button functions properly (e.g., from Settings back to Pause or Main Menu).
         /// </summary>
@@ -120,6 +124,9 @@ namespace UI
             
             lapHistoryBox = root.Q<VisualElement>("LapHistoryBox");
             lapListContainer = root.Q<VisualElement>("LapList");
+
+            countdownBox = root.Q<VisualElement>("CountdownBox");
+            countdownText = root.Q<Label>("CountdownText");
 
             // 2. Setup Button Callbacks
 
@@ -300,6 +307,37 @@ namespace UI
         public void ShowObstacleChoiceView()
         {
             ShowView(obstacleChoiceView);
+        }
+
+        /// <summary>
+        /// Toggles the massive full-screen countdown sequence graphics.
+        /// </summary>
+        public void ShowCountdown(bool show)
+        {
+            if (show)
+                countdownBox?.RemoveFromClassList("hidden");
+            else
+                countdownBox?.AddToClassList("hidden");
+        }
+
+        /// <summary>
+        /// Updates the text inside the countdown (3, 2, 1, GO!) and triggers a bouncy heartbeat physical scale effect.
+        /// </summary>
+        public void UpdateCountdownText(string text)
+        {
+            if (countdownText != null)
+            {
+                countdownText.text = text;
+                
+                // Add huge popping scale
+                countdownText.AddToClassList("countdown-pop");
+                
+                // Remove pop naturally after a tiny delay so it shrinks smoothly back
+                countdownText.schedule.Execute(() => 
+                {
+                    countdownText.RemoveFromClassList("countdown-pop");
+                }).StartingIn(200); 
+            }
         }
 
         /// <summary>
