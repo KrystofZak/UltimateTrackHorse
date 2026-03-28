@@ -55,6 +55,9 @@ namespace UI
         private VisualElement countdownBox;
         private Label countdownText;
 
+        // Reference for displaying the Map Seed in the Pause Menu
+        private Label mapSeedLabel;
+
         /// <summary>
         /// Stores the last active view so that the "Back" button functions properly (e.g., from Settings back to Pause or Main Menu).
         /// </summary>
@@ -127,6 +130,8 @@ namespace UI
 
             countdownBox = root.Q<VisualElement>("CountdownBox");
             countdownText = root.Q<Label>("CountdownText");
+
+            mapSeedLabel = root.Q<Label>("MapSeedLabel");
 
             // 2. Setup Button Callbacks
 
@@ -275,14 +280,20 @@ namespace UI
             newView.RemoveFromClassList("hidden");
             currentView = newView;
 
+            // If entering the Pause View, instantly ping the MapGenerator for the active seed and display it!
+            if (newView == pauseView && mapSeedLabel != null && mapGenerator != null)
+            {
+                // To accurately rebuild the seed, DO NOT subtract the start/end tiles, use the literal GeneratedPath count!
+                int length = mapGenerator.GeneratedPath != null ? mapGenerator.GeneratedPath.Count : mapGenerator.targetTrackLength; 
+                mapSeedLabel.text = $"{length:00}{mapGenerator.LastUsedSeed}";
+            }
+
             // Target the specific background wrapper element so we don't accidentally style the invisible UI Document root.
             VisualElement targetContainer = root.Q<VisualElement>("RootContainer");
 
             if (targetContainer != null)
             {
-                // The easiest and safest way to hide the background without destroying UI Builder's inline texture reference 
-                // is to simply make its Tint Color fully transparent!
-                if (newView == gameView || newView == obstacleChoiceView)
+                if (newView == gameView || newView == obstacleChoiceView || newView == pauseView)
                 {
                     // Map becomes visible underneath the UI overlay
                     targetContainer.style.unityBackgroundImageTintColor = new StyleColor(Color.clear);
