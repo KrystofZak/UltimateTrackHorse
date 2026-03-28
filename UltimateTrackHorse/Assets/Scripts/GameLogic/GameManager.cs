@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 using Cinemachine;
 using GameLogic.Obstacles;
@@ -16,6 +17,9 @@ namespace GameLogic
         private int lapCount;
         private float totalTimeComplexity;
         private Timer timer;
+        
+        // List to hold the history of lap completion times for the current track session
+        private List<float> currentMapLapTimes = new List<float>();
 
         [SerializeField] private SpawnObstacle spawnObstacle;
         
@@ -87,6 +91,13 @@ namespace GameLogic
 
         public void SetupNewTrack()
         {
+            // Fully wipe the history list and hide the panel when generating a brand new track
+            currentMapLapTimes.Clear();
+            if (uiController != null)
+            {
+                uiController.HideLapHistory();
+            }
+
             CalculateTotalTimeComplexity();
             
             timer = FindObjectOfType<Timer>();
@@ -172,6 +183,14 @@ namespace GameLogic
             {
                 timer.StopTimer();
                 Debug.Log("Lap time: " + timer.timeElapsed);
+                // Record the lap time into the history tracker
+                currentMapLapTimes.Add(timer.timeElapsed);
+            }
+
+            // Immediately send the updated history list to the UI Controller to be drawn
+            if (uiController != null)
+            {
+                uiController.UpdateLapHistoryUI(currentMapLapTimes);
             }
 
             lapCount++;

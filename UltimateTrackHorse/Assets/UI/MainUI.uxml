@@ -60,6 +60,11 @@
                 <ui:Label text="00:00" name="Timer" class="hud-text"/>
                 <ui:Label text="0 km/h" name="SpeedLabel" class="hud-text"/>
             </ui:VisualElement>
+            <!-- LAP HISTORY BOX -->
+            <ui:VisualElement name="LapHistoryBox" class="hud-box lap-history hidden" style="pointer-events: auto; top: 160px;">
+                <ui:Label text="Last Laps" class="history-title"/>
+                <ui:VisualElement name="LapList" />
+            </ui:VisualElement>
         </ui:VisualElement>
         <ui:VisualElement name="pauseView" class="view-container hidden">
             <ui:VisualElement class="panel">

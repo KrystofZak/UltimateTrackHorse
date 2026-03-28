@@ -47,6 +47,10 @@ namespace UI
         private VisualElement settingsView;
         private VisualElement aboutUsView;
 
+        // References for Lap History UI
+        private VisualElement lapHistoryBox;
+        private VisualElement lapListContainer;
+
         /// <summary>
         /// Stores the last active view so that the "Back" button functions properly (e.g., from Settings back to Pause or Main Menu).
         /// </summary>
@@ -113,6 +117,9 @@ namespace UI
             pauseView = root.Q<VisualElement>("pauseView");
             settingsView = root.Q<VisualElement>("settingsView");
             aboutUsView = root.Q<VisualElement>("aboutUsView");
+            
+            lapHistoryBox = root.Q<VisualElement>("LapHistoryBox");
+            lapListContainer = root.Q<VisualElement>("LapList");
 
             // 2. Setup Button Callbacks
 
@@ -207,6 +214,9 @@ namespace UI
             ShowView(mainMenuView);
             Time.timeScale = 1f;
 
+            // Safety wipe: ensure lap history is hidden if returning to main menu
+            HideLapHistory();
+
             // Specifically destroy the map instantly so it doesn't run in the background
             if (mapGenerator != null)
             {
@@ -290,6 +300,69 @@ namespace UI
         public void ShowObstacleChoiceView()
         {
             ShowView(obstacleChoiceView);
+        }
+
+        /// <summary>
+        /// Instantly hides the Lap history panel and erases the visually rendered child texts inside.
+        /// </summary>
+        public void HideLapHistory()
+        {
+            lapHistoryBox?.AddToClassList("hidden");
+            lapListContainer?.Clear();
+        }
+
+        /// <summary>
+        /// Takes a list of raw lap times in seconds, formats them beautifully, calculates the fastest one, 
+        /// and dynamically builds UI Labels to draw the History Board on the screen!
+        /// </summary>
+        public void UpdateLapHistoryUI(List<float> lapTimes)
+        {
+            if (lapHistoryBox == null || lapListContainer == null) return;
+
+            // If we have 0 laps somehow, just stay hidden
+            if (lapTimes == null || lapTimes.Count == 0)
+            {
+                HideLapHistory();
+                return;
+            }
+
+            // Bring the box onto the screen!
+            lapHistoryBox.RemoveFromClassList("hidden");
+            lapListContainer.Clear();
+
+            // First, find the absolute fastest time (lowest number)
+            float bestTime = float.MaxValue;
+            foreach (float t in lapTimes)
+            {
+                if (t < bestTime) bestTime = t;
+            }
+
+            // Figure out the window of the last 5 laps 
+            int startIndex = Mathf.Max(0, lapTimes.Count - 5);
+
+            // Loop and build the UI rows!
+            for (int i = startIndex; i < lapTimes.Count; i++)
+            {
+                float timeInSecs = lapTimes[i];
+                
+                // Format matching exactly how the Timer.cs renders! (e.g. 01:25)
+                float seconds = Mathf.FloorToInt(timeInSecs);
+                float milliseconds = Mathf.FloorToInt((timeInSecs - seconds) * 100);
+                string formattedTime = string.Format("{0:00}:{1:00}", seconds, milliseconds);
+
+                // Build a literal label via code
+                Label rowLabel = new Label($"Lap {i + 1}: {formattedTime}");
+                rowLabel.AddToClassList("history-label");
+
+                // Highlight the absolute best time recorded on this track
+                if (Mathf.Approximately(timeInSecs, bestTime))
+                {
+                    rowLabel.AddToClassList("best-time-label");
+                }
+
+                // Append the label dynamically into the visual layout
+                lapListContainer.Add(rowLabel);
+            }
         }
 
         /// <summary>
