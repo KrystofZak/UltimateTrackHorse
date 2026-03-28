@@ -341,6 +341,14 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 98060268913647907, guid: b9558e934d781414b9c241e07cf86b00, type: 3}
+      propertyPath: cullingMode
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 98060268913647907, guid: b9558e934d781414b9c241e07cf86b00, type: 3}
+      propertyPath: InitialModule.maxNumParticles
+      value: 3000
+      objectReference: {fileID: 0}
     - target: {fileID: 1135847025745862852, guid: b9558e934d781414b9c241e07cf86b00, type: 3}
       propertyPath: reverseSpeedThreshold
       value: 2
@@ -369,6 +377,26 @@ PrefabInstance:
       propertyPath: m_LocalRotation.z
       value: -0.2820595
       objectReference: {fileID: 0}
+    - target: {fileID: 3331185074443240495, guid: b9558e934d781414b9c241e07cf86b00, type: 3}
+      propertyPath: cullingMode
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 3331185074443240495, guid: b9558e934d781414b9c241e07cf86b00, type: 3}
+      propertyPath: InitialModule.maxNumParticles
+      value: 3000
+      objectReference: {fileID: 0}
+    - target: {fileID: 3336745290986387805, guid: b9558e934d781414b9c241e07cf86b00, type: 3}
+      propertyPath: m_CameraCutEvent.m_PersistentCalls.m_Calls.Array.size
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3336745290986387805, guid: b9558e934d781414b9c241e07cf86b00, type: 3}
+      propertyPath: m_CameraCutEvent.m_PersistentCalls.m_Calls.Array.data[0].m_Mode
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3336745290986387805, guid: b9558e934d781414b9c241e07cf86b00, type: 3}
+      propertyPath: m_CameraCutEvent.m_PersistentCalls.m_Calls.Array.data[0].m_CallState
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 3740341940118696860, guid: b9558e934d781414b9c241e07cf86b00, type: 3}
       propertyPath: m_LocalPosition.x
       value: -10.553993
@@ -389,6 +417,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: pitchus
       objectReference: {fileID: 0}
+    - target: {fileID: 5624250130704783932, guid: b9558e934d781414b9c241e07cf86b00, type: 3}
+      propertyPath: targetCar
+      value: 
+      objectReference: {fileID: 1404281237}
     - target: {fileID: 6162271603535876281, guid: b9558e934d781414b9c241e07cf86b00, type: 3}
       propertyPath: m_LocalPosition.y
       value: 0
@@ -514,6 +546,11 @@ GameObject:
 --- !u!54 &1404281236 stripped
 Rigidbody:
   m_CorrespondingSourceObject: {fileID: 1908177467138095219, guid: b9558e934d781414b9c241e07cf86b00, type: 3}
+  m_PrefabInstance: {fileID: 1404281232}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &1404281237 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 1843856484784576679, guid: b9558e934d781414b9c241e07cf86b00, type: 3}
   m_PrefabInstance: {fileID: 1404281232}
   m_PrefabAsset: {fileID: 0}
 --- !u!1001 &1788754388
@@ -685,7 +722,7 @@ MonoBehaviour:
   screenTintController: {fileID: 1965604385}
   placeholderTag: Obstacle
   obstacleType: 2
-  prefabIndex: 1
+  prefabIndex: 2
   keepParent: 0
   keepScale: 0
 --- !u!114 &1965604384
