@@ -148,15 +148,36 @@ namespace UI
             root.Q<Button>("PauseSettingsButton")?.RegisterCallback<ClickEvent>(evt => ShowSettingsFrom(pauseView));
             root.Q<Button>("BackToMainButton")?.RegisterCallback<ClickEvent>(evt => 
             {
-                ShowView(mainMenuView);
-                Time.timeScale = 1f;
+                ReturnToMainMenu();
             });
 
             // Settings Menu
             root.Q<Button>("SettingsBackButton")?.RegisterCallback<ClickEvent>(evt => RestorePreviousView());
 
-            // Initialize default state
+            // Initialize default state. (If this runs before background is grabbed, it clears it!)
+            ReturnToMainMenu();
+        }
+
+        private void ReturnToMainMenu()
+        {
             ShowView(mainMenuView);
+            Time.timeScale = 1f;
+
+            // Specifically destroy the map instantly so it doesn't run in the background
+            if (mapGenerator != null)
+            {
+                mapGenerator.ClearScene();
+            }
+
+            // Immediately disable player input if passing through to main menu
+            if (gameManager != null && gameManager.playerCar != null)
+            {
+                CarController carController = gameManager.playerCar.GetComponent<CarController>();
+                if (carController != null)
+                {
+                    carController.isInputEnabled = false;
+                }
+            }
         }
 
         private void HideAllViews()
@@ -182,6 +203,24 @@ namespace UI
             HideAllViews();
             newView.RemoveFromClassList("hidden");
             currentView = newView;
+
+            // Get exactly the element you put your image on
+            VisualElement targetContainer = root.Q<VisualElement>("RootContainer");
+
+            if (targetContainer != null)
+            {
+                // The easiest and safest way to hide the background without deleting its texture 
+                // is to simply make its Tint Color fully transparent!
+                if (newView == gameView || newView == obstacleChoiceView)
+                {
+                    targetContainer.style.unityBackgroundImageTintColor = new StyleColor(Color.clear);
+                }
+                else
+                {
+                    // Restore to full white (visible) for all menus
+                    targetContainer.style.unityBackgroundImageTintColor = new StyleColor(Color.white);
+                }
+            }
         }
 
         public bool IsObstacleChoiceViewActive => obstacleChoiceView != null && !obstacleChoiceView.ClassListContains("hidden");

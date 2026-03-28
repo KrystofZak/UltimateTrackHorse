@@ -16,6 +16,12 @@
     justify-content: center;
 }
 
+/* This new class hides the root container's background when entering the actual game! */
+.root-container.game-active-bg {
+    background-image: none !important;
+    background-color: transparent !important;
+}
+
 .view-container {
     position: absolute;
     width: 100%;

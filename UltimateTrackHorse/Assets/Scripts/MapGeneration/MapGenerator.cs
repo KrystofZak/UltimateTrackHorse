@@ -724,7 +724,7 @@ namespace MapGeneration
         /// <summary>
         /// Clears the scene by destroying all game objects in the scene.
         /// </summary>
-        private void ClearScene()
+        public void ClearScene()
         {
             foreach (Transform child in transform)
             {
