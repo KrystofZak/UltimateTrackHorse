@@ -71,6 +71,7 @@ public class CarController : MonoBehaviour
     [SerializeField] private float steerPullPerFlatTire = 0.6f;
     [SerializeField] private float steerLossPerFrontFlat = 0.4f;
     [SerializeField] private float speedLossPerRearFlat = 0.35f;
+    [SerializeField] private ParticleSystem[] acidVapors = new ParticleSystem[4];
 
     private bool[] isTireFlat = new bool[4];
 
@@ -438,6 +439,12 @@ public class CarController : MonoBehaviour
             {
                 tires[i].transform.localScale = Vector3.one;
             }
+
+            if (acidVapors.Length > i && acidVapors[i] != null)
+            {
+                acidVapors[i].Stop();
+                acidVapors[i].Clear();
+            }
         }
     }
 
@@ -521,7 +528,12 @@ public class CarController : MonoBehaviour
                         if (!isTireFlat[i])
                         {
                             isTireFlat[i] = true;
-                            Debug.Log($"Kolo {i} bylo rozlept�no!");
+                            Debug.Log($"Wheel {i} is flat");
+
+                            if (acidVapors.Length > i && acidVapors[i] != null)
+                            {
+                                acidVapors[i].Play();
+                            }
                         }
                     }
 
