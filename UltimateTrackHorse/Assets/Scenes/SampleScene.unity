@@ -341,6 +341,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 1135847025745862852, guid: b9558e934d781414b9c241e07cf86b00, type: 3}
+      propertyPath: reverseSpeedThreshold
+      value: 2
+      objectReference: {fileID: 0}
     - target: {fileID: 2812063740190067861, guid: b9558e934d781414b9c241e07cf86b00, type: 3}
       propertyPath: m_LocalPosition.y
       value: 0
@@ -384,6 +388,10 @@ PrefabInstance:
     - target: {fileID: 5059805935864523498, guid: b9558e934d781414b9c241e07cf86b00, type: 3}
       propertyPath: m_Name
       value: pitchus
+      objectReference: {fileID: 0}
+    - target: {fileID: 6162271603535876281, guid: b9558e934d781414b9c241e07cf86b00, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 6162271603535876281, guid: b9558e934d781414b9c241e07cf86b00, type: 3}
       propertyPath: m_LocalPosition.z

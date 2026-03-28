@@ -164,56 +164,57 @@ public class CarController : MonoBehaviour
 
         if (moveInput > 0.1f)
         {
-           
             if (forwardSpeed < -0.5f)
             {
-                carRB.AddForceAtPosition(transform.forward * moveInput * effectiveDeceleration, accelerationPoint.position, ForceMode.Acceleration);
-            }
             
+                carRB.AddForceAtPosition(transform.forward * moveInput * (effectiveDeceleration * 3f), accelerationPoint.position, ForceMode.Acceleration);
+            }
             else if (forwardSpeed < effectiveMaxSpeed)
             {
-               
                 float startAssist = (forwardSpeed < 1f) ? 1.5f : 1f;
                 carRB.AddForceAtPosition(transform.forward * moveInput * effectiveAcceleration * startAssist, accelerationPoint.position, ForceMode.Acceleration);
             }
         }
-       
         else if (moveInput < -0.1f)
         {
             if (preventReverse)
             {
-               
                 if (forwardSpeed > 0.5f)
                 {
-                    carRB.AddForceAtPosition(transform.forward * moveInput * effectiveDeceleration, accelerationPoint.position, ForceMode.Acceleration);
+                  
+                    carRB.AddForceAtPosition(transform.forward * moveInput * (effectiveDeceleration * 1.5f), accelerationPoint.position, ForceMode.Acceleration);
                 }
                 else
                 {
-                   
                     BrakeToStop();
                 }
             }
             else
             {
-             
                 if (forwardSpeed > -effectiveMaxSpeed)
                 {
                     carRB.AddForceAtPosition(transform.forward * moveInput * effectiveAcceleration, accelerationPoint.position, ForceMode.Acceleration);
                 }
             }
         }
-      
         else
         {
-            
             if (Mathf.Abs(forwardSpeed) < 1.0f)
             {
-               
                 carRB.linearVelocity = Vector3.Lerp(carRB.linearVelocity, new Vector3(0, carRB.linearVelocity.y, 0), Time.fixedDeltaTime * 10f);
             }
         }
     }
 
+    private void LongitudinalDrag()
+    {
+        if (Mathf.Abs(moveInput) < 0.1f)
+        {
+           
+            float dragForce = -currentCarLocalVelocity.z * (deceleration * 0.1f);
+            carRB.AddForceAtPosition(transform.forward * dragForce, accelerationPoint.position, ForceMode.Acceleration);
+        }
+    }
     private void BrakeToStop()
     {
         float forwardSpeed = currentCarLocalVelocity.z;
@@ -228,15 +229,7 @@ public class CarController : MonoBehaviour
             carRB.linearVelocity = transform.TransformDirection(localVel);
         }
     }
-    private void LongitudinalDrag()
-    {
-
-        if (Mathf.Abs(moveInput) < 0.1f)
-        {
-            float dragForce = -currentCarLocalVelocity.z * (deceleration * 0.5f);
-            carRB.AddForceAtPosition(transform.forward * dragForce, accelerationPoint.position, ForceMode.Acceleration);
-        }
-    }
+    
 
     private void EnforceSurfaceMaxSpeed()
     {
