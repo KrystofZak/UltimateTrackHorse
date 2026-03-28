@@ -18,7 +18,9 @@ namespace GameLogic
         private Timer timer;
 
         [SerializeField] private SpawnObstacle spawnObstacle;
-        [SerializeField] private UIManager uiManager;
+        
+        // Replaced old UIManager with the new UIController
+        private UIController uiController;
 
         /// <summary>
         /// Subscribe to the finish line event when the game manager is enabled, and unsubscribe when disabled.
@@ -26,6 +28,7 @@ namespace GameLogic
         void OnEnable() 
         { 
             FinishLine.OnPlayerFinished += ResetToStart; 
+            uiController = FindObjectOfType<UIController>();
         }
         void OnDisable() 
         { 
@@ -42,7 +45,13 @@ namespace GameLogic
             {
                 RestartCurrentLap();
             }
-            if (uiManager.obstacleChoiceView.active)
+
+            if (uiController == null)
+            {
+                uiController = FindObjectOfType<UIController>();
+            }
+
+            if (uiController != null && uiController.IsObstacleChoiceViewActive)
             {
                 CarController carController = playerCar.GetComponent<CarController>();
                 if (carController != null)
@@ -80,11 +89,26 @@ namespace GameLogic
         {
             CalculateTotalTimeComplexity();
             
-            timer = FindFirstObjectByType<Timer>();
+            timer = FindObjectOfType<Timer>();
+
             if (timer != null)
             {
                 timer.SetStartTime(totalTimeComplexity);
                 timer.OnTimeUp += HandleTimeUp;
+            }
+            else
+            {
+                Debug.LogWarning("GameManager: Timer not found in the scene! Ensure a Timer component exists.");
+            }
+
+            // A fallback to ensure UI sets to unpaused correctly
+            Time.timeScale = 1f;
+
+            // Enforce car controls correctly initialized
+            CarController carController = playerCar.GetComponent<CarController>();
+            if (carController != null)
+            {
+                carController.isInputEnabled = true;
             }
         }
 
@@ -135,15 +159,22 @@ namespace GameLogic
         /// </summary>
         private void ResetToStart()
         {
-            uiManager.obstacleChoiceView.SetActive(true);
-            timer.StopTimer();
+            if (uiController != null)
+            {
+                uiController.ShowObstacleChoiceView();
+            }
+            
+            if (timer != null)
+            {
+                timer.StopTimer();
+                Debug.Log("Lap time: " + timer.timeElapsed);
+            }
+
             lapCount++;
 
             Debug.Log("Completed laps: " + lapCount);
             PlaceCarOnStart();
             ObstacleManager.Instance.ResetObstacles();
-            Debug.Log("Lap time: " + timer.timeElapsed);
-            
         }
         
         /// <summary>
@@ -152,6 +183,13 @@ namespace GameLogic
         /// </summary>
         public void PlaceCarOnStart()
         {
+            if (mapGenerator == null) mapGenerator = FindObjectOfType<MapGenerator>();
+            if (mapGenerator == null) 
+            {
+                Debug.LogError("GameManager: Cannot execute PlaceCarOnStart because MapGenerator is missing!");
+                return;
+            }
+
             var startCell = mapGenerator.GetCell(1, 1);
 
             if (startCell != null && startCell.CollapsedVariant != null)
@@ -186,9 +224,12 @@ namespace GameLogic
                 if (carController != null)
                 {
                     carController.isInputEnabled = true;
+
+                    // Small nudge just in case ground checks freeze
+                    if (rb != null) rb.WakeUp();
                 }
 
-                CinemachineVirtualCamera vcam = FindFirstObjectByType<CinemachineVirtualCamera>();
+                CinemachineVirtualCamera vcam = FindObjectOfType<CinemachineVirtualCamera>();
 
                 if (vcam != null)
                 {
@@ -199,10 +240,11 @@ namespace GameLogic
                     vcam.enabled = true;
                 }
             }
+            else
+            {
+                Debug.LogWarning("GameManager: Could not PlaceCarOnStart because start cell is null or uncollapsed.");
+            }
         }
         
     }
-    
-    
-    
 }

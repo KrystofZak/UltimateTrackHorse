@@ -103,12 +103,18 @@ namespace MapGeneration
         /// </summary>
         public void OnPlayClicked()
         {
+            if (gameManager == null) gameManager = FindObjectOfType<GameManager>();
+
             GenerateMapWithCurrentSeed();
+            
             if (gameManager != null)
             {
                 gameManager.SetupNewTrack();
             }
-            
+            else
+            {
+                Debug.LogError("MapGenerator: Cannot find GameManager to SetupNewTrack!");
+            }
         }
 
         /// <summary>
@@ -681,6 +687,14 @@ namespace MapGeneration
         /// </summary>
         private bool GenerateValidMap()
         {
+            // CRITICAL FIX: If the MapGenerator is accidentally scaled to 0, all instantiated tiles 
+            // will be sized 0, making them completely invisible and turning their colliders into nothingness!
+            if (transform.localScale.sqrMagnitude < 0.001f)
+            {
+                Debug.LogWarning("MapGenerator: Transform Scale was 0,0,0! Forcing it back to 1,1,1 so tiles are actually visible and have physical colliders.");
+                transform.localScale = Vector3.one;
+            }
+
             ClearScene();
             ObstacleManager.Instance.ClearAllObstacles();
             InitializeGrid(); 
@@ -693,6 +707,7 @@ namespace MapGeneration
                 RunWFC(); 
                 InstantiatePathAndScenery(GeneratedPath);
 
+                if (gameManager == null) gameManager = FindObjectOfType<GameManager>();
                 if (gameManager != null)
                 {
                     gameManager.PlaceCarOnStart();

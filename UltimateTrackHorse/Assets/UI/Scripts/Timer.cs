@@ -1,17 +1,34 @@
 using UnityEngine;
-using TMPro; // Required for TextMeshPro UI integration
+using TMPro; // Included for old references if any
+using UnityEngine.UIElements;
 using System;
+using UI;
 
 public class Timer : MonoBehaviour
 {
     public event Action OnTimeUp;
+    
+    // Legacy support for TMP
     [Header("Timer Settings")]
     [SerializeField] private TMP_Text timerText;
+    
+    private Label uiToolkitTimerLabel;
+
     public float timeElapsed { get; private set; } = 0f;
     private float timeRemaining = 30f;
     private float incrementAmount = 0f;
     private bool timerIsRunning = false;
     private bool timeUp = false;
+
+    private void Start()
+    {
+        // Try resolving new UI Toolkit document
+        var document = FindObjectOfType<UIDocument>();
+        if (document != null && document.rootVisualElement != null)
+        {
+            uiToolkitTimerLabel = document.rootVisualElement.Q<Label>("Timer");
+        }
+    }
 
     void Update()
     {
@@ -80,8 +97,16 @@ public class Timer : MonoBehaviour
         
         // Calculate hundredths of a second (milliseconds formatted for 2 digits)
         float milliseconds = Mathf.FloorToInt((timeToDisplay - seconds) * 100);
+        string timeString = string.Format("{0:00}:{1:00}", seconds, milliseconds);
 
-        // Updates the text to the format 30:00 (Seconds:Milliseconds)
-        timerText.text = string.Format("{0:00}:{1:00}", seconds, milliseconds);
+        if (timerText != null)
+        {
+            timerText.text = timeString;
+        }
+        
+        if (uiToolkitTimerLabel != null)
+        {
+            uiToolkitTimerLabel.text = timeString;
+        }
     }
 }

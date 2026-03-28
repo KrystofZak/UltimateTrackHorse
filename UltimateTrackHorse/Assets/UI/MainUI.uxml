@@ -1,0 +1,95 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" editor-extension-mode="False" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <Style src="project://database/Assets/UI/MainUI.uss" />
+
+    <ui:VisualElement name="RootContainer" class="root-container">
+
+        <!-- Main Menu View -->
+        <ui:VisualElement name="mainMenuView" class="view-container">
+            <ui:VisualElement class="panel" name="WhiteBoard">
+                <ui:Label text="Ultimate Track Horse" name="TitleLabel" class="title-label" />
+                <ui:Button text="Play" name="PlayButton" class="animated-button" />
+                <ui:Button text="Settings" name="SettingsButton" class="animated-button" />
+                <ui:Button text="Quit" name="QuitButton" class="animated-button" style="background-color: #8B4513;" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+        <!-- Map Selection View -->
+        <ui:VisualElement name="mapSelectionView" class="view-container hidden">
+            <ui:VisualElement class="panel" name="WhiteBoard">
+                <ui:Label text="Run Type" class="title-label" />
+                <ui:Button text="Random" name="Random" class="animated-button" />
+                <ui:Button text="Seeded" name="Seeded" class="animated-button" />
+                <ui:Button text="Back" name="MapBackButton" class="animated-button" style="margin-top: 20px;" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+        <!-- Random Selection View -->
+        <ui:VisualElement name="randomSelectionView" class="view-container hidden">
+            <ui:VisualElement class="panel" name="WhiteBoard">
+                <ui:Label text="Track Length" class="title-label" />
+                <ui:Button text="Short (5)" name="Length5" class="animated-button" />
+                <ui:Button text="Medium (10)" name="Length10" class="animated-button" />
+                <ui:Button text="Long (15)" name="Length15" class="animated-button" />
+                <ui:VisualElement style="margin-top: 10px; align-items: center;">
+                    <ui:Label text="Custom Length:" class="custom-length-label" />
+                    <ui:TextField name="LengthCustomInput" class="input-field" text="20" />
+                    <ui:Button text="Play Custom" name="LengthCustomPlay" class="animated-button" />
+                </ui:VisualElement>
+                <ui:Button text="Back" name="RandomBackButton" class="animated-button" style="margin-top: 20px;" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+        <!-- Seeded Selection View -->
+        <ui:VisualElement name="seededSelectionView" class="view-container hidden">
+            <ui:VisualElement class="panel" name="WhiteBoard">
+                <ui:Label text="Seeded Run" class="title-label" />
+                <ui:TextField name="SeedInput" class="input-field" text="Enter Seed..." />
+                <ui:Button text="Play" name="SeededPlayButton" class="animated-button" />
+                <ui:Button text="Back" name="SeededBackButton" class="animated-button" style="margin-top: 20px;" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+        <!-- Obstacle Choice View -->
+        <ui:VisualElement name="obstacleChoiceView" class="view-container hidden">
+            <ui:VisualElement class="panel" name="WhiteBoard">
+                <ui:Label text="Obstacle Amount" class="title-label" />
+                <ui:Button text="Zero" name="Zero" class="animated-button" />
+                <ui:Button text="One" name="One" class="animated-button" />
+                <ui:Button text="Two" name="Two" class="animated-button" />
+                <ui:Button text="Back" name="ObstaclesBackButton" class="animated-button" style="margin-top: 20px;" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+        <!-- Game View HUD -->
+        <ui:VisualElement name="gameView" class="view-container hidden" style="background-color: transparent; pointer-events: none;">
+            <ui:VisualElement class="top-bar" style="pointer-events: auto;">
+                <ui:Button text="Pause" name="Pause" class="animated-button" style="width: 120px; height: 50px;" />
+            </ui:VisualElement>
+            <ui:VisualElement name="WhiteBox" class="hud-box" style="pointer-events: auto;">
+                <ui:Label text="00:00" name="Timer" class="hud-text" />
+                <ui:Label text="0 km/h" name="SpeedLabel" class="hud-text" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+        <!-- Pause Menu -->
+        <ui:VisualElement name="pauseView" class="view-container hidden">
+            <ui:VisualElement class="panel">
+                <ui:Label text="Paused" class="title-label" />
+                <ui:Button text="Resume" name="ResumeButton" class="animated-button" />
+                <ui:Button text="Settings" name="PauseSettingsButton" class="animated-button" />
+                <ui:Button text="Main Menu" name="BackToMainButton" class="animated-button" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+        <!-- Settings View -->
+        <ui:VisualElement name="settingsView" class="view-container hidden">
+            <ui:VisualElement class="panel">
+                <ui:Label text="Settings" class="title-label" />
+                <ui:Slider text="Volume" name="VolumeSlider" class="input-field" />
+                <ui:Toggle label="Fullscreen" name="FullscreenToggle" class="input-field" />
+                <ui:Button text="Back" name="SettingsBackButton" class="animated-button" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+    </ui:VisualElement>
+</ui:UXML>
