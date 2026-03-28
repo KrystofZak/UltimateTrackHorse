@@ -45,6 +45,7 @@ namespace UI
         private VisualElement obstacleChoiceView;
         private VisualElement pauseView;
         private VisualElement settingsView;
+        private VisualElement aboutUsView;
 
         /// <summary>
         /// Stores the last active view so that the "Back" button functions properly (e.g., from Settings back to Pause or Main Menu).
@@ -111,6 +112,7 @@ namespace UI
             obstacleChoiceView = root.Q<VisualElement>("obstacleChoiceView");
             pauseView = root.Q<VisualElement>("pauseView");
             settingsView = root.Q<VisualElement>("settingsView");
+            aboutUsView = root.Q<VisualElement>("aboutUsView");
 
             // 2. Setup Button Callbacks
 
@@ -121,6 +123,11 @@ namespace UI
                 Time.timeScale = 1f;
             });
             root.Q<Button>("SettingsButton")?.RegisterCallback<ClickEvent>(evt => ShowSettingsFrom(mainMenuView));
+            root.Q<Button>("AboutButton")?.RegisterCallback<ClickEvent>(evt => 
+            {
+                previousView = mainMenuView;
+                ShowView(aboutUsView);
+            });
             root.Q<Button>("QuitButton")?.RegisterCallback<ClickEvent>(evt => 
             {
                 Debug.Log("Quit Game!");
@@ -183,6 +190,9 @@ namespace UI
             // Settings Menu
             root.Q<Button>("SettingsBackButton")?.RegisterCallback<ClickEvent>(evt => RestorePreviousView());
 
+            // About Us Menu
+            root.Q<Button>("AboutBackButton")?.RegisterCallback<ClickEvent>(evt => RestorePreviousView());
+
             // Initialize default state.
             ReturnToMainMenu();
         }
@@ -228,6 +238,7 @@ namespace UI
             obstacleChoiceView?.AddToClassList("hidden");
             pauseView?.AddToClassList("hidden");
             settingsView?.AddToClassList("hidden");
+            aboutUsView?.AddToClassList("hidden");
         }
 
         /// <summary>

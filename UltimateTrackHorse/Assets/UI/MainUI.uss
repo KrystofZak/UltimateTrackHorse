@@ -33,6 +33,12 @@
     transition-property: opacity, display;
 }
 
+/* New layout class to cleanly push the Main Menu to the left side */
+.left-aligned {
+    align-items: flex-start;
+    padding-left: 10%;
+}
+
 .hidden {
     opacity: 0;
     display: none;
@@ -41,31 +47,52 @@
 .panel {
     background-color: var(--color-panel);
     border-radius: 24px;
-    padding: 40px;
+    padding: 50px 60px; /* Slightly larger padding to breathe */
     align-items: center;
     border-width: 4px;
     border-color: var(--color-accent);
 }
 
 .title-label {
-    font-size: 50px;
+    font-size: 58px; /* Slightly bigger */
     -unity-font-style: bold;
     color: var(--color-accent);
-    margin-bottom: 30px;
+    margin-bottom: 35px;
+    text-shadow: 2px 5px 0 rgba(0, 0, 0, 0.4); /* Nice 3D text shadow */
+}
+
+/* Styles for the new About Us popup text */
+.about-text {
+    font-size: 26px;
+    -unity-font-style: bold;
+    color: var(--color-text);
+    margin-top: 15px;
+    text-shadow: 1px 2px 0 rgba(0, 0, 0, 0.5);
 }
 
 .animated-button {
-    width: 260px;
-    height: 65px;
-    margin-bottom: 15px;
-    font-size: 24px;
+    width: 280px; /* Make buttons slightly bigger */
+    height: 70px;
+    margin-bottom: 18px;
+    font-size: 28px;
     -unity-font-style: bold;
     border-radius: 12px;
-    border-width: 0;
+    
+    /* 3D button border trick */
+    border-top-width: 0px;
+    border-left-width: 0px;
+    border-right-width: 0px;
+    border-bottom-width: 6px; 
+    border-color: rgba(0, 0, 0, 0.35); /* Shaded bottom ridge */
+    
     background-color: var(--color-primary);
     color: var(--color-text-light);
-    transition-duration: 0.15s;
-    transition-property: scale, background-color;
+    
+    text-shadow: 1px 2px 0 rgba(0, 0, 0, 0.4); /* 3D text depth */
+    
+    /* Snappy 0.1s transition so the press registers instantly */
+    transition-duration: 0.1s;
+    transition-property: scale, background-color, border-bottom-width, translate;
 }
 
 .animated-button:hover {
@@ -74,8 +101,12 @@
 }
 
 .animated-button:active {
-    scale: 0.95;
+    scale: 0.98;
     background-color: var(--color-accent);
+    
+    /* Physical 3D push-down effect when clicked! */
+    border-bottom-width: 0px; 
+    translate: 0 6px; 
 }
 
 .horizontal-scroll {
