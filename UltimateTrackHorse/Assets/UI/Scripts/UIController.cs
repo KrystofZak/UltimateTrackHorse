@@ -352,6 +352,26 @@ namespace UI
                 Debug.LogWarning("UIController: SpawnObstacle missing!");
             }
             
+            // Adjust the timer based on the player's obstacle choice.
+            // Since this runs EVERY time they pick obstacles (every lap),
+            // we ADD/SUBTRACT from the pile of adjustments so it stacks as intended!
+            Timer timerScript = FindObjectOfType<Timer>();
+            if (timerScript != null)
+            {
+                if (obstacleCount == 0)
+                {
+                    timerScript.SubtractSecondsFromIncrement(2f);
+                }
+                else if (obstacleCount == 2)
+                {
+                    timerScript.AddSecondsToIncrement(2f);
+                }
+            }
+            else
+            {
+                Debug.LogWarning("UIController: Timer missing! Could not adjust time.");
+            }
+            
             if (gameManager != null)
             {
                 gameManager.OnChoiceClicked();

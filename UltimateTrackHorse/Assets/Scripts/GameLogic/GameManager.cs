@@ -93,6 +93,10 @@ namespace GameLogic
 
             if (timer != null)
             {
+                // When we generate an entirely brand new track, we must clear the old 
+                // bonus/penalty stack completely before starting.
+                timer.ResetIncrement();
+                
                 timer.SetStartTime(totalTimeComplexity);
                 timer.OnTimeUp += HandleTimeUp;
             }

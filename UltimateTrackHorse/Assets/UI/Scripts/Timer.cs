@@ -80,14 +80,19 @@ public class Timer : MonoBehaviour
         DisplayTime(timeRemaining);
     }
 
-    public void NoObstaclesTimeHandler()
+    public void AddSecondsToIncrement(float seconds)
     {
-        incrementAmount -= 2f;
+        incrementAmount += seconds;
     }
 
-    public void TwoObstaclesTimeHandler()
+    public void SubtractSecondsFromIncrement(float seconds)
     {
-        incrementAmount += 2f;
+        incrementAmount -= seconds;
+    }
+    
+    public void ResetIncrement()
+    {
+        incrementAmount = 0f;
     }
 
     private void DisplayTime(float timeToDisplay)
