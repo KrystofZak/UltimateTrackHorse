@@ -202,3 +202,66 @@
     color: #4CAF50; /* Fresh Green */
     text-shadow: 1px 2px 3px rgba(0, 0, 0, 0.6);
 }
+
+/* ======================================================== */
+/* ?? REALISTIC DRIVING TACHOMETER (PURE CSS)               */
+/* ======================================================== */
+
+.tacho-wrapper {
+    position: absolute;
+    bottom: 0px; /* Changed from 25px to 0px so it sits perfectly flush with the bottom screen edge! */
+    width: 100%;
+    align-items: center; /* Horizontally centers the dial cleanly! */
+}
+
+.tachometer-container {
+    width: 280px; /* Scaled down from 360px */
+    height: 140px; /* Exactly half of the width */
+    align-items: center;
+    justify-content: flex-end;
+    overflow: hidden; /* Clips off the excess half of the circle */
+}
+
+.tachometer-dial {
+    position: absolute;
+    top: 0px; 
+    width: 280px; /* Scaled down */
+    height: 280px; /* Scaled down */
+    border-radius: 50%;
+    background-color: rgba(26, 32, 40, 0.95); /* Heavy metallic grey background */
+    
+    border-width: 10px; /* Slightly thinner border to match scale */
+    border-color: #58A6FF; /* Glowing blue rim */
+    border-right-color: #E2B714; /* Orange/Yellow 'warning' rim on the high-speed side */
+    border-bottom-color: transparent; 
+}
+
+.tachometer-needle {
+    position: absolute;
+    bottom: 0px; 
+    width: 6px; /* Slightly thinner needle */
+    height: 120px; /* Scaled down needle length so it stays inside the rim */
+    background-color: #FF4A4A; /* Racing Red sports needle */
+    border-radius: 3px;
+    transform-origin: bottom center; /* This is what makes it physically rotate around the base! */
+}
+
+.tachometer-pivot {
+    position: absolute;
+    bottom: -24px; /* Mathematically center it on the flat edge (half of 48px) */
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background-color: #111; /* Carbon black cap */
+    border-width: 4px; /* Scaled down */
+    border-color: #E2B714; /* Gold inner ring */
+}
+
+.tachometer-text {
+    position: absolute;
+    bottom: 30px; /* Hover just above the new smaller cap */
+    font-size: 26px; /* Scaled down text */
+    -unity-font-style: bold;
+    color: #FFFFFF;
+    text-shadow: 2px 3px 6px rgba(0, 0, 0, 0.85); /* Deep shadow */
+}
