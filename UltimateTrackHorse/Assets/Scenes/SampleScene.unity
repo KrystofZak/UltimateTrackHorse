@@ -350,8 +350,16 @@ PrefabInstance:
       value: 3000
       objectReference: {fileID: 0}
     - target: {fileID: 1135847025745862852, guid: b9558e934d781414b9c241e07cf86b00, type: 3}
+      propertyPath: acidLayer.m_Bits
+      value: 256
+      objectReference: {fileID: 0}
+    - target: {fileID: 1135847025745862852, guid: b9558e934d781414b9c241e07cf86b00, type: 3}
       propertyPath: reverseSpeedThreshold
       value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 1135847025745862852, guid: b9558e934d781414b9c241e07cf86b00, type: 3}
+      propertyPath: flatTireRadiusMultiplier
+      value: 0.7
       objectReference: {fileID: 0}
     - target: {fileID: 2812063740190067861, guid: b9558e934d781414b9c241e07cf86b00, type: 3}
       propertyPath: m_LocalPosition.y
@@ -722,7 +730,7 @@ MonoBehaviour:
   screenTintController: {fileID: 1965604385}
   placeholderTag: Obstacle
   obstacleType: 2
-  prefabIndex: 2
+  prefabIndex: 0
   keepParent: 0
   keepScale: 0
 --- !u!114 &1965604384
