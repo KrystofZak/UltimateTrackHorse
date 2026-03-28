@@ -422,6 +422,25 @@ public class CarController : MonoBehaviour
         carVelocityRatio = currentCarLocalVelocity.z / effectiveMaxSpeed;
     }
 
+    public void ResetCar()
+    {
+        carRB.linearVelocity = Vector3.zero;
+        carRB.angularVelocity = Vector3.zero;
+
+        isTireFlat = new bool[4];
+
+        activeLingerTimer = 0f;
+        activeSurface = SurfaceSettings.Default;
+
+        for (int i = 0; i < tires.Length; i++)
+        {
+            if (tires[i] != null)
+            {
+                tires[i].transform.localScale = Vector3.one;
+            }
+        }
+    }
+
     #endregion
 
     #region Input Handeling
@@ -502,7 +521,7 @@ public class CarController : MonoBehaviour
                         if (!isTireFlat[i])
                         {
                             isTireFlat[i] = true;
-                            Debug.Log($"Kolo {i} bylo rozleptáno!");
+                            Debug.Log($"Kolo {i} bylo rozleptï¿½no!");
                         }
                     }
 
@@ -550,7 +569,11 @@ public class CarController : MonoBehaviour
 
                     if (isTireFlat[i])
                     {
-                        tires[i].transform.localScale = new Vector3(1, flatTireRadiusMultiplier, 1);
+                        tires[i].transform.localScale = new Vector3(flatTireRadiusMultiplier, flatTireRadiusMultiplier, flatTireRadiusMultiplier);
+                    }
+                    else
+                    {
+                        tires[i].transform.localScale = Vector3.one;
                     }
 
                     Debug.DrawLine(rayPoints[i].position, groundHit.point, Color.red);

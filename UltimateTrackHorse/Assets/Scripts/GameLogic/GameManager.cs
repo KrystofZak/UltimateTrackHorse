@@ -186,6 +186,7 @@ namespace GameLogic
                 if (carController != null)
                 {
                     carController.isInputEnabled = true;
+                    carController.ResetCar();
                 }
 
                 CinemachineVirtualCamera vcam = FindFirstObjectByType<CinemachineVirtualCamera>();
