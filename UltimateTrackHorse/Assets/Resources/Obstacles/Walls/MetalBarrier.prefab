@@ -12,6 +12,8 @@ GameObject:
   - component: {fileID: 7974232630553596520}
   - component: {fileID: 2231277642716133322}
   - component: {fileID: 475923879953086998}
+  - component: {fileID: -4136337879948792723}
+  - component: {fileID: 7200352651337636229}
   m_Layer: 0
   m_Name: MetalBarrier
   m_TagString: Untagged
@@ -113,3 +115,30 @@ MeshCollider:
   m_Convex: 0
   m_CookingOptions: 30
   m_Mesh: {fileID: -4954554257721388540, guid: 241a323ff55292a4eabfe8e6db2efc40, type: 3}
+--- !u!114 &-4136337879948792723
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3113575091151856805}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 91729265beaf413d8c42cb291e180385, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GameLogic.Traps.TrapRuntime
+  definition: {fileID: 11400000, guid: bb4b6099cf818b44a8aeecf3a766a86b, type: 2}
+  playerTag: Player
+--- !u!114 &7200352651337636229
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3113575091151856805}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4224a4b0d92d40809aeac27fcd32f83a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GameLogic.Traps.TrapSensor
+  trap: {fileID: -4136337879948792723}

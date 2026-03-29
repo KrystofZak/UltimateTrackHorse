@@ -12,7 +12,8 @@ GameObject:
   - component: {fileID: 5953161245427824421}
   - component: {fileID: 5999789436586079556}
   - component: {fileID: 8322129857195808150}
-  - component: {fileID: 8583082506083288866}
+  - component: {fileID: -5755866313586032943}
+  - component: {fileID: -2454583860256192364}
   m_Layer: 2
   m_Name: Smoke_Wall_Green
   m_TagString: Trap
@@ -4641,7 +4642,7 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 2.1627662, y: 1.8365507, z: 0.98592407}
   m_Center: {x: -0.018454006, y: 0.07000002, z: 0.027960356}
---- !u!114 &8583082506083288866
+--- !u!114 &-5755866313586032943
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -4650,13 +4651,21 @@ MonoBehaviour:
   m_GameObject: {fileID: 5488090970591884924}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 212cda3959394df2a7cbb8b3dfdd1957, type: 3}
+  m_Script: {fileID: 11500000, guid: 91729265beaf413d8c42cb291e180385, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::GameLogic.Obstacles.SmokeScreenTrigger
-  carTag: Player
-  smokeColor: {r: 0.05490196, g: 0.25490198, b: 0.23137255, a: 1}
-  alpha: 0.99
-  fadeIn: 0.15
-  hold: 2
-  fadeOut: 1
-  tintController: {fileID: 0}
+  m_EditorClassIdentifier: Assembly-CSharp::GameLogic.Traps.TrapRuntime
+  definition: {fileID: 11400000, guid: d4e169a90b35fe240b0c5bd09dec519e, type: 2}
+  playerTag: Player
+--- !u!114 &-2454583860256192364
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5488090970591884924}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4224a4b0d92d40809aeac27fcd32f83a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GameLogic.Traps.TrapSensor
+  trap: {fileID: -5755866313586032943}

@@ -10,6 +10,8 @@ GameObject:
   m_Component:
   - component: {fileID: 6662908483903211654}
   - component: {fileID: 762091876417145206}
+  - component: {fileID: 7422432899976959177}
+  - component: {fileID: 8933803502632563430}
   m_Layer: 0
   m_Name: Car_Wreck
   m_TagString: Untagged
@@ -53,8 +55,35 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 1.8412881, y: 0.5785482, z: 1.1084576}
-  m_Center: {x: 0.585165, y: 0.30728614, z: 0.73277473}
+  m_Size: {x: 1.810023, y: 0.56139565, z: 0.86136836}
+  m_Center: {x: 0.01563257, y: 0.29870987, z: -0.06870726}
+--- !u!114 &7422432899976959177
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 442747656404444808}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 91729265beaf413d8c42cb291e180385, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GameLogic.Traps.TrapRuntime
+  definition: {fileID: 11400000, guid: 4e912191e2120cf439d3c597738462a0, type: 2}
+  playerTag: Player
+--- !u!114 &8933803502632563430
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 442747656404444808}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4224a4b0d92d40809aeac27fcd32f83a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GameLogic.Traps.TrapSensor
+  trap: {fileID: 7422432899976959177}
 --- !u!1 &1416624880214185432
 GameObject:
   m_ObjectHideFlags: 0
@@ -82,7 +111,7 @@ Transform:
   m_GameObject: {fileID: 1416624880214185432}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0.86131, y: 0.41700006, z: 0.42574}
+  m_LocalPosition: {x: 0.386, y: 0.41700006, z: -0.297}
   m_LocalScale: {x: 0.3, y: 0.3, z: 0.3}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -4700,7 +4729,7 @@ Transform:
   m_GameObject: {fileID: 9122102707678762021}
   serializedVersion: 2
   m_LocalRotation: {x: -0.7071068, y: -0, z: -0, w: 0.7071068}
-  m_LocalPosition: {x: 0.59031, y: 0.29900002, z: 0.7267401}
+  m_LocalPosition: {x: 0, y: 0.29900002, z: 0}
   m_LocalScale: {x: 100, y: 100, z: 100}
   m_ConstrainProportionsScale: 0
   m_Children: []

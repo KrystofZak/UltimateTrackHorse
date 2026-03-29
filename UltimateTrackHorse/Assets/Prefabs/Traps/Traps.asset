@@ -1,0 +1,36 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b73e39cccc314b70a700ea80f9fb5701, type: 3}
+  m_Name: Traps
+  m_EditorClassIdentifier: Assembly-CSharp::GameLogic.Traps.TrapCatalog
+  wallPrefabs:
+  - {fileID: 6829537706591255742, guid: 86d448d71e779d54184d1edd39442a1f, type: 3}
+  - {fileID: 4231384845910028526, guid: 3958dcea099a6bf4d83bbf4fad4dab24, type: 3}
+  - {fileID: 442747656404444808, guid: f97effd3352fbfb478dda4935ee10a15, type: 3}
+  - {fileID: 6649400045077255480, guid: 599c07e6ea7abc84fb15dd59a0e958c0, type: 3}
+  - {fileID: 7546204015920426744, guid: 2b6dfa89632afdc41ab3b3780ed2235e, type: 3}
+  - {fileID: 2813342317983818744, guid: 96a1d76ae48f01d409c4a63d37fa3d5f, type: 3}
+  - {fileID: 3113575091151856805, guid: 2072325ce5d2f8c4d8948846c9476e48, type: 3}
+  - {fileID: 1582701303342411184, guid: c579231e6bf4ec84193733133d044afb, type: 3}
+  - {fileID: 4041439914391409553, guid: 495f034491ab37e499b47712614a7ae0, type: 3}
+  fogPrefabs:
+  - {fileID: 7979900808194764874, guid: 763804b81e60dd045a1dac688c1c2f2d, type: 3}
+  - {fileID: 9217475310159705389, guid: a9ccad0dd43192e4bba94e49c8f91b80, type: 3}
+  - {fileID: 5488090970591884924, guid: 740b64708d9da5f47945384ce639b0e9, type: 3}
+  - {fileID: 9162231272479943500, guid: 3367269c0a9706b4b8f1c9250ca04e1b, type: 3}
+  - {fileID: 7503329038995569648, guid: 142f191eee81ce5439944cb331bd73d7, type: 3}
+  - {fileID: 8905257110173855182, guid: 864532c7a0c293146b17ec6b7d20b2a7, type: 3}
+  surfacePrefabs:
+  - {fileID: 952152659579891679, guid: 25dda98240d7c0e43a434583a6c258ff, type: 3}
+  - {fileID: 9059011431584462864, guid: 3e32e660ef4467a49b7c81b3454c9874, type: 3}
+  - {fileID: 7573716507071989479, guid: 1ac106775435b4342affdae0a430ff1d, type: 3}
+  - {fileID: 6615250786108363984, guid: 6298c10f1290f51419efbb570c7da4f6, type: 3}

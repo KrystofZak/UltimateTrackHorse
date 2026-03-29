@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 1042415735317291563}
   - component: {fileID: 510004708732197212}
   - component: {fileID: 3187658092225504691}
+  - component: {fileID: -1251295201328760251}
   m_Layer: 2
   m_Name: Smoke_Large
   m_TagString: Untagged
@@ -4618,3 +4619,17 @@ ParticleSystemRenderer:
   m_MeshWeighting1: 1
   m_MeshWeighting2: 1
   m_MeshWeighting3: 1
+--- !u!114 &-1251295201328760251
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7979900808194764874}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 91729265beaf413d8c42cb291e180385, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GameLogic.Traps.TrapRuntime
+  definition: {fileID: 0}
+  playerTag: Player

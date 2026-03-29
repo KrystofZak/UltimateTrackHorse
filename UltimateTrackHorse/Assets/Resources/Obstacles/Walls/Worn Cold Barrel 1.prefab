@@ -192,6 +192,8 @@ GameObject:
   - component: {fileID: 4665471644143974432}
   - component: {fileID: 4617302437800371190}
   - component: {fileID: 3533106352729094523}
+  - component: {fileID: -593171959209961056}
+  - component: {fileID: 8002408798505984065}
   m_Layer: 0
   m_Name: Worn Cold Barrel 1
   m_TagString: Trap
@@ -291,6 +293,33 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
+--- !u!114 &-593171959209961056
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4041439914391409553}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 91729265beaf413d8c42cb291e180385, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GameLogic.Traps.TrapRuntime
+  definition: {fileID: 0}
+  playerTag: Player
+--- !u!114 &8002408798505984065
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4041439914391409553}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4224a4b0d92d40809aeac27fcd32f83a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GameLogic.Traps.TrapSensor
+  trap: {fileID: 0}
 --- !u!1 &4491277993330661707
 GameObject:
   m_ObjectHideFlags: 0

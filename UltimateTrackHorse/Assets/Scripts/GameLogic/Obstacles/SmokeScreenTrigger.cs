@@ -27,7 +27,7 @@ namespace GameLogic.Obstacles
             if (!other.CompareTag(carTag))
                 return;
 
-            if (tintController != null)
+            if (tintController)
                 tintController.PlayTint(smokeColor, alpha, fadeIn, hold, fadeOut);
 
             Debug.Log($"{tintController.gameObject.name}");
