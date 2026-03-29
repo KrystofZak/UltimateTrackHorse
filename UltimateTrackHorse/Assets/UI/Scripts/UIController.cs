@@ -201,8 +201,9 @@ namespace UI
                 Time.timeScale = 1f;
             });
             root.Q<Button>("PauseSettingsButton")?.RegisterCallback<ClickEvent>(evt => ShowSettingsFrom(pauseView));
-            root.Q<Button>("BackToMainButton")?.RegisterCallback<ClickEvent>(evt => 
+            root.Q<Button>("BackToMainButton")?.RegisterCallback<ClickEvent>(evt =>
             {
+                mapGenerator.ResetSeed();
                 ReturnToMainMenu();
             });
 
