@@ -137,10 +137,14 @@ namespace MapGeneration
             string trimmedSeed = seed.Trim();
             if (trimmedSeed.Length > 2 && int.TryParse(trimmedSeed.Substring(0, 2), out int length) && int.TryParse(trimmedSeed.Substring(2), out int parsedSeed))
             {
-                targetTrackLength = Mathf.Clamp(length, 3, 100);
+                targetTrackLength = Mathf.Clamp(length, 3, 99); 
                 manualSeed = parsedSeed;
                 useManualSeed = true;
-                Debug.Log($"Manual seed set. Track length: {targetTrackLength}, Seed: {manualSeed}.");
+                
+                // Dynamically adjust grid size based on track length
+                mapWidth = mapHeight = Mathf.Max(10, (int)(targetTrackLength * 0.7f));
+
+                Debug.Log($"Manual seed set. Track length: {targetTrackLength}, Seed: {manualSeed}. Grid size set to {mapWidth}x{mapHeight}.");
             }
             else
             {
@@ -149,16 +153,31 @@ namespace MapGeneration
             }
         }
 
+        /// <summary>
+        /// Resets the seed settings to default, ensuring the next map is random unless a new seed is set.
+        /// </summary>
+        public void ResetSeed()
+        {
+            useManualSeed = false;
+            manualSeed = 0;
+            // Reset map size to default if needed, or keep it dynamic for next random generation.
+            // For consistency, let's reset it to the default value.
+            mapWidth = 10;
+            mapHeight = 10;
+            Debug.Log("Seed and map settings have been reset.");
+        }
+
         private void GenerateMapWithCurrentSeed()
         {
             if (useManualSeed)
             {
                 GenerateMapFromSeed(manualSeed);
-                useManualSeed = false; // Reset after use to avoid accidental reuse on next generation
             }
             else
             {
                 // When using a random seed, still respect the currently set targetTrackLength.
+                // And also dynamically adjust grid size.
+                mapWidth = mapHeight = Mathf.Max(10, (int)(targetTrackLength * 0.7f));
                 int randomPart = Random.Range(0, 1000000); // Generate a random part for the seed
                 GenerateMapFromSeed(randomPart);
             }
