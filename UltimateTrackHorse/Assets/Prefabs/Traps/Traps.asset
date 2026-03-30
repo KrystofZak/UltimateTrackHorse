@@ -22,7 +22,6 @@ MonoBehaviour:
   - {fileID: 4807407935975322614, guid: e8e459db571fae545af9b0df58c96f2f, type: 3}
   - {fileID: 6829537706591255742, guid: 86d448d71e779d54184d1edd39442a1f, type: 3}
   - {fileID: 1582701303342411184, guid: c579231e6bf4ec84193733133d044afb, type: 3}
-  - {fileID: 23487178586477874, guid: ab128b86176a4204bb9baa7fa7088e6d, type: 3}
   fogPrefabs:
   - {fileID: 7979900808194764874, guid: 763804b81e60dd045a1dac688c1c2f2d, type: 3}
   - {fileID: 9217475310159705389, guid: a9ccad0dd43192e4bba94e49c8f91b80, type: 3}
