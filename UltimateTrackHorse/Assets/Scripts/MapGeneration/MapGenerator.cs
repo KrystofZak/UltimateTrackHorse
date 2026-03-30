@@ -52,7 +52,7 @@ namespace MapGeneration
         /// </summary>
         private void Start()
         {
-            targetTrackLength += 2; // Account for start and finish tiles
+            // Not needed now
         }
 
         #region UI Toolkit Integration for Track Length
@@ -88,7 +88,7 @@ namespace MapGeneration
             if (int.TryParse(lengthString, out int parsedLength))
             {
                 // Optionally clamp the value to prevent too small or too large maps
-                targetTrackLength = Mathf.Clamp(parsedLength, 3, 100); 
+                targetTrackLength = Mathf.Clamp(parsedLength, 1, 99); 
             }
             else
             {
@@ -137,7 +137,7 @@ namespace MapGeneration
             string trimmedSeed = seed.Trim();
             if (trimmedSeed.Length > 2 && int.TryParse(trimmedSeed.Substring(0, 2), out int length) && int.TryParse(trimmedSeed.Substring(2), out int parsedSeed))
             {
-                targetTrackLength = Mathf.Clamp(length, 3, 99); 
+                targetTrackLength = Mathf.Clamp(length, 1, 99); 
                 manualSeed = parsedSeed;
                 useManualSeed = true;
                 
@@ -717,7 +717,7 @@ namespace MapGeneration
             ObstacleManager.Instance.ClearAllObstacles();
             InitializeGrid(); 
             
-            GeneratedPath = GenerateRandomPath(new Vector2Int(1, 1), targetTrackLength);
+            GeneratedPath = GenerateRandomPath(new Vector2Int(1, 1), targetTrackLength + 2); // Add 2 for start and finish
 
             if (GeneratedPath != null)
             {
