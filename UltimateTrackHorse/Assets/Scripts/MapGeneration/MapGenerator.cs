@@ -55,9 +55,9 @@ namespace MapGeneration
             targetTrackLength += 2; // Account for start and finish tiles
         }
 
-        #region UI Toggle Methods for Track Length
+        #region UI Toolkit Integration for Track Length
         /// <summary>
-        /// Sets a short track length. Connect this to the OnValueChanged event of a "Short Track" UI Toggle.
+        /// Sets a short track length. Previously attached to a Legacy UI Toggle, now triggered by the UIController via UI Toolkit button events.
         /// </summary>
         public void SetTrackLengthFive()
         {
@@ -65,7 +65,7 @@ namespace MapGeneration
         }
 
         /// <summary>
-        /// Sets a medium track length. Connect this to the OnValueChanged event of a "Medium Track" UI Toggle.
+        /// Sets a medium track length. Previously attached to a Legacy UI Toggle, now triggered by the UIController via UI Toolkit button events.
         /// </summary>
         public void SetTrackLengthTen()
         {
@@ -73,7 +73,7 @@ namespace MapGeneration
         }
 
         /// <summary>
-        /// Sets a long track length. Connect this to the OnValueChanged event of a "Long Track" UI Toggle.
+        /// Sets a long track length. Previously attached to a Legacy UI Toggle, now triggered by the UIController via UI Toolkit button events.
         /// </summary>
         public void SetTrackLengthFifteen()
         {
@@ -81,7 +81,7 @@ namespace MapGeneration
         }
 
         /// <summary>
-        /// Sets a custom track length from a string input. Connect this to the OnEndEdit event of an InputField.
+        /// Sets a custom track length from a string input. Called securely from the UIController after it parses the UI Toolkit TextField.
         /// </summary>
         public void SetCustomTrackLengthFromString(string lengthString)
         {
@@ -99,16 +99,23 @@ namespace MapGeneration
         #endregion
 
         /// <summary>
-        /// Starts the game. Connect this to PlayButton in Main Menu.
+        /// Starts the game and fires off the WFC generation algorithms. 
+        /// Externally heavily relied upon by the UIController when transitioning from map-selection menus into the active game state.
         /// </summary>
         public void OnPlayClicked()
         {
+            if (gameManager == null) gameManager = FindObjectOfType<GameManager>();
+
             GenerateMapWithCurrentSeed();
+            
             if (gameManager != null)
             {
                 gameManager.SetupNewTrack();
             }
-            
+            else
+            {
+                Debug.LogError("MapGenerator: Cannot find GameManager to SetupNewTrack!");
+            }
         }
 
         /// <summary>
@@ -130,10 +137,14 @@ namespace MapGeneration
             string trimmedSeed = seed.Trim();
             if (trimmedSeed.Length > 2 && int.TryParse(trimmedSeed.Substring(0, 2), out int length) && int.TryParse(trimmedSeed.Substring(2), out int parsedSeed))
             {
-                targetTrackLength = Mathf.Clamp(length, 3, 100);
+                targetTrackLength = Mathf.Clamp(length, 3, 99); 
                 manualSeed = parsedSeed;
                 useManualSeed = true;
-                Debug.Log($"Manual seed set. Track length: {targetTrackLength}, Seed: {manualSeed}.");
+                
+                // Dynamically adjust grid size based on track length
+                mapWidth = mapHeight = Mathf.Max(10, (int)(targetTrackLength * 0.7f));
+
+                Debug.Log($"Manual seed set. Track length: {targetTrackLength}, Seed: {manualSeed}. Grid size set to {mapWidth}x{mapHeight}.");
             }
             else
             {
@@ -142,16 +153,31 @@ namespace MapGeneration
             }
         }
 
+        /// <summary>
+        /// Resets the seed settings to default, ensuring the next map is random unless a new seed is set.
+        /// </summary>
+        public void ResetSeed()
+        {
+            useManualSeed = false;
+            manualSeed = 0;
+            // Reset map size to default if needed, or keep it dynamic for next random generation.
+            // For consistency, let's reset it to the default value.
+            mapWidth = 10;
+            mapHeight = 10;
+            Debug.Log("Seed and map settings have been reset.");
+        }
+
         private void GenerateMapWithCurrentSeed()
         {
             if (useManualSeed)
             {
                 GenerateMapFromSeed(manualSeed);
-                useManualSeed = false; // Reset after use to avoid accidental reuse on next generation
             }
             else
             {
                 // When using a random seed, still respect the currently set targetTrackLength.
+                // And also dynamically adjust grid size.
+                mapWidth = mapHeight = Mathf.Max(10, (int)(targetTrackLength * 0.7f));
                 int randomPart = Random.Range(0, 1000000); // Generate a random part for the seed
                 GenerateMapFromSeed(randomPart);
             }
@@ -681,6 +707,12 @@ namespace MapGeneration
         /// </summary>
         private bool GenerateValidMap()
         {
+            if (transform.localScale.sqrMagnitude < 0.001f)
+            {
+                Debug.LogWarning("MapGenerator: Transform Scale was 0,0,0! Forcing it back to 1,1,1 so tiles are actually visible and have physical colliders.");
+                transform.localScale = Vector3.one;
+            }
+
             ClearScene();
             ObstacleManager.Instance.ClearAllObstacles();
             InitializeGrid(); 
@@ -693,6 +725,7 @@ namespace MapGeneration
                 RunWFC(); 
                 InstantiatePathAndScenery(GeneratedPath);
 
+                if (gameManager == null) gameManager = FindObjectOfType<GameManager>();
                 if (gameManager != null)
                 {
                     gameManager.PlaceCarOnStart();
@@ -709,7 +742,7 @@ namespace MapGeneration
         /// <summary>
         /// Clears the scene by destroying all game objects in the scene.
         /// </summary>
-        private void ClearScene()
+        public void ClearScene()
         {
             foreach (Transform child in transform)
             {

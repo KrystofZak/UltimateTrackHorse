@@ -43,6 +43,7 @@ public class CameraOrbitControl : MonoBehaviour
         if (Mouse.current != null && Mouse.current.leftButton.isPressed)
         {
             float mouseX = Mouse.current.delta.x.ReadValue();
+
             freeLookCamera.m_XAxis.Value += mouseX * mouseSensitivity;
         }
         else

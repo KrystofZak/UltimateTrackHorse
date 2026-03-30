@@ -65,6 +65,16 @@ public class CarController : MonoBehaviour
     [Tooltip("Override car behaviour per surface layer. Layers not listed here use default multipliers (1.0).")]
     [SerializeField] private SurfaceSettings[] surfaceSettings = new SurfaceSettings[0];
 
+    [Header("Acid Settings")]
+    [SerializeField] private LayerMask acidLayer;
+    [SerializeField] private float flatTireRadiusMultiplier = 0.5f;
+    [SerializeField] private float steerPullPerFlatTire = 0.6f;
+    [SerializeField] private float steerLossPerFrontFlat = 0.4f;
+    [SerializeField] private float speedLossPerRearFlat = 0.35f;
+    [SerializeField] private ParticleSystem[] acidVapors = new ParticleSystem[4];
+
+    private bool[] isTireFlat = new bool[4];
+
     [Header("Visuals")]
     [SerializeField] private float tireRotationSpeed = 3000f;
     [SerializeField] private float minSkidVelocity = 10f;
@@ -158,62 +168,63 @@ public class CarController : MonoBehaviour
     private void HandleMotor()
     {
         float forwardSpeed = currentCarLocalVelocity.z;
-        float effectiveAcceleration = acceleration * activeSurface.accelerationMultiplier;
+        float acidSpeedMult = GetAcidSpeedMultiplier();
+
+        float effectiveAcceleration = acceleration * activeSurface.accelerationMultiplier * acidSpeedMult;
         float effectiveDeceleration = deceleration * activeSurface.accelerationMultiplier;
-        float effectiveMaxSpeed = maxSpeed * activeSurface.maxSpeedMultiplier;
+        float effectiveMaxSpeed = maxSpeed * activeSurface.maxSpeedMultiplier * acidSpeedMult;
 
         if (moveInput > 0.1f)
         {
-           
             if (forwardSpeed < -0.5f)
             {
-                carRB.AddForceAtPosition(transform.forward * moveInput * effectiveDeceleration, accelerationPoint.position, ForceMode.Acceleration);
+                carRB.AddForceAtPosition(transform.forward * moveInput * (effectiveDeceleration * 3f), accelerationPoint.position, ForceMode.Acceleration);
             }
-            
             else if (forwardSpeed < effectiveMaxSpeed)
             {
-               
                 float startAssist = (forwardSpeed < 1f) ? 1.5f : 1f;
                 carRB.AddForceAtPosition(transform.forward * moveInput * effectiveAcceleration * startAssist, accelerationPoint.position, ForceMode.Acceleration);
             }
         }
-       
         else if (moveInput < -0.1f)
         {
             if (preventReverse)
             {
-               
                 if (forwardSpeed > 0.5f)
                 {
-                    carRB.AddForceAtPosition(transform.forward * moveInput * effectiveDeceleration, accelerationPoint.position, ForceMode.Acceleration);
+                    carRB.AddForceAtPosition(transform.forward * moveInput * (effectiveDeceleration * 1.5f), accelerationPoint.position, ForceMode.Acceleration);
                 }
                 else
                 {
-                   
                     BrakeToStop();
                 }
             }
             else
             {
-             
                 if (forwardSpeed > -effectiveMaxSpeed)
                 {
                     carRB.AddForceAtPosition(transform.forward * moveInput * effectiveAcceleration, accelerationPoint.position, ForceMode.Acceleration);
                 }
             }
         }
-      
         else
         {
-            
             if (Mathf.Abs(forwardSpeed) < 1.0f)
             {
-               
                 carRB.linearVelocity = Vector3.Lerp(carRB.linearVelocity, new Vector3(0, carRB.linearVelocity.y, 0), Time.fixedDeltaTime * 10f);
             }
         }
     }
 
+    private void LongitudinalDrag()
+    {
+        if (Mathf.Abs(moveInput) < 0.1f)
+        {
+           
+            float dragForce = -currentCarLocalVelocity.z * (deceleration * 0.1f);
+            carRB.AddForceAtPosition(transform.forward * dragForce, accelerationPoint.position, ForceMode.Acceleration);
+        }
+    }
     private void BrakeToStop()
     {
         float forwardSpeed = currentCarLocalVelocity.z;
@@ -228,27 +239,17 @@ public class CarController : MonoBehaviour
             carRB.linearVelocity = transform.TransformDirection(localVel);
         }
     }
-    private void LongitudinalDrag()
-    {
 
-        if (Mathf.Abs(moveInput) < 0.1f)
-        {
-            float dragForce = -currentCarLocalVelocity.z * (deceleration * 0.5f);
-            carRB.AddForceAtPosition(transform.forward * dragForce, accelerationPoint.position, ForceMode.Acceleration);
-        }
-    }
 
     private void EnforceSurfaceMaxSpeed()
     {
-        
         if (!activeSurface.killMomentum) return;
 
         float forwardSpeed = currentCarLocalVelocity.z;
-        float effectiveMaxSpeed = maxSpeed * activeSurface.maxSpeedMultiplier;
+        float effectiveMaxSpeed = maxSpeed * activeSurface.maxSpeedMultiplier * GetAcidSpeedMultiplier();
 
         if (forwardSpeed > effectiveMaxSpeed && forwardSpeed > 1f)
         {
-           
             float overSpeedForce = (forwardSpeed - effectiveMaxSpeed) * (deceleration * 5f);
             carRB.AddForceAtPosition(-transform.forward * overSpeedForce, accelerationPoint.position, ForceMode.Acceleration);
         }
@@ -264,12 +265,37 @@ public class CarController : MonoBehaviour
 
     private void Steer()
     {
+        float flatTireSteerBias = 0f;
+        float currentSteerStrength = steerStrength;
+        float leftSteerLoss = 0f;
+        float rightSteerLoss = 0f;
+
+        for (int i = 0; i < rayPoints.Length; i++)
+        {
+            if (isTireFlat[i])
+            {
+                Vector3 localWheelPos = transform.InverseTransformPoint(rayPoints[i].position);
+
+                if (localWheelPos.x < 0) flatTireSteerBias -= steerPullPerFlatTire;
+                else if (localWheelPos.x > 0) flatTireSteerBias += steerPullPerFlatTire;
+
+                if (localWheelPos.z > 0)
+                {
+                    if (localWheelPos.x < 0) leftSteerLoss += steerLossPerFrontFlat;
+                    else if (localWheelPos.x > 0) rightSteerLoss += steerLossPerFrontFlat;
+                }
+            }
+        }
+
+        if (steerInput < 0) currentSteerStrength *= Mathf.Clamp01(1f - leftSteerLoss);
+        else if (steerInput > 0) currentSteerStrength *= Mathf.Clamp01(1f - rightSteerLoss);
 
         float speedRatioAbs = Mathf.Abs(carVelocityRatio);
-
         float direction = currentCarLocalVelocity.z >= -0.1f ? 1f : -1f;
 
-        carRB.AddTorque(steerStrength * steerInput * steerCurve.Evaluate(speedRatioAbs) * direction * transform.up, ForceMode.Acceleration);
+        float finalSteerInput = Mathf.Clamp(steerInput + flatTireSteerBias, -1.5f, 1.5f);
+
+        carRB.AddTorque(currentSteerStrength * finalSteerInput * steerCurve.Evaluate(speedRatioAbs) * direction * transform.up, ForceMode.Acceleration);
     }
 
     private void SidewaysDrag()
@@ -316,7 +342,6 @@ public class CarController : MonoBehaviour
 
     private void Vfx()
     {
-
         if (isGrounded && Mathf.Abs(currentCarLocalVelocity.x) > minSkidVelocity)
         {
             ToggleSkidMarks(true);
@@ -328,27 +353,63 @@ public class CarController : MonoBehaviour
             ToggleSkidSmokes(false);
         }
     }
+
     private void ToggleSkidMarks(bool toggle)
     {
         foreach (TrailRenderer skid in skidMarks)
         {
-            skid.emitting = toggle;
+            bool shouldEmit = toggle;
+
+            if (toggle && IsWheelFlatNearEffect(skid.transform))
+            {
+                shouldEmit = false;
+            }
+
+            skid.emitting = shouldEmit;
         }
     }
+
     private void ToggleSkidSmokes(bool toggle)
     {
         foreach (ParticleSystem skid in skidSmokes)
         {
-          
+            bool shouldEmit = toggle;
+
+            if (toggle && IsWheelFlatNearEffect(skid.transform))
+            {
+                shouldEmit = false;
+            }
+
             var emission = skid.emission;
+            emission.enabled = shouldEmit;
 
-            emission.enabled = toggle;
-
-            if (toggle && !skid.isPlaying)
+            if (shouldEmit && !skid.isPlaying)
             {
                 skid.Play();
             }
         }
+    }
+
+    private bool IsWheelFlatNearEffect(Transform effectTransform)
+    {
+        int closestTireIndex = -1;
+        float minDist = float.MaxValue;
+
+        for (int i = 0; i < rayPoints.Length; i++)
+        {
+            float dist = Vector3.Distance(effectTransform.position, rayPoints[i].position);
+            if (dist < minDist)
+            {
+                minDist = dist;
+                closestTireIndex = i;
+            }
+        }
+
+        if (closestTireIndex != -1)
+        {
+            return isTireFlat[closestTireIndex];
+        }
+        return false;
     }
 
     #endregion
@@ -372,13 +433,54 @@ public class CarController : MonoBehaviour
             isGrounded = false;
         }
     }
+    private float GetAcidSpeedMultiplier()
+    {
+        float multiplier = 1f;
+        for (int i = 0; i < rayPoints.Length; i++)
+        {
+            if (isTireFlat[i])
+            {
+              
+                Vector3 localWheelPos = transform.InverseTransformPoint(rayPoints[i].position);
+                if (localWheelPos.z < 0)
+                {
+                    multiplier -= speedLossPerRearFlat;
+                }
+            }
+        }
+        return Mathf.Clamp(multiplier, 0.1f, 1f);
+    }
 
     private void CalculateCarVelocity()
     {
         currentCarLocalVelocity = transform.InverseTransformDirection(carRB.linearVelocity);
-        float effectiveMaxSpeed = maxSpeed * activeSurface.maxSpeedMultiplier;
+        float effectiveMaxSpeed = maxSpeed * activeSurface.maxSpeedMultiplier * GetAcidSpeedMultiplier();
         carVelocityRatio = currentCarLocalVelocity.z / effectiveMaxSpeed;
+    }
 
+    public void ResetCar()
+    {
+        carRB.linearVelocity = Vector3.zero;
+        carRB.angularVelocity = Vector3.zero;
+
+        isTireFlat = new bool[4];
+
+        activeLingerTimer = 0f;
+        activeSurface = SurfaceSettings.Default;
+
+        for (int i = 0; i < tires.Length; i++)
+        {
+            if (tires[i] != null)
+            {
+                tires[i].transform.localScale = Vector3.one;
+            }
+
+            if (acidVapors.Length > i && acidVapors[i] != null)
+            {
+                acidVapors[i].Stop();
+                acidVapors[i].Clear();
+            }
+        }
     }
 
     #endregion
@@ -435,12 +537,12 @@ public class CarController : MonoBehaviour
         for (int i = 0; i < rayPoints.Length; i++)
         {
             float maxDistance = restLength;
+            float currentRadius = isTireFlat[i] ? wheelRadius * flatTireRadiusMultiplier : wheelRadius;
 
-            RaycastHit[] hits = Physics.RaycastAll(rayPoints[i].position, -rayPoints[i].up, maxDistance + wheelRadius);
+            RaycastHit[] hits = Physics.RaycastAll(rayPoints[i].position, -rayPoints[i].up, maxDistance + currentRadius, ~0, QueryTriggerInteraction.Collide);
 
             if (hits.Length > 0)
             {
-                
                 Array.Sort(hits, (a, b) => a.distance.CompareTo(b.distance));
 
                 int surfaceLayer = -1;
@@ -451,16 +553,29 @@ public class CarController : MonoBehaviour
                 {
                     int hitLayer = hit.collider.gameObject.layer;
 
-                    if (surfaceLayer == -1)
+                    if (surfaceLayer == -1 && (acidLayer.value & (1 << hitLayer)) == 0)
                     {
                         surfaceLayer = hitLayer;
                     }
 
-                    if ((drivable.value & (1 << hitLayer)) != 0)
+                    if ((acidLayer.value & (1 << hitLayer)) != 0)
+                    {
+                        if (!isTireFlat[i])
+                        {
+                            isTireFlat[i] = true;
+                            Debug.Log($"Wheel {i} is flat");
+
+                            if (acidVapors.Length > i && acidVapors[i] != null)
+                            {
+                                acidVapors[i].Play();
+                            }
+                        }
+                    }
+
+                    if (!foundDrivable && (drivable.value & (1 << hitLayer)) != 0)
                     {
                         groundHit = hit;
                         foundDrivable = true;
-                        break;
                     }
                 }
 
@@ -474,7 +589,7 @@ public class CarController : MonoBehaviour
                         mostGroundedIndex = i;
                     }
 
-                    float currentSpringLength = groundHit.distance - wheelRadius;
+                    float currentSpringLength = groundHit.distance - currentRadius;
                     float springCompression = (restLength - currentSpringLength) / springTravel;
 
                     float springForce = springCompression * springStiffness;
@@ -497,13 +612,21 @@ public class CarController : MonoBehaviour
 
                     carRB.AddForceAtPosition(rayPoints[i].up * netForce, rayPoints[i].position);
 
-                    SetTirePosition(tires[i], groundHit.point + rayPoints[i].up * wheelRadius);
+                    SetTirePosition(tires[i], groundHit.point + rayPoints[i].up * currentRadius);
+
+                    if (isTireFlat[i])
+                    {
+                        tires[i].transform.localScale = new Vector3(flatTireRadiusMultiplier, flatTireRadiusMultiplier, flatTireRadiusMultiplier);
+                    }
+                    else
+                    {
+                        tires[i].transform.localScale = Vector3.one;
+                    }
 
                     Debug.DrawLine(rayPoints[i].position, groundHit.point, Color.red);
                 }
                 else
                 {
-                   
                     wheelIsGrounded[i] = 0;
                     SetTirePosition(tires[i], rayPoints[i].position - rayPoints[i].up * maxDistance);
                     Debug.DrawLine(rayPoints[i].position, rayPoints[i].position - rayPoints[i].up * maxDistance, Color.green);
@@ -511,7 +634,6 @@ public class CarController : MonoBehaviour
             }
             else
             {
-               
                 wheelIsGrounded[i] = 0;
                 SetTirePosition(tires[i], rayPoints[i].position - rayPoints[i].up * maxDistance);
                 Debug.DrawLine(rayPoints[i].position, rayPoints[i].position - rayPoints[i].up * maxDistance, Color.green);
