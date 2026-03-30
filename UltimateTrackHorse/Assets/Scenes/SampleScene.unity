@@ -533,8 +533,8 @@ PrefabInstance:
   m_SourcePrefab: {fileID: 100100000, guid: b9558e934d781414b9c241e07cf86b00, type: 3}
 --- !u!1 &1404281233 stripped
 GameObject:
-  m_CorrespondingSourceObject: {fileID: 5123362669617435364, guid: b9558e934d781414b9c241e07cf86b00, type: 3}
-  m_PrefabInstance: {fileID: 1404281232}
+  m_CorrespondingSourceObject: {fileID: 8188444430857552384, guid: 70b94d11e208fff479924ad3d9bd485d, type: 3}
+  m_PrefabInstance: {fileID: 262256811500967437}
   m_PrefabAsset: {fileID: 0}
 --- !u!1 &1965604380
 GameObject:
@@ -604,7 +604,7 @@ MonoBehaviour:
   screenTintController: {fileID: 1965604385}
   placeholderTag: Obstacle
   obstacleType: 2
-  prefabIndex: 1
+  prefabIndex: 0
   keepParent: 0
   keepScale: 0
 --- !u!114 &1965604384
