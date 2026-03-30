@@ -1,0 +1,26 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 56dc305bc58f4ee68778efb2490b886e, type: 3}
+  m_Name: Blue
+  m_EditorClassIdentifier: Assembly-CSharp::GameLogic.Traps.ScreenOverlayProfile
+  layoutMode: 1
+  splatSprites: []
+  tint: {r: 0.08627451, g: 0.20784315, b: 0.85098046, a: 1}
+  alpha: 0.99
+  minSplats: 1
+  maxSplats: 1
+  scaleRange: {x: 1, y: 1}
+  rotationRange: {x: 0, y: 0}
+  fadeIn: 0.1
+  hold: 0.8
+  fadeOut: 1
+  wipeDuration: 0.25

@@ -68,7 +68,11 @@ namespace GameLogic.Traps
             yield return new WaitForSeconds(profile.hold);
             yield return FadeAll(profile.alpha, 0f, profile.fadeOut);
 
-            ClearImmediate();
+            if (profile.layoutMode != ScreenOverlayLayoutMode.RandomSplats)
+            {
+                ClearImmediate();
+            }
+
             activeRoutine = null;
         }
 
@@ -94,7 +98,7 @@ namespace GameLogic.Traps
                     break;
             }
         }
-        
+
         private void SpawnSplats(ScreenOverlayProfile profile)
         {
             int count = Random.Range(profile.minSplats, profile.maxSplats + 1);
@@ -127,7 +131,7 @@ namespace GameLogic.Traps
                 activeImages.Add(image);
             }
         }
-        
+
         private void SpawnFullScreenTint(ScreenOverlayProfile profile)
         {
             var image = Instantiate(imagePrefab, overlayRoot);

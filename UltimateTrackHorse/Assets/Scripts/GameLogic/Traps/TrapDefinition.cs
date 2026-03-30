@@ -15,7 +15,12 @@ namespace GameLogic.Traps
         /// <summary>
         /// A trap that obstructs visibility or creates a fog-like effect.
         /// </summary>
-        Fog
+        Fog,
+
+        /// <summary>
+        /// TODO: Add refactored logic to this shit
+        /// </summary>
+        Surfaces
     }
 
     /// <summary>

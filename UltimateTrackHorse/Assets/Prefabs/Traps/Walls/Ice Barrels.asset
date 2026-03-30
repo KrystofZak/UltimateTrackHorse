@@ -10,12 +10,11 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: eaa3982a7290443dbdcfb2434ea3a062, type: 3}
-  m_Name: Explosive Barrels
+  m_Name: Ice Barrels
   m_EditorClassIdentifier: Assembly-CSharp::GameLogic.Traps.TrapDefinition
   category: 0
   activationMode: 0
   repeatCooldown: 0
   effects:
-  - {fileID: 11400000, guid: d645d0ee9c8a14640b93b8c144f6e8ab, type: 2}
+  - {fileID: 11400000, guid: 54273c17fae34184c957de01b25bb3b2, type: 2}
   - {fileID: 11400000, guid: cdc1017641fbeeb468f71a2cdfc5dee0, type: 2}
-  - {fileID: 11400000, guid: d9f70cc014017664181ca363d3e4c62a, type: 2}
