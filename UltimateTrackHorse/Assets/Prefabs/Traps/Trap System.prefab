@@ -230,8 +230,8 @@ MonoBehaviour:
   catalog: {fileID: 11400000, guid: fa3fb9e96abd55a4d8644b4b62decd29, type: 2}
   services: {fileID: 5013302169756300357}
   placeholderTag: Obstacle
-  keepParent: 1
-  keepScale: 1
+  keepParent: 0
+  keepScale: 0
   enableTestingInputs: 1
   specificTrapPrefab: {fileID: 0}
   replaceWithRandomKey: 286
