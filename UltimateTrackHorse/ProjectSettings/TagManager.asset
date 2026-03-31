@@ -12,6 +12,7 @@ TagManager:
   - Mushroom
   - Obstacle
   - Trap
+  - FxTemporaire
   layers:
   - Default
   - TransparentFX

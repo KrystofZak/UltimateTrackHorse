@@ -1,0 +1,20 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: eaa3982a7290443dbdcfb2434ea3a062, type: 3}
+  m_Name: Pink Paint
+  m_EditorClassIdentifier: Assembly-CSharp::GameLogic.Traps.TrapDefinition
+  category: 1
+  activationMode: 0
+  repeatCooldown: 0
+  effects:
+  - {fileID: 11400000, guid: d43aa06c8f6a5b741b248dde2f1fb772, type: 2}
+  - {fileID: 11400000, guid: cdc1017641fbeeb468f71a2cdfc5dee0, type: 2}

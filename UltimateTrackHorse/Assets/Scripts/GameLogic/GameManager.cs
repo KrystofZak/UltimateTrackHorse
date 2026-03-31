@@ -279,6 +279,7 @@ namespace GameLogic
 
                     // Small nudge just in case ground checks freeze
                     if (rb != null) rb.WakeUp();
+                    carController.ResetCar();
                 }
 
                 CinemachineVirtualCamera vcam = FindObjectOfType<CinemachineVirtualCamera>();
