@@ -128,10 +128,19 @@
         <ui:VisualElement name="aboutUsView" class="view-container hidden">
             <ui:VisualElement class="panel">
                 <ui:Label text="About Us" class="title-label"/>
-                <ui:Label text="Programmer 1: [Name Here]" class="about-text"/>
-                <ui:Label text="Programmer 2: [Name Here]" class="about-text"/>
-                <ui:Label text="Programmer 3: [Name Here]" class="about-text"/>
-                <ui:Label text="Programmer 4: [Name Here]" class="about-text"/>
+                
+                <ui:Label text="Marek &quot;The Driver&quot; Jirusek" class="about-text"/>
+                <ui:Label text="Car physics, Obstacle physics, Car sounds" class="about-text" style="font-size: 18px; margin-top: 0; -unity-font-style: normal;"/>
+                
+                <ui:Label text="Vitalij &quot;The Trapper&quot; Atamanjuk" class="about-text"/>
+                <ui:Label text="Obstacle visuals, Audio, Effects" class="about-text" style="font-size: 18px; margin-top: 0; -unity-font-style: normal;"/>
+                
+                <ui:Label text="Tomas &quot;The Mapper&quot; Rybak" class="about-text"/>
+                <ui:Label text="Map Generation, Game logic" class="about-text" style="font-size: 18px; margin-top: 0; -unity-font-style: normal;"/>
+                
+                <ui:Label text="Krystof &quot;The Artist&quot; Zak" class="about-text"/>
+                <ui:Label text="Graphics designer, UI, Sounds" class="about-text" style="font-size: 18px; margin-top: 0; -unity-font-style: normal;"/>
+                
                 <ui:Button text="Back" name="AboutBackButton" class="animated-button" style="margin-top: 30px;"/>
             </ui:VisualElement>
         </ui:VisualElement>

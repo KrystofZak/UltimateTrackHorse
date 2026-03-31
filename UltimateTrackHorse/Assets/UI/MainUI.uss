@@ -212,10 +212,6 @@
     width: 100%;
 }
 
-/* ======================================================== */
-/* ?? REALISTIC DRIVING TACHOMETER (PURE CSS)               */
-/* ======================================================== */
-
 .tacho-wrapper {
     position: absolute;
     bottom: 0px; /* Changed from 25px to 0px so it sits perfectly flush with the bottom screen edge! */
