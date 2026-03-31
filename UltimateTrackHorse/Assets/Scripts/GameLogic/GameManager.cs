@@ -282,6 +282,21 @@ namespace GameLogic
                     carController.ResetCar();
                 }
 
+                // FIX: Force Cinemachine to instantly cut instead of blending from the 5000 unit diorama teleport
+                if (Camera.main != null)
+                {
+                    CinemachineBrain brain = Camera.main.GetComponent<CinemachineBrain>();
+                    if (brain != null)
+                    {
+                        // Temporarily disable blending for this specific jump
+                        CinemachineBlendDefinition oldDef = brain.m_DefaultBlend;
+                        brain.m_DefaultBlend = new CinemachineBlendDefinition(CinemachineBlendDefinition.Style.Cut, 0f);
+
+                        // Restore the old blend definition tightly after making the cut
+                        StartCoroutine(RestoreCinemachineBlend(brain, oldDef));
+                    }
+                }
+
                 CinemachineVirtualCamera vcam = FindObjectOfType<CinemachineVirtualCamera>();
 
                 if (vcam != null)
@@ -292,6 +307,12 @@ namespace GameLogic
                     vcam.enabled = false;
                     vcam.enabled = true;
                 }
+                
+                CinemachineFreeLook freeLookCamera = FindObjectOfType<CinemachineFreeLook>();
+                if (freeLookCamera != null)
+                {
+                    freeLookCamera.PreviousStateIsValid = false;
+                }
             }
             else
             {
@@ -299,5 +320,18 @@ namespace GameLogic
             }
         }
         
+        /// <summary>
+        /// Coroutine to restore the original Cinemachine blend definition after making an instant cut
+        /// </summary>
+        private IEnumerator RestoreCinemachineBlend(CinemachineBrain brain, CinemachineBlendDefinition oldDef)
+        {
+            // Wait strictly for two frames so the single "Cut" update propagates completely through LateUpdate
+            yield return null;
+            yield return null;
+            if (brain != null)
+            {
+                brain.m_DefaultBlend = oldDef;
+            }
+        }
     }
 }

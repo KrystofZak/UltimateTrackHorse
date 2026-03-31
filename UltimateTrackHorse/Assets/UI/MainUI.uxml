@@ -1,6 +1,6 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi="http://www.w3.org/2001/XMLSchema-instance" editor-extension-mode="False">
     <Style src="project://database/Assets/UI/MainUI.uss?fileID=7433441132597879392&amp;guid=4ffe49d19757b9e409b9535da0ab20d0&amp;type=3#MainUI"/>
-    <ui:VisualElement name="RootContainer" class="root-container" style="background-image: url(&quot;project://database/Assets/UI/Images/MenuImage.png?fileID=2800000&amp;guid=e6702885a591530439a6b55843aff18f&amp;type=3#MenuImage&quot;); -unity-background-image-tint-color: rgb(255, 255, 255);">
+    <ui:VisualElement name="RootContainer" class="root-container" style="background-color: transparent;">
         
         <!-- Pushed lightly to the left using the new .left-aligned class -->
         <ui:VisualElement name="mainMenuView" class="view-container left-aligned" style="background-image: none;">
