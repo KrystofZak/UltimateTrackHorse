@@ -382,9 +382,32 @@ namespace UI
 
             // First, find the absolute fastest time (lowest number)
             float bestTime = float.MaxValue;
-            foreach (float t in lapTimes)
+            int bestLapIndex = -1;
+            for (int i = 0; i < lapTimes.Count; i++)
             {
-                if (t < bestTime) bestTime = t;
+                if (lapTimes[i] < bestTime)
+                {
+                    bestTime = lapTimes[i];
+                    bestLapIndex = i;
+                }
+            }
+
+            // Always display the best lap at the top
+            if (bestLapIndex != -1)
+            {
+                float bSeconds = Mathf.FloorToInt(bestTime);
+                float bMilliseconds = Mathf.FloorToInt((bestTime - bSeconds) * 100);
+                string bFormatted = string.Format("{0:00}:{1:00}", bSeconds, bMilliseconds);
+
+                Label bestLabel = new Label($"Best (Lap {bestLapIndex + 1}): {bFormatted}");
+                bestLabel.AddToClassList("history-label");
+                bestLabel.AddToClassList("best-time-label");
+                lapListContainer.Add(bestLabel);
+
+                // Add a divider below the best lap
+                VisualElement divider = new VisualElement();
+                divider.AddToClassList("history-divider");
+                lapListContainer.Add(divider);
             }
 
             // Figure out the window of the last 5 laps 
@@ -403,12 +426,6 @@ namespace UI
                 // Build a literal label via code
                 Label rowLabel = new Label($"Lap {i + 1}: {formattedTime}");
                 rowLabel.AddToClassList("history-label");
-
-                // Highlight the absolute best time recorded on this track
-                if (Mathf.Approximately(timeInSecs, bestTime))
-                {
-                    rowLabel.AddToClassList("best-time-label");
-                }
 
                 // Append the label dynamically into the visual layout
                 lapListContainer.Add(rowLabel);
