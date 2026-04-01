@@ -345,14 +345,7 @@ namespace GameLogic
                     freeLookCamera.PreviousStateIsValid = false;
                 }
             }
-
-            CinemachineVirtualCamera vcam = FindObjectOfType<CinemachineVirtualCamera>();
-            if (vcam != null)
-            {
-                vcam.PreviousStateIsValid = false;
-                vcam.enabled = false;
-                vcam.enabled = true;
-            }
+            
         }
         
         /// <summary>

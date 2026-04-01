@@ -49,6 +49,15 @@ namespace MapGeneration
         public List<Vector2Int> GeneratedPath { get; private set; }
 
         /// <summary>
+        /// Returns the user-facing seed format: 2 digits of logical track length + generation seed.
+        /// Logical track length excludes start/finish tiles.
+        /// </summary>
+        public string GetSeedDisplayValue()
+        {
+            return $"{targetTrackLength:00}{LastUsedSeed}";
+        }
+
+        /// <summary>
         /// Initializes the map generator and generates a valid map with start and finish cells
         /// </summary>
         private void Start()
@@ -548,7 +557,7 @@ namespace MapGeneration
                         if (cp != null)
                         {
                             // Calculate the direction from the current tile to the next tile in the path
-                            Vector2Int gridDir = path[i + 1] - path[i];
+                            Vector2Int gridDir = path[i + 1] - path[i - 1];
                             Vector3 worldDir = new Vector3(gridDir.x, 0, gridDir.y);
                     
                             // Save the direction in the checkpoint component
