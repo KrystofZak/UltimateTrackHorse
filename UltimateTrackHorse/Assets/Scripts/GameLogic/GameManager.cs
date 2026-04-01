@@ -27,6 +27,10 @@ namespace GameLogic
         // Replaced old UIManager with the new UIController
         private UIController uiController;
 
+        // Variables to hold the current respawn position and rotation, set by checkpoints
+        private Vector3 currentRespawnPos;
+        private Quaternion currentRespawnRot;
+
         /// <summary>
         /// Subscribe to the finish line event when the game manager is enabled, and unsubscribe when disabled.
         /// </summary>
@@ -48,7 +52,8 @@ namespace GameLogic
         {
             if (Input.GetKeyDown(KeyCode.R))
             {
-                RestartCurrentLap();
+                //RestartCurrentLap();
+                RespawnCar(true);
             }
 
             if (uiController == null)
@@ -228,6 +233,17 @@ namespace GameLogic
             PlaceCarOnStart();
             ObstacleManager.Instance.ResetObstacles();
         }
+
+        /// <summary>
+        /// Set the respawn position and rotation for the player's car.'
+        /// </summary>
+        /// <param name="pos">Position to be set</param>
+        /// <param name="rot">Rotation to be set</param>
+        public void SetRespawnPoint(Vector3 pos, Quaternion rot)
+        {
+            currentRespawnPos = pos;
+            currentRespawnRot = rot;
+        }
         
         /// <summary>
         /// Place the player's car at the starting position (1,1) on the map,
@@ -236,44 +252,59 @@ namespace GameLogic
         public void PlaceCarOnStart()
         {
             if (mapGenerator == null) mapGenerator = FindObjectOfType<MapGenerator>();
-            if (mapGenerator == null) 
-            {
-                Debug.LogError("GameManager: Cannot execute PlaceCarOnStart because MapGenerator is missing!");
-                return;
-            }
+            if (mapGenerator == null) return; 
 
             var startCell = mapGenerator.GetCell(1, 1);
 
-            if (startCell != null && startCell.CollapsedVariant != null)
+            // Check if the cell exists and has a collapsed variant, and that the generated path is valid
+            if (startCell != null && startCell.CollapsedVariant != null && mapGenerator.GeneratedPath != null && mapGenerator.GeneratedPath.Count > 1)
             {
                 float size = mapGenerator.tileSize;
-                Vector3 startPos = new Vector3(1 * size, 1f, 1 * size);
-                Quaternion startRot = Quaternion.Euler(0, startCell.CollapsedVariant.Rotation * 90f, 0);
+                Vector3 startPos = new Vector3(1 * size, 0.05f, 1 * size);
+        
+                // Get the direction of the first segment of the generated path to determine the correct rotation
+                Vector2Int gridDir = mapGenerator.GeneratedPath[1] - mapGenerator.GeneratedPath[0];
+                Vector3 worldDir = new Vector3(gridDir.x, 0, gridDir.y);
+        
+                // Set the respawn position and rotation based on the direction of the first segment
+                Quaternion startRot = Quaternion.LookRotation(worldDir);
 
-                Rigidbody rb = playerCar.GetComponent<Rigidbody>();
+                SetRespawnPoint(startPos, startRot);
 
-                if (rb != null)
-                {
-                    // Disable physics for the player car while setting position and rotation
-                    rb.isKinematic = true;
-                    rb.position = startPos;
-                    rb.rotation = startRot;
+                RespawnCar(false);
+            }
+        }
 
-                    // Set position and rotation of the player car
-                    playerCar.transform.SetPositionAndRotation(startPos, startRot);
+        public void RespawnCar(bool isMidGameRespawn)
+        {
+            if (playerCar == null) return;
 
-                    rb.isKinematic = false;
-                    rb.linearVelocity = Vector3.zero;
-                    rb.angularVelocity = Vector3.zero;
-                }
-                else
-                {
-                    playerCar.transform.SetPositionAndRotation(startPos, startRot);
-                }
-                Physics.SyncTransforms();
+            Rigidbody rb = playerCar.GetComponent<Rigidbody>();
+            if (rb != null)
+            {
+                rb.isKinematic = true;
+                rb.position = currentRespawnPos;
+                rb.rotation = currentRespawnRot;
+                playerCar.transform.SetPositionAndRotation(currentRespawnPos, currentRespawnRot);
+                
+                rb.isKinematic = false;
+                rb.linearVelocity = Vector3.zero;
+                rb.angularVelocity = Vector3.zero;
+            }
+            else
+            {
+                playerCar.transform.SetPositionAndRotation(currentRespawnPos, currentRespawnRot);
+            }
+            Physics.SyncTransforms();
 
-                CarController carController = playerCar.GetComponent<CarController>();
-                if (carController != null)
+            CarController carController = playerCar.GetComponent<CarController>();
+            if (carController != null)
+            {
+                if (rb != null) rb.WakeUp();
+                carController.ResetCar();
+                
+                // No countdown for mid-game respawns, so we need to re-enable input immediately
+                if (isMidGameRespawn) 
                 {
                     carController.isInputEnabled = true;
 
@@ -314,9 +345,13 @@ namespace GameLogic
                     freeLookCamera.PreviousStateIsValid = false;
                 }
             }
-            else
+
+            CinemachineVirtualCamera vcam = FindObjectOfType<CinemachineVirtualCamera>();
+            if (vcam != null)
             {
-                Debug.LogWarning("GameManager: Could not PlaceCarOnStart because start cell is null or uncollapsed.");
+                vcam.PreviousStateIsValid = false;
+                vcam.enabled = false;
+                vcam.enabled = true;
             }
         }
         
