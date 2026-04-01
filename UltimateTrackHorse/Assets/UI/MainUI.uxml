@@ -1,6 +1,6 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi="http://www.w3.org/2001/XMLSchema-instance" editor-extension-mode="False">
     <Style src="project://database/Assets/UI/MainUI.uss?fileID=7433441132597879392&amp;guid=4ffe49d19757b9e409b9535da0ab20d0&amp;type=3#MainUI"/>
-    <ui:VisualElement name="RootContainer" class="root-container" style="background-image: url(&quot;project://database/Assets/UI/Images/MenuImage.png?fileID=2800000&amp;guid=e6702885a591530439a6b55843aff18f&amp;type=3#MenuImage&quot;); -unity-background-image-tint-color: rgb(255, 255, 255);">
+    <ui:VisualElement name="RootContainer" class="root-container" style="background-color: transparent;">
         
         <!-- Pushed lightly to the left using the new .left-aligned class -->
         <ui:VisualElement name="mainMenuView" class="view-container left-aligned" style="background-image: none;">
@@ -128,10 +128,19 @@
         <ui:VisualElement name="aboutUsView" class="view-container hidden">
             <ui:VisualElement class="panel">
                 <ui:Label text="About Us" class="title-label"/>
-                <ui:Label text="Programmer 1: [Name Here]" class="about-text"/>
-                <ui:Label text="Programmer 2: [Name Here]" class="about-text"/>
-                <ui:Label text="Programmer 3: [Name Here]" class="about-text"/>
-                <ui:Label text="Programmer 4: [Name Here]" class="about-text"/>
+                
+                <ui:Label text="Marek &quot;The Driver&quot; Jirusek" class="about-text"/>
+                <ui:Label text="Car physics, Obstacle physics, Car sounds" class="about-text" style="font-size: 18px; margin-top: 0; -unity-font-style: normal;"/>
+                
+                <ui:Label text="Vitalij &quot;The Trapper&quot; Atamanjuk" class="about-text"/>
+                <ui:Label text="Obstacle visuals, Audio, Effects" class="about-text" style="font-size: 18px; margin-top: 0; -unity-font-style: normal;"/>
+                
+                <ui:Label text="Tomas &quot;The Mapper&quot; Rybak" class="about-text"/>
+                <ui:Label text="Map Generation, Game logic" class="about-text" style="font-size: 18px; margin-top: 0; -unity-font-style: normal;"/>
+                
+                <ui:Label text="Krystof &quot;The Artist&quot; Zak" class="about-text"/>
+                <ui:Label text="Graphics designer, UI, Sounds" class="about-text" style="font-size: 18px; margin-top: 0; -unity-font-style: normal;"/>
+                
                 <ui:Button text="Back" name="AboutBackButton" class="animated-button" style="margin-top: 30px;"/>
             </ui:VisualElement>
         </ui:VisualElement>
