@@ -300,12 +300,10 @@ namespace UI
             newView.RemoveFromClassList("hidden");
             currentView = newView;
 
-            // If entering the Pause View, instantly ping the MapGenerator for the active seed and display it!
+            // If entering the Pause View, instantly ping the MapGenerator for the active seed and display it.
             if (newView == pauseView && mapSeedLabel != null && mapGenerator != null)
             {
-                // To accurately rebuild the seed, DO NOT subtract the start/end tiles, use the literal GeneratedPath count!
-                int length = mapGenerator.GeneratedPath != null ? mapGenerator.GeneratedPath.Count : mapGenerator.targetTrackLength; 
-                mapSeedLabel.text = $"{length:00}{mapGenerator.LastUsedSeed}";
+                mapSeedLabel.text = mapGenerator.GetSeedDisplayValue();
             }
 
             bool shouldShowMenuCam = !(newView == gameView || newView == obstacleChoiceView || newView == pauseView);
