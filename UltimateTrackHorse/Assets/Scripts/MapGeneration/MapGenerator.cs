@@ -31,15 +31,16 @@ namespace MapGeneration
         [Header("Scenery Tiles")]
         public List<TileData> sceneryTiles; // List of all scenery tiles
         
-        // Start and finish tiles
-        [Header("Special Tiles")]
-        public TileData startTileData;
-        public TileData finishTileData;
+        [Header("Special Tiles")] 
+        public TileData startTileData; // Start tile data
+        public TileData finishTileData; // Finish tile dat
+        public List<TileData> checkpointTiles; // List of checkpoint tile data
 
         private Cell[,] grid; // 2D array representing the map
         private List<TileVariant> standardVariants; // List of all possible tile variants
         private List<TileVariant> startVariants; // List of possible start tile variants
         private List<TileVariant> finishVariants; // List of possible finish tile variants
+        private List<TileVariant> checkpointVariants; // List of possible checkpoint tile variants
         private bool useManualSeed;
         private int manualSeed;
 
@@ -257,6 +258,7 @@ namespace MapGeneration
             standardVariants = new List<TileVariant>();
             startVariants = new List<TileVariant>();
             finishVariants = new List<TileVariant>();
+            checkpointVariants = new List<TileVariant>();
 
             // Split each tile into its 4 possible rotations and categorize them
             foreach (var tile in allAvailableTiles)
@@ -264,7 +266,8 @@ namespace MapGeneration
                 for (int r = 0; r < 4; r++)
                 {
                     TileVariant variant = new TileVariant(tile, r);
-
+                    
+                    // Choose variant based on tile type
                     if (tile == startTileData)
                     {
                         startVariants.Add(variant);
@@ -272,6 +275,10 @@ namespace MapGeneration
                     else if (tile == finishTileData)
                     {
                         finishVariants.Add(variant);
+                    }
+                    else if (checkpointTiles != null && checkpointTiles.Contains(tile)) 
+                    { 
+                        checkpointVariants.Add(variant);
                     }
                     else
                     {
@@ -433,9 +440,19 @@ namespace MapGeneration
                 List<TileVariant> validForPath = new List<TileVariant>();
 
                 // Choose the source variants based on whether it's the start, finish, or a middle cell
-                List<TileVariant> sourceVariants = standardVariants;
-                if (i == 0) sourceVariants = startVariants;
-                else if (i == path.Count - 1) sourceVariants = finishVariants;
+                List<TileVariant> sourceVariants = standardVariants; 
+                if (i == 0) 
+                { 
+                    sourceVariants = startVariants;
+                } 
+                else if (i == path.Count - 1) 
+                { 
+                    sourceVariants = finishVariants;
+                } 
+                else if (i % 5 == 0 && targetTrackLength > 5) // Every 5th tile is a checkpoint tile.
+                { 
+                    sourceVariants = checkpointVariants;
+                }
 
                 // Choose only the variants with road sockets
                 foreach (var variant in sourceVariants)
