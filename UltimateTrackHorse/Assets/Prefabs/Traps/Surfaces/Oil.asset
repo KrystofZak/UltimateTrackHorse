@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Oil
   m_EditorClassIdentifier: Assembly-CSharp::GameLogic.Traps.TrapDefinition
   category: 2
-  activationMode: 1
+  activationMode: 0
   repeatCooldown: 0.5
   effects:
   - {fileID: 11400000, guid: 19e41796ac7090a4ba9df334d50fd941, type: 2}
