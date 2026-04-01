@@ -431,8 +431,11 @@ public class CarController : MonoBehaviour
     {
         if (engineSound != null)
         {
-            
-            float targetPitch = Mathf.Lerp(minPitch, maxPitch, Mathf.Abs(carVelocityRatio));
+           
+          
+            float currentRatio = Mathf.Abs(carVelocityRatio);
+
+            float targetPitch = Mathf.Lerp(minPitch, maxPitch, currentRatio);
 
             engineSound.pitch = Mathf.Lerp(engineSound.pitch, targetPitch, Time.deltaTime * pitchSmoothSpeed);
         }
@@ -511,6 +514,20 @@ public class CarController : MonoBehaviour
                 acidVapors[i].Clear();
             }
         }
+    }
+    public float GetMaxSpeedOnAsphalt()
+    {
+        
+        foreach (SurfaceSettings surface in surfaceSettings)
+        {
+            string sName = surface.name.ToLower();
+            if (sName.Contains("asfalt") || sName.Contains("asphalt"))
+            {
+                return maxSpeed * surface.maxSpeedMultiplier;
+            }
+        }
+
+        return maxSpeed;
     }
 
     #endregion
