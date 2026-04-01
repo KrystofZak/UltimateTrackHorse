@@ -1,5 +1,81 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
+--- !u!1 &5150581362779176825
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 4378330369542778603}
+  - component: {fileID: 170265427051464773}
+  - component: {fileID: 1159632056506222993}
+  - component: {fileID: 7653742261704777726}
+  m_Layer: 0
+  m_Name: Cube
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &4378330369542778603
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5150581362779176825}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: -0.049, y: 0.14, z: 0.051}
+  m_LocalScale: {x: 1, y: 0.64, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 5775195022750186895}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!33 &170265427051464773
+MeshFilter:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5150581362779176825}
+  m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!65 &1159632056506222993
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5150581362779176825}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 1
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 1, y: 1, z: 1}
+  m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &7653742261704777726
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5150581362779176825}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4224a4b0d92d40809aeac27fcd32f83a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GameLogic.Traps.TrapSensor
+  trap: {fileID: 829516105201898120}
 --- !u!1 &7573716507071989479
 GameObject:
   m_ObjectHideFlags: 0
@@ -32,6 +108,7 @@ Transform:
   m_Children:
   - {fileID: 6581997053148483257}
   - {fileID: 5472302482894276686}
+  - {fileID: 4378330369542778603}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &829516105201898120
@@ -107,29 +184,8 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents:
-    - targetCorrespondingSourceObject: {fileID: 6615250786108363984, guid: 6298c10f1290f51419efbb570c7da4f6, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 568415839804018578}
+    m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 6298c10f1290f51419efbb570c7da4f6, type: 3}
---- !u!1 &5772528262851138563 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 6615250786108363984, guid: 6298c10f1290f51419efbb570c7da4f6, type: 3}
-  m_PrefabInstance: {fileID: 851800817143496915}
-  m_PrefabAsset: {fileID: 0}
---- !u!114 &568415839804018578
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5772528262851138563}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4224a4b0d92d40809aeac27fcd32f83a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::GameLogic.Traps.TrapSensor
-  trap: {fileID: 829516105201898120}
 --- !u!4 &6581997053148483257 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 5802262664930168426, guid: 6298c10f1290f51419efbb570c7da4f6, type: 3}
@@ -190,29 +246,8 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents:
-    - targetCorrespondingSourceObject: {fileID: 4133259209943829458, guid: b26a6d5e81b91764486c6b8fa72b8982, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 6489532195797662028}
+    m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: b26a6d5e81b91764486c6b8fa72b8982, type: 3}
---- !u!1 &1996719825040532142 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 4133259209943829458, guid: b26a6d5e81b91764486c6b8fa72b8982, type: 3}
-  m_PrefabInstance: {fileID: 2515699372756642172}
-  m_PrefabAsset: {fileID: 0}
---- !u!114 &6489532195797662028
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1996719825040532142}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4224a4b0d92d40809aeac27fcd32f83a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::GameLogic.Traps.TrapSensor
-  trap: {fileID: 829516105201898120}
 --- !u!4 &5472302482894276686 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 7572813070317379890, guid: b26a6d5e81b91764486c6b8fa72b8982, type: 3}
