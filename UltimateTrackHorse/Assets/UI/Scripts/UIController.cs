@@ -31,7 +31,11 @@ namespace UI
         /// Reference to the script that handles placing obstacles on the generated track.
         /// </summary>
         [Tooltip("Drag the GameManager GameObject here (it has the SpawnObstacle script)")]
-        public GameLogic.Obstacles.SpawnObstacle spawnObstacle;
+        public GameLogic.Traps.TrapSpawner spawnObstacle;
+
+        [Header("Menu 3D Background")]
+        [Tooltip("Drag the Virtual Camera looking at your custom Menu Diorama here")]
+        public GameObject menuCamera;
 
         private UIDocument document;
         private VisualElement root;
@@ -107,7 +111,13 @@ namespace UI
             // but preferring your manual Drag-and-Drop assignments in the Inspector to prevent any weird Unity bugs!
             if (mapGenerator == null) mapGenerator = FindObjectOfType<MapGeneration.MapGenerator>();
             if (gameManager == null) gameManager = FindObjectOfType<GameLogic.GameManager>();
-            if (spawnObstacle == null) spawnObstacle = FindObjectOfType<GameLogic.Obstacles.SpawnObstacle>();
+            if (spawnObstacle == null) spawnObstacle = FindObjectOfType<GameLogic.Traps.TrapSpawner>();
+            
+            if (menuCamera == null) 
+            {
+                var camObj = GameObject.Find("MenuCamera");
+                if (camObj != null) menuCamera = camObj;
+            }
 
             EnsureHUDComponents();
 
@@ -201,8 +211,9 @@ namespace UI
                 Time.timeScale = 1f;
             });
             root.Q<Button>("PauseSettingsButton")?.RegisterCallback<ClickEvent>(evt => ShowSettingsFrom(pauseView));
-            root.Q<Button>("BackToMainButton")?.RegisterCallback<ClickEvent>(evt => 
+            root.Q<Button>("BackToMainButton")?.RegisterCallback<ClickEvent>(evt =>
             {
+                mapGenerator.ResetSeed();
                 ReturnToMainMenu();
             });
 
@@ -214,6 +225,15 @@ namespace UI
 
             // Initialize default state.
             ReturnToMainMenu();
+            
+            // Kickstart the menu camera to instantly be active upon booting the game
+            if (menuCamera != null)
+            {
+                TriggerCameraCut();
+                menuCamera.SetActive(true);
+                var vcam = menuCamera.GetComponent<Cinemachine.CinemachineVirtualCameraBase>();
+                if (vcam != null) vcam.Priority = 100;
+            }
         }
 
         /// <summary>
@@ -280,12 +300,25 @@ namespace UI
             newView.RemoveFromClassList("hidden");
             currentView = newView;
 
-            // If entering the Pause View, instantly ping the MapGenerator for the active seed and display it!
+            // If entering the Pause View, instantly ping the MapGenerator for the active seed and display it.
             if (newView == pauseView && mapSeedLabel != null && mapGenerator != null)
             {
-                // To accurately rebuild the seed, DO NOT subtract the start/end tiles, use the literal GeneratedPath count!
-                int length = mapGenerator.GeneratedPath != null ? mapGenerator.GeneratedPath.Count : mapGenerator.targetTrackLength; 
-                mapSeedLabel.text = $"{length:00}{mapGenerator.LastUsedSeed}";
+                mapSeedLabel.text = mapGenerator.GetSeedDisplayValue();
+            }
+
+            bool shouldShowMenuCam = !(newView == gameView || newView == obstacleChoiceView || newView == pauseView);
+
+            if (menuCamera != null && menuCamera.activeSelf != shouldShowMenuCam)
+            {
+                TriggerCameraCut();
+                menuCamera.SetActive(shouldShowMenuCam);
+
+                // Force the menu camera to have extremely high priority so it always overpowers the game camera on boot!
+                var vcam = menuCamera.GetComponent<Cinemachine.CinemachineVirtualCameraBase>();
+                if (vcam != null)
+                {
+                    vcam.Priority = shouldShowMenuCam ? 100 : 0;
+                }
             }
 
             // Target the specific background wrapper element so we don't accidentally style the invisible UI Document root.
@@ -293,7 +326,7 @@ namespace UI
 
             if (targetContainer != null)
             {
-                if (newView == gameView || newView == obstacleChoiceView || newView == pauseView)
+                if (!shouldShowMenuCam)
                 {
                     // Map becomes visible underneath the UI overlay
                     targetContainer.style.unityBackgroundImageTintColor = new StyleColor(Color.clear);
@@ -303,6 +336,35 @@ namespace UI
                     // Restore to full white opacity (fully visible menu background)
                     targetContainer.style.unityBackgroundImageTintColor = new StyleColor(Color.white);
                 }
+            }
+        }
+
+        /// <summary>
+        /// Hacks into the global camera brain to instantly execute a teleporting cut, 
+        /// preventing the camera from sweeping 5000 units across the map between menus.
+        /// </summary>
+        private void TriggerCameraCut()
+        {
+            if (Camera.main != null)
+            {
+                Cinemachine.CinemachineBrain brain = Camera.main.GetComponent<Cinemachine.CinemachineBrain>();
+                if (brain != null)
+                {
+                    Cinemachine.CinemachineBlendDefinition oldDef = brain.m_DefaultBlend;
+                    brain.m_DefaultBlend = new Cinemachine.CinemachineBlendDefinition(Cinemachine.CinemachineBlendDefinition.Style.Cut, 0f);
+                    StartCoroutine(RestoreCinemachineBlend(brain, oldDef));
+                }
+            }
+        }
+
+        private IEnumerator RestoreCinemachineBlend(Cinemachine.CinemachineBrain brain, Cinemachine.CinemachineBlendDefinition oldDef)
+        {
+            // Wait strictly two frames so the Cut is consumed by Cinemachine's LateUpdate cycle completely
+            yield return null;
+            yield return null; 
+            if (brain != null)
+            {
+                brain.m_DefaultBlend = oldDef;
             }
         }
 
@@ -381,9 +443,32 @@ namespace UI
 
             // First, find the absolute fastest time (lowest number)
             float bestTime = float.MaxValue;
-            foreach (float t in lapTimes)
+            int bestLapIndex = -1;
+            for (int i = 0; i < lapTimes.Count; i++)
             {
-                if (t < bestTime) bestTime = t;
+                if (lapTimes[i] < bestTime)
+                {
+                    bestTime = lapTimes[i];
+                    bestLapIndex = i;
+                }
+            }
+
+            // Always display the best lap at the top
+            if (bestLapIndex != -1)
+            {
+                float bSeconds = Mathf.FloorToInt(bestTime);
+                float bMilliseconds = Mathf.FloorToInt((bestTime - bSeconds) * 100);
+                string bFormatted = string.Format("{0:00}:{1:00}", bSeconds, bMilliseconds);
+
+                Label bestLabel = new Label($"Best (Lap {bestLapIndex + 1}): {bFormatted}");
+                bestLabel.AddToClassList("history-label");
+                bestLabel.AddToClassList("best-time-label");
+                lapListContainer.Add(bestLabel);
+
+                // Add a divider below the best lap
+                VisualElement divider = new VisualElement();
+                divider.AddToClassList("history-divider");
+                lapListContainer.Add(divider);
             }
 
             // Figure out the window of the last 5 laps 
@@ -402,12 +487,6 @@ namespace UI
                 // Build a literal label via code
                 Label rowLabel = new Label($"Lap {i + 1}: {formattedTime}");
                 rowLabel.AddToClassList("history-label");
-
-                // Highlight the absolute best time recorded on this track
-                if (Mathf.Approximately(timeInSecs, bestTime))
-                {
-                    rowLabel.AddToClassList("best-time-label");
-                }
 
                 // Append the label dynamically into the visual layout
                 lapListContainer.Add(rowLabel);
@@ -478,7 +557,7 @@ namespace UI
         {
             if (spawnObstacle != null)
             {
-                spawnObstacle.SpawnNewObstacles(obstacleCount);
+                spawnObstacle.SpawnNewTraps(obstacleCount);
             }
             else
             {
