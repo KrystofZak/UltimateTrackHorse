@@ -527,14 +527,34 @@ namespace MapGeneration
             }
 
             // Draw the path - WFC-generated tiles
-            foreach (Vector2Int pos in path)
+            for (int i = 0; i < path.Count; i++)
             {
+                Vector2Int pos = path[i];
                 Cell cell = grid[pos.x, pos.y];
+        
                 if (cell.CollapsedVariant != null)
                 {
                     Vector3 worldPos = new Vector3(pos.x * tileSize, 0, pos.y * tileSize);
                     Quaternion rot = Quaternion.Euler(0, cell.CollapsedVariant.Rotation * 90f, 0);
-                    Instantiate(cell.CollapsedVariant.Data.prefab, worldPos, rot, transform);
+            
+                    // Save the prefab name for later use
+                    GameObject spawnedTile = Instantiate(cell.CollapsedVariant.Data.prefab, worldPos, rot, transform);
+
+                    // Logic for Checkpoint branchement
+                    if (i > 0 && i % 5 == 0 && i < path.Count - 1)
+                    {
+                        // Correctly orient the checkpoint's respawn point to face the next tile in the path
+                        Checkpoint cp = spawnedTile.GetComponentInChildren<Checkpoint>();
+                        if (cp != null)
+                        {
+                            // Calculate the direction from the current tile to the next tile in the path
+                            Vector2Int gridDir = path[i + 1] - path[i];
+                            Vector3 worldDir = new Vector3(gridDir.x, 0, gridDir.y);
+                    
+                            // Save the direction in the checkpoint component
+                            cp.correctRotation = Quaternion.LookRotation(worldDir);
+                        }
+                    }
                 }
             }
 
