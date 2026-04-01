@@ -49,6 +49,15 @@ namespace MapGeneration
         public List<Vector2Int> GeneratedPath { get; private set; }
 
         /// <summary>
+        /// Returns the user-facing seed format: 2 digits of logical track length + generation seed.
+        /// Logical track length excludes start/finish tiles.
+        /// </summary>
+        public string GetSeedDisplayValue()
+        {
+            return $"{targetTrackLength:00}{LastUsedSeed}";
+        }
+
+        /// <summary>
         /// Initializes the map generator and generates a valid map with start and finish cells
         /// </summary>
         private void Start()
