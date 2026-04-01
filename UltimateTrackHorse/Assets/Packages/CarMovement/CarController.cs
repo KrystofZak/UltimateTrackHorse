@@ -36,6 +36,7 @@ public class CarController : MonoBehaviour
     [SerializeField] private GameObject[] tires = new GameObject[4];
     [SerializeField] private TrailRenderer[] skidMarks = new TrailRenderer[2];
     [SerializeField] private ParticleSystem[] skidSmokes = new ParticleSystem[2];
+    [SerializeField] private AudioSource engineSound,skidSound;
 
     [Header("Suspension Settings")]
     [SerializeField] private float springStiffness;
@@ -60,6 +61,14 @@ public class CarController : MonoBehaviour
     [SerializeField] private float steerStrength = 15f;
     [SerializeField] private AnimationCurve steerCurve;
     [SerializeField] private float dragCoefficient = 1f;
+
+
+    [Header("Audio")]
+    [SerializeField]
+    [Range(0f, 1f)] private float minPitch = 1f;
+    [SerializeField]
+    [Range(1,5)] private float maxPitch = 5f;
+    private float pitchSmoothSpeed = 3f;
 
     [Header("Surface Settings")]
     [Tooltip("Override car behaviour per surface layer. Layers not listed here use default multipliers (1.0).")]
@@ -121,6 +130,7 @@ public class CarController : MonoBehaviour
         Movement();
         Visuals();
         Vfx();
+        Audio();
     }
 
     private void Update()
@@ -346,11 +356,13 @@ public class CarController : MonoBehaviour
         {
             ToggleSkidMarks(true);
             ToggleSkidSmokes(true);
+            ToggleSkidSound(true);
         }
         else
         {
             ToggleSkidMarks(false);
             ToggleSkidSmokes(false);
+            ToggleSkidSound(false);
         }
     }
 
@@ -410,6 +422,27 @@ public class CarController : MonoBehaviour
             return isTireFlat[closestTireIndex];
         }
         return false;
+    }
+
+    #endregion
+
+    #region Audio
+    private void Audio()
+    {
+        if (engineSound != null)
+        {
+           
+          
+            float currentRatio = Mathf.Abs(carVelocityRatio);
+
+            float targetPitch = Mathf.Lerp(minPitch, maxPitch, currentRatio);
+
+            engineSound.pitch = Mathf.Lerp(engineSound.pitch, targetPitch, Time.deltaTime * pitchSmoothSpeed);
+        }
+    }
+    private void ToggleSkidSound(bool toggle)
+    {
+        skidSound.mute = !toggle;
     }
 
     #endregion
@@ -481,6 +514,20 @@ public class CarController : MonoBehaviour
                 acidVapors[i].Clear();
             }
         }
+    }
+    public float GetMaxSpeedOnAsphalt()
+    {
+        
+        foreach (SurfaceSettings surface in surfaceSettings)
+        {
+            string sName = surface.name.ToLower();
+            if (sName.Contains("asfalt") || sName.Contains("asphalt"))
+            {
+                return maxSpeed * surface.maxSpeedMultiplier;
+            }
+        }
+
+        return maxSpeed;
     }
 
     #endregion
