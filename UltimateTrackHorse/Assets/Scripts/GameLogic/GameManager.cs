@@ -30,6 +30,9 @@ namespace GameLogic
         // Variables to hold the current respawn position and rotation, set by checkpoints
         private Vector3 currentRespawnPos;
         private Quaternion currentRespawnRot;
+        
+        // Track whether time has expired to prevent respawning
+        private bool hasTimeExpired = false;
 
         /// <summary>
         /// Subscribe to the finish line event when the game manager is enabled, and unsubscribe when disabled.
@@ -50,7 +53,7 @@ namespace GameLogic
 
         void Update()
         {
-            if (Input.GetKeyDown(KeyCode.R))
+            if (Input.GetKeyDown(KeyCode.R) && !hasTimeExpired)
             {
                 //RestartCurrentLap();
                 RespawnCar(true);
@@ -96,6 +99,7 @@ namespace GameLogic
         {
             // Fully wipe the history list and hide the panel when generating a brand new track
             currentMapLapTimes.Clear();
+            hasTimeExpired = false;
             if (uiController != null)
             {
                 uiController.HideLapHistory();
@@ -129,6 +133,7 @@ namespace GameLogic
         private void HandleTimeUp()
         {
             Debug.Log("game over, time is up");
+            hasTimeExpired = true;
             CarController carController = playerCar.GetComponent<CarController>();
             if (carController != null)
             {
@@ -154,6 +159,7 @@ namespace GameLogic
 
         public void OnChoiceClicked()
         {
+            hasTimeExpired = false;
             if (timer != null)
             {
                 timer.ResetTimer();
