@@ -548,7 +548,7 @@ namespace MapGeneration
                         if (cp != null)
                         {
                             // Calculate the direction from the current tile to the next tile in the path
-                            Vector2Int gridDir = path[i + 1] - path[i];
+                            Vector2Int gridDir = path[i + 1] - path[i - 1];
                             Vector3 worldDir = new Vector3(gridDir.x, 0, gridDir.y);
                     
                             // Save the direction in the checkpoint component
