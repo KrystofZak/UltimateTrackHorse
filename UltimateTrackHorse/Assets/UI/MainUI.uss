@@ -192,20 +192,25 @@
 .history-label {
     font-size: 18px;
     -unity-font-style: bold;
-    color: var(--color-text);
+    color: #FFFFFF;
     margin-bottom: 3px;
     text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.5);
 }
 
 /* Highlight style for the fastest run */
 .best-time-label {
-    color: #4CAF50; /* Fresh Green */
+    color: #32CD32; /* Brighter Lime Green */
     text-shadow: 1px 2px 3px rgba(0, 0, 0, 0.6);
 }
 
-/* ======================================================== */
-/* ?? REALISTIC DRIVING TACHOMETER (PURE CSS)               */
-/* ======================================================== */
+/* Divider beneath the best lap */
+.history-divider {
+    height: 1px;
+    background-color: rgba(255, 255, 255, 0.3);
+    margin-top: 4px;
+    margin-bottom: 4px;
+    width: 100%;
+}
 
 .tacho-wrapper {
     position: absolute;

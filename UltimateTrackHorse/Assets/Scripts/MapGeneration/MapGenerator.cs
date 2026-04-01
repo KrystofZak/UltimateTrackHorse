@@ -31,15 +31,16 @@ namespace MapGeneration
         [Header("Scenery Tiles")]
         public List<TileData> sceneryTiles; // List of all scenery tiles
         
-        // Start and finish tiles
-        [Header("Special Tiles")]
-        public TileData startTileData;
-        public TileData finishTileData;
+        [Header("Special Tiles")] 
+        public TileData startTileData; // Start tile data
+        public TileData finishTileData; // Finish tile dat
+        public List<TileData> checkpointTiles; // List of checkpoint tile data
 
         private Cell[,] grid; // 2D array representing the map
         private List<TileVariant> standardVariants; // List of all possible tile variants
         private List<TileVariant> startVariants; // List of possible start tile variants
         private List<TileVariant> finishVariants; // List of possible finish tile variants
+        private List<TileVariant> checkpointVariants; // List of possible checkpoint tile variants
         private bool useManualSeed;
         private int manualSeed;
 
@@ -48,11 +49,20 @@ namespace MapGeneration
         public List<Vector2Int> GeneratedPath { get; private set; }
 
         /// <summary>
+        /// Returns the user-facing seed format: 2 digits of logical track length + generation seed.
+        /// Logical track length excludes start/finish tiles.
+        /// </summary>
+        public string GetSeedDisplayValue()
+        {
+            return $"{targetTrackLength:00}{LastUsedSeed}";
+        }
+
+        /// <summary>
         /// Initializes the map generator and generates a valid map with start and finish cells
         /// </summary>
         private void Start()
         {
-            targetTrackLength += 2; // Account for start and finish tiles
+            // Not needed now
         }
 
         #region UI Toolkit Integration for Track Length
@@ -88,7 +98,7 @@ namespace MapGeneration
             if (int.TryParse(lengthString, out int parsedLength))
             {
                 // Optionally clamp the value to prevent too small or too large maps
-                targetTrackLength = Mathf.Clamp(parsedLength, 3, 100); 
+                targetTrackLength = Mathf.Clamp(parsedLength, 1, 99); 
             }
             else
             {
@@ -137,7 +147,7 @@ namespace MapGeneration
             string trimmedSeed = seed.Trim();
             if (trimmedSeed.Length > 2 && int.TryParse(trimmedSeed.Substring(0, 2), out int length) && int.TryParse(trimmedSeed.Substring(2), out int parsedSeed))
             {
-                targetTrackLength = Mathf.Clamp(length, 3, 99); 
+                targetTrackLength = Mathf.Clamp(length, 1, 99); 
                 manualSeed = parsedSeed;
                 useManualSeed = true;
                 
@@ -257,6 +267,7 @@ namespace MapGeneration
             standardVariants = new List<TileVariant>();
             startVariants = new List<TileVariant>();
             finishVariants = new List<TileVariant>();
+            checkpointVariants = new List<TileVariant>();
 
             // Split each tile into its 4 possible rotations and categorize them
             foreach (var tile in allAvailableTiles)
@@ -264,7 +275,8 @@ namespace MapGeneration
                 for (int r = 0; r < 4; r++)
                 {
                     TileVariant variant = new TileVariant(tile, r);
-
+                    
+                    // Choose variant based on tile type
                     if (tile == startTileData)
                     {
                         startVariants.Add(variant);
@@ -272,6 +284,10 @@ namespace MapGeneration
                     else if (tile == finishTileData)
                     {
                         finishVariants.Add(variant);
+                    }
+                    else if (checkpointTiles != null && checkpointTiles.Contains(tile)) 
+                    { 
+                        checkpointVariants.Add(variant);
                     }
                     else
                     {
@@ -433,9 +449,19 @@ namespace MapGeneration
                 List<TileVariant> validForPath = new List<TileVariant>();
 
                 // Choose the source variants based on whether it's the start, finish, or a middle cell
-                List<TileVariant> sourceVariants = standardVariants;
-                if (i == 0) sourceVariants = startVariants;
-                else if (i == path.Count - 1) sourceVariants = finishVariants;
+                List<TileVariant> sourceVariants = standardVariants; 
+                if (i == 0) 
+                { 
+                    sourceVariants = startVariants;
+                } 
+                else if (i == path.Count - 1) 
+                { 
+                    sourceVariants = finishVariants;
+                } 
+                else if (i % 5 == 0 && targetTrackLength > 5) // Every 5th tile is a checkpoint tile.
+                { 
+                    sourceVariants = checkpointVariants;
+                }
 
                 // Choose only the variants with road sockets
                 foreach (var variant in sourceVariants)
@@ -510,14 +536,34 @@ namespace MapGeneration
             }
 
             // Draw the path - WFC-generated tiles
-            foreach (Vector2Int pos in path)
+            for (int i = 0; i < path.Count; i++)
             {
+                Vector2Int pos = path[i];
                 Cell cell = grid[pos.x, pos.y];
+        
                 if (cell.CollapsedVariant != null)
                 {
                     Vector3 worldPos = new Vector3(pos.x * tileSize, 0, pos.y * tileSize);
                     Quaternion rot = Quaternion.Euler(0, cell.CollapsedVariant.Rotation * 90f, 0);
-                    Instantiate(cell.CollapsedVariant.Data.prefab, worldPos, rot, transform);
+            
+                    // Save the prefab name for later use
+                    GameObject spawnedTile = Instantiate(cell.CollapsedVariant.Data.prefab, worldPos, rot, transform);
+
+                    // Logic for Checkpoint branchement
+                    if (i > 0 && i % 5 == 0 && i < path.Count - 1)
+                    {
+                        // Correctly orient the checkpoint's respawn point to face the next tile in the path
+                        Checkpoint cp = spawnedTile.GetComponentInChildren<Checkpoint>();
+                        if (cp != null)
+                        {
+                            // Calculate the direction from the current tile to the next tile in the path
+                            Vector2Int gridDir = path[i + 1] - path[i - 1];
+                            Vector3 worldDir = new Vector3(gridDir.x, 0, gridDir.y);
+                    
+                            // Save the direction in the checkpoint component
+                            cp.correctRotation = Quaternion.LookRotation(worldDir);
+                        }
+                    }
                 }
             }
 
@@ -717,7 +763,7 @@ namespace MapGeneration
             ObstacleManager.Instance.ClearAllObstacles();
             InitializeGrid(); 
             
-            GeneratedPath = GenerateRandomPath(new Vector2Int(1, 1), targetTrackLength);
+            GeneratedPath = GenerateRandomPath(new Vector2Int(1, 1), targetTrackLength + 2); // Add 2 for start and finish
 
             if (GeneratedPath != null)
             {
