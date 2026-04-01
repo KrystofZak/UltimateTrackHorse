@@ -5,6 +5,7 @@ using Cinemachine;
 using GameLogic.Obstacles;
 using MapGeneration;
 using UI;
+using GameLogic.Traps;
 
 namespace GameLogic
 {
@@ -22,8 +23,8 @@ namespace GameLogic
         // List to hold the history of lap completion times for the current track session
         private List<float> currentMapLapTimes = new List<float>();
 
-        [SerializeField] private SpawnObstacle spawnObstacle;
-        
+        [SerializeField] private TrapSpawner trapSpawner; 
+
         // Replaced old UIManager with the new UIController
         private UIController uiController;
 
