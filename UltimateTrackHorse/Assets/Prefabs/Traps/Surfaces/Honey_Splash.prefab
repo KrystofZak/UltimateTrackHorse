@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 4709667758700506383}
   - component: {fileID: 7401928316894370245}
   - component: {fileID: 2636733388196589245}
+  - component: {fileID: 382366050686445924}
   m_Layer: 6
   m_Name: Honey_Splash
   m_TagString: Untagged
@@ -112,3 +113,17 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 0.01921779, y: 0.00096679997, z: 0.01923057}
   m_Center: {x: 0.000011154916, y: 0.000002159999, z: 0.000057194848}
+--- !u!114 &382366050686445924
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9059011431584462864}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 91729265beaf413d8c42cb291e180385, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GameLogic.Traps.TrapRuntime
+  definition: {fileID: 0}
+  playerTag: Player

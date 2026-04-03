@@ -2,7 +2,6 @@ using System.Collections.Generic;
 using System.Collections; // Added for Coroutines
 using UnityEngine;
 using Cinemachine;
-using GameLogic.Obstacles;
 using MapGeneration;
 using UI;
 using GameLogic.Traps;

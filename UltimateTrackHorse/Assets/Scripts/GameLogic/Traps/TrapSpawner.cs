@@ -146,7 +146,7 @@ namespace GameLogic.Traps
             var rotation = source.transform.rotation * prefab.transform.rotation;
             var position = source.transform.position + prefab.transform.position;
 
-            GameObject spawned = Instantiate(prefab, position, rotation, parent);
+            var spawned = Instantiate(prefab, position, rotation, parent);
 
             if (keepScale)
             {
@@ -159,7 +159,9 @@ namespace GameLogic.Traps
             {
                 trap.Initialize(services);
             }
-
+            
+            ObstacleManager.Instance.RegisterObstacle(prefab, spawned.transform.position, spawned.transform.rotation, spawned.transform.localScale, parent, spawned);
+            
             Destroy(source);
             return true;
         }

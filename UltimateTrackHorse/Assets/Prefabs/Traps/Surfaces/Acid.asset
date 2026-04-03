@@ -10,11 +10,10 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: eaa3982a7290443dbdcfb2434ea3a062, type: 3}
-  m_Name: Friendly Barrels
+  m_Name: Acid
   m_EditorClassIdentifier: Assembly-CSharp::GameLogic.Traps.TrapDefinition
   category: 0
-  activationMode: 1
-  repeatCooldown: 1
+  activationMode: 0
+  repeatCooldown: 0
   effects:
-  - {fileID: 11400000, guid: 0b51d9aef5ddadc4d8390e6a9915a353, type: 2}
-  - {fileID: 11400000, guid: cdc1017641fbeeb468f71a2cdfc5dee0, type: 2}
+  - {fileID: 11400000, guid: 0dc2ab45a14346f4db68241227c2f7f0, type: 2}
