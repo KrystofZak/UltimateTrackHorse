@@ -306,6 +306,20 @@ public class CarController : MonoBehaviour
         float finalSteerInput = Mathf.Clamp(steerInput + flatTireSteerBias, -1.5f, 1.5f);
 
         carRB.AddTorque(currentSteerStrength * finalSteerInput * steerCurve.Evaluate(speedRatioAbs) * direction * transform.up, ForceMode.Acceleration);
+        if (Mathf.Abs(steerInput) < 0.1f)
+        {
+            // Pokud je rychlost do boku MENŠÍ nebo rovna hranici pro smyk (kouø se NEtváøí)
+            if (Mathf.Abs(currentCarLocalVelocity.x) <= minSkidVelocity)
+            {
+                // Zjistíme aktuální rychlost rotace
+                float currentAngularSpin = transform.InverseTransformDirection(carRB.angularVelocity).y;
+
+                // Aplikujeme protisílu pro zastavení otáèení
+                float counterTorque = -currentAngularSpin * 15f;
+                carRB.AddTorque(transform.up * counterTorque, ForceMode.Acceleration);
+            }
+        }
+
     }
 
     private void SidewaysDrag()
