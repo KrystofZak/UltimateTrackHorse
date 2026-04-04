@@ -69,6 +69,10 @@ public class CarController : MonoBehaviour
     [SerializeField]
     [Range(1,5)] private float maxPitch = 5f;
     private float pitchSmoothSpeed = 3f;
+    [SerializeField] private float minSkidPitch = 0.5f;
+    [SerializeField] private float maxSkidPitch = 1.5f;
+    [SerializeField] private float skidIntensityRange = 15f;
+    [SerializeField] private float skidSmoothSpeed = 10f;
 
     [Header("Surface Settings")]
     [Tooltip("Override car behaviour per surface layer. Layers not listed here use default multipliers (1.0).")]
@@ -365,18 +369,13 @@ public class CarController : MonoBehaviour
 
     private void Vfx()
     {
-        if (isGrounded && Mathf.Abs(currentCarLocalVelocity.x) > minSkidVelocity)
-        {
-            ToggleSkidMarks(true);
-            ToggleSkidSmokes(true);
-            ToggleSkidSound(true);
-        }
-        else
-        {
-            ToggleSkidMarks(false);
-            ToggleSkidSmokes(false);
-            ToggleSkidSound(false);
-        }
+        float sidewaysSpeed = Mathf.Abs(currentCarLocalVelocity.x);
+        bool isSkidding = isGrounded && sidewaysSpeed > minSkidVelocity;
+
+        ToggleSkidMarks(isSkidding);
+        ToggleSkidSmokes(isSkidding);
+
+        UpdateSkidSound(isSkidding, sidewaysSpeed);
     }
 
     private void ToggleSkidMarks(bool toggle)
@@ -453,11 +452,37 @@ public class CarController : MonoBehaviour
             engineSound.pitch = Mathf.Lerp(engineSound.pitch, targetPitch, Time.deltaTime * pitchSmoothSpeed);
         }
     }
-    private void ToggleSkidSound(bool toggle)
+    private void UpdateSkidSound(bool isSkidding, float sidewaysSpeed)
     {
-        skidSound.mute = !toggle;
-    }
+        if (skidSound == null) return;
 
+        if (isSkidding)
+        {
+            if (skidSound.mute) skidSound.mute = false;
+            if (!skidSound.isPlaying) skidSound.Play();
+
+            // Výpoèet intenzity od 0 do 1 podle tvého nastavení v Inspectoru
+            float maxSkidIntensitySpeed = minSkidVelocity + skidIntensityRange;
+            float skidIntensity = Mathf.InverseLerp(minSkidVelocity, maxSkidIntensitySpeed, sidewaysSpeed);
+
+            // Hlasitost
+            skidSound.volume = Mathf.Lerp(skidSound.volume, skidIntensity, Time.deltaTime * skidSmoothSpeed);
+
+            // Pitch - TADY se to teï bude mìnit víc, protože minSkidPitch a maxSkidPitch nastavíš v Unity!
+            float targetSkidPitch = Mathf.Lerp(minSkidPitch, maxSkidPitch, skidIntensity);
+            skidSound.pitch = Mathf.Lerp(skidSound.pitch, targetSkidPitch, Time.deltaTime * skidSmoothSpeed);
+        }
+        else
+        {
+            // Smyk skonèil - plynulé ztlumení o nìco rychleji než nábìh (skidSmoothSpeed * 1.5f)
+            skidSound.volume = Mathf.Lerp(skidSound.volume, 0f, Time.deltaTime * (skidSmoothSpeed * 1.5f));
+
+            if (skidSound.volume < 0.05f && !skidSound.mute)
+            {
+                skidSound.mute = true;
+            }
+        }
+    }
     #endregion
 
     #region Car Status Check
