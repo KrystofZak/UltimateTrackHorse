@@ -107,29 +107,8 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents:
-    - targetCorrespondingSourceObject: {fileID: 6615250786108363984, guid: 6298c10f1290f51419efbb570c7da4f6, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 568415839804018578}
+    m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 6298c10f1290f51419efbb570c7da4f6, type: 3}
---- !u!1 &5772528262851138563 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 6615250786108363984, guid: 6298c10f1290f51419efbb570c7da4f6, type: 3}
-  m_PrefabInstance: {fileID: 851800817143496915}
-  m_PrefabAsset: {fileID: 0}
---- !u!114 &568415839804018578
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5772528262851138563}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4224a4b0d92d40809aeac27fcd32f83a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::GameLogic.Traps.TrapSensor
-  trap: {fileID: 829516105201898120}
 --- !u!4 &6581997053148483257 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 5802262664930168426, guid: 6298c10f1290f51419efbb570c7da4f6, type: 3}
@@ -190,29 +169,8 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents:
-    - targetCorrespondingSourceObject: {fileID: 4133259209943829458, guid: b26a6d5e81b91764486c6b8fa72b8982, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 6489532195797662028}
+    m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: b26a6d5e81b91764486c6b8fa72b8982, type: 3}
---- !u!1 &1996719825040532142 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 4133259209943829458, guid: b26a6d5e81b91764486c6b8fa72b8982, type: 3}
-  m_PrefabInstance: {fileID: 2515699372756642172}
-  m_PrefabAsset: {fileID: 0}
---- !u!114 &6489532195797662028
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1996719825040532142}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4224a4b0d92d40809aeac27fcd32f83a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::GameLogic.Traps.TrapSensor
-  trap: {fileID: 829516105201898120}
 --- !u!4 &5472302482894276686 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 7572813070317379890, guid: b26a6d5e81b91764486c6b8fa72b8982, type: 3}

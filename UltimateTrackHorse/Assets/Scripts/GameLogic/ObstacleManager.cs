@@ -1,4 +1,3 @@
-using GameLogic.Obstacles;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -87,22 +86,14 @@ namespace GameLogic
             }
             _activeObstacles.Clear();
 
+            // Find the ScreenTintController once OUTSIDE the loop for much better performance
+            var gmObject = GameObject.Find("GameManager");
+
             foreach (var state in _initialObstacleStates)
             {
                 var spawned = Instantiate(state.Prefab, state.Position, state.Rotation, state.Parent);
                 spawned.transform.localScale = state.Scale;
                 _activeObstacles.Add(spawned);
-
-                //TODO: you assholes!!!you need to redo this shit!!
-                var screenTintController = GameObject.Find("GameManager").GetComponent<ScreenTintController>();
-
-                if (!screenTintController) return;
-
-                foreach (var injectable in spawned.GetComponentsInChildren<IScreenTintInjectable>(true))
-                {
-                    injectable.InjectScreenTint(screenTintController);
-                }
-                //-----------------
             }
         }
     }
