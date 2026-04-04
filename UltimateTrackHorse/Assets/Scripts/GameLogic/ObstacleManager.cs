@@ -5,25 +5,6 @@ namespace GameLogic
 {
     public class ObstacleManager : MonoBehaviour
     {
-        private static ObstacleManager _instance;
-
-        public static ObstacleManager Instance
-        {
-            get
-            {
-                if (_instance == null)
-                {
-                    _instance = FindObjectOfType<ObstacleManager>();
-                    if (_instance == null)
-                    {
-                        GameObject go = new GameObject("ObstacleManager");
-                        _instance = go.AddComponent<ObstacleManager>();
-                    }
-                }
-                return _instance;
-            }
-        }
-
         private class ObstacleState
         {
             public GameObject Prefab;
@@ -36,15 +17,13 @@ namespace GameLogic
         private readonly List<ObstacleState> _initialObstacleStates = new List<ObstacleState>();
         private readonly List<GameObject> _activeObstacles = new List<GameObject>();
 
-        private void Awake()
+        public int ActiveObstacleCount
         {
-            if (_instance != null && _instance != this)
+            get
             {
-                Destroy(gameObject);
-            }
-            else
-            {
-                _instance = this;
+                // Clean up list from any null references that might occur if an obstacle is destroyed by other means.
+                _activeObstacles.RemoveAll(item => item == null);
+                return _activeObstacles.Count;
             }
         }
 
