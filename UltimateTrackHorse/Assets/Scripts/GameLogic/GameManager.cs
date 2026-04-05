@@ -5,6 +5,7 @@ using Cinemachine;
 using MapGeneration;
 using UI;
 using GameLogic.Traps;
+using UnityEngine.Rendering.UI;
 
 namespace GameLogic
 {
@@ -14,7 +15,15 @@ namespace GameLogic
     public class GameManager : MonoBehaviour
     {
         public GameObject playerCar;
-        public MapGenerator mapGenerator;
+        [Header("Component References")]
+        [SerializeField] private TrapSpawner trapSpawner;
+        [SerializeField] private GameStateManager gameStateManager;
+        [SerializeField] private ObstacleManager obstacleManager;
+        [SerializeField] private MapGenerator mapGenerator;
+
+        // Replaced old UIManager with the new UIController
+        private UIController uiController;
+
         private int lapCount;
         private float totalTimeComplexity;
         private Timer timer;
@@ -22,17 +31,13 @@ namespace GameLogic
         // List to hold the history of lap completion times for the current track session
         private List<float> currentMapLapTimes = new List<float>();
 
-        [SerializeField] private TrapSpawner trapSpawner; 
-
-        // Replaced old UIManager with the new UIController
-        private UIController uiController;
-
         // Variables to hold the current respawn position and rotation, set by checkpoints
         private Vector3 currentRespawnPos;
         private Quaternion currentRespawnRot;
         
         // Track whether time has expired to prevent respawning
         private bool hasTimeExpired = false;
+        public bool isGameActive = false;
 
         /// <summary>
         /// Subscribe to the finish line event when the game manager is enabled, and unsubscribe when disabled.
@@ -72,13 +77,18 @@ namespace GameLogic
                     carController.isInputEnabled = false;
                 }
             }
+
+            if (isGameActive)
+            {
+                CheckForLoss();
+            }
         }
 
         public void RestartCurrentLap()
         {
             Debug.Log("Restarting lap...");
             PlaceCarOnStart();
-            ObstacleManager.Instance.ResetObstacles();
+            obstacleManager.ResetObstacles();
 
             if (timer != null)
             {
@@ -104,6 +114,10 @@ namespace GameLogic
             {
                 uiController.HideLapHistory();
             }
+            
+            lapCount = 0; // Reset lap count
+
+            StartCoroutine(InitializeGameStateDelayed());
 
             CalculateTotalTimeComplexity();
             
@@ -111,11 +125,11 @@ namespace GameLogic
 
             if (timer != null)
             {
-                // When we generate an entirely brand new track, we must clear the old 
-                // bonus/penalty stack completely before starting.
                 timer.ResetIncrement();
+                timer.SetStartTime(totalTimeComplexity, false); 
                 
-                timer.SetStartTime(totalTimeComplexity, false); // Don't tick down yet!
+                // FIX 2: Vždy se nejprve odhlásíme, abychom zabránili hromadění eventů
+                timer.OnTimeUp -= HandleTimeUp;
                 timer.OnTimeUp += HandleTimeUp;
             }
             else
@@ -123,21 +137,41 @@ namespace GameLogic
                 Debug.LogWarning("GameManager: Timer not found in the scene! Ensure a Timer component exists.");
             }
 
-            // A fallback to ensure UI sets to unpaused correctly
             Time.timeScale = 1f;
+            isGameActive = true;
 
-            // Commence the 3.. 2.. 1.. Sequence
             StartCoroutine(RaceCountdownCoroutine());
+        }
+
+        
+        private IEnumerator InitializeGameStateDelayed()
+        {
+            // Wait for one frame to ensure the game state manager is fully initialized and the new map is generated before counting placeholders
+            yield return new WaitForEndOfFrame();
+            
+            if (gameStateManager != null)
+            {
+                gameStateManager.InitializePlaceholderCount();
+            }
         }
 
         private void HandleTimeUp()
         {
-            Debug.Log("game over, time is up");
             hasTimeExpired = true;
+            Debug.Log("Time is up! Disabling car controls.");
+
             CarController carController = playerCar.GetComponent<CarController>();
             if (carController != null)
             {
                 carController.isInputEnabled = false;
+            }
+        }
+
+        private void CheckForLoss()
+        {
+            if (gameStateManager != null && gameStateManager.IsLost(hasTimeExpired))
+            {
+                HandleLoss();
             }
         }
 
@@ -160,6 +194,8 @@ namespace GameLogic
         public void OnChoiceClicked()
         {
             hasTimeExpired = false;
+            isGameActive = true;
+            
             if (timer != null)
             {
                 timer.ResetTimer();
@@ -214,6 +250,23 @@ namespace GameLogic
         /// </summary>
         private void ResetToStart()
         {
+            if (!isGameActive) return;
+
+            // If the player crosses the finish line after time has expired,
+            // it's a valid lap completion, not a loss.
+            if (hasTimeExpired)
+            {
+                Debug.Log("Crossed finish line after time was up. Lap counts!");
+                // The hasTimeExpired flag will be reset in OnChoiceClicked or SetupNewTrack.
+                hasTimeExpired = false; // Reset the flag
+            }
+
+            if (gameStateManager != null && obstacleManager != null && gameStateManager.AreAllObstaclesPlaced(obstacleManager.ActiveObstacleCount))
+            {
+                HandleVictory();
+                return;
+            }
+
             if (uiController != null)
             {
                 uiController.ShowObstacleChoiceView();
@@ -234,10 +287,57 @@ namespace GameLogic
             }
 
             lapCount++;
-
             Debug.Log("Completed laps: " + lapCount);
             PlaceCarOnStart();
-            ObstacleManager.Instance.ResetObstacles();
+            obstacleManager.ResetObstacles();
+        }
+
+        private void HandleVictory()
+        {
+            if (!isGameActive) return;
+            isGameActive = false;
+
+            Debug.Log("Victory! All obstacles placed and lap finished!");
+            if (uiController != null)
+            {
+                // TODO: Žegy - Show some victory screen with smting like lap history,
+                // TODO: total time, and a "Next Track" button that generates a new track or idk
+            }
+            
+            if (timer != null)
+            {
+                timer.StopTimer();
+            }
+
+            CarController carController = playerCar.GetComponent<CarController>();
+            if (carController != null)
+            {
+                carController.isInputEnabled = false;
+            }
+        }
+
+        private void HandleLoss()
+        {
+            if (!isGameActive) return;
+            isGameActive = false;
+
+            Debug.Log("Loss! The car has stopped after time ran out.");
+            if (uiController != null)
+            {
+                //
+            }
+
+            CarController carController = playerCar.GetComponent<CarController>();
+            if (carController != null)
+            {
+                carController.isInputEnabled = false;
+            }
+            
+            // To be absolutely sure, stop the timer again.
+            if (timer != null)
+            {
+                timer.StopTimer();
+            }
         }
 
         /// <summary>
