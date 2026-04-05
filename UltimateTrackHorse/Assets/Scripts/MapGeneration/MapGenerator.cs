@@ -23,6 +23,9 @@ namespace MapGeneration
         
         [Header("Logic References")]
         public GameManager gameManager; // Reference to the GameManager script
+        
+        [Header("Obstacle Management")] 
+        public ObstacleManager obstacleManager;
 
         [Header("WFC Data")] 
         public List<TileData> allAvailableTiles; // List of all available tiles
@@ -760,7 +763,7 @@ namespace MapGeneration
             }
 
             ClearScene();
-            ObstacleManager.Instance.ClearAllObstacles();
+            obstacleManager.ClearAllObstacles();
             InitializeGrid(); 
             
             GeneratedPath = GenerateRandomPath(new Vector2Int(1, 1), targetTrackLength + 2); // Add 2 for start and finish
