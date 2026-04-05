@@ -55,6 +55,10 @@ namespace MapGeneration
         public void SetTrackLengthTen() { targetTrackLength = 10; }
         public void SetTrackLengthFifteen() { targetTrackLength = 15; }
 
+        /// <summary>
+        /// Sets the track length to a custom value entered by the user.
+        /// </summary>
+        /// <param name="lengthString">The string input from the UI, expected to be an integer between 1 and 99.</param>
         public void SetCustomTrackLengthFromString(string lengthString)
         {
             if (int.TryParse(lengthString, out int parsedLength))
@@ -68,6 +72,9 @@ namespace MapGeneration
         }
         #endregion
 
+        /// <summary>
+        /// Generates a new map with the current settings.
+        /// </summary>
         public void OnPlayClicked()
         {
             if (gameManager == null) gameManager = FindObjectOfType<GameManager>();
@@ -84,6 +91,10 @@ namespace MapGeneration
             }
         }
 
+        /// <summary>
+        /// Sets the seed for the map generation.
+        /// </summary>
+        /// <param name="seed">The seed string</param>
         public void SetSeed(string seed)
         {
             if (string.IsNullOrWhiteSpace(seed))
@@ -93,6 +104,7 @@ namespace MapGeneration
                 return;
             }
 
+            // Parse the seed string to extract the track length and seed value
             string trimmedSeed = seed.Trim();
             if (trimmedSeed.Length > 2 && int.TryParse(trimmedSeed.Substring(0, 2), out int length) && int.TryParse(trimmedSeed.Substring(2), out int parsedSeed))
             {
@@ -110,6 +122,9 @@ namespace MapGeneration
             }
         }
 
+        /// <summary>
+        /// Resets the seed and map settings to their default values.
+        /// </summary>
         public void ResetSeed()
         {
             useManualSeed = false;
@@ -119,6 +134,11 @@ namespace MapGeneration
             Debug.Log("Seed and map settings have been reset.");
         }
 
+        /// <summary>
+        /// Generates a new map with the current settings.
+        /// If a manual seed is set, it will use that seed; otherwise,
+        /// it will generate a random seed and adjust the map size based on the target track length.
+        /// </summary>
         private void GenerateMapWithCurrentSeed()
         {
             if (useManualSeed)
@@ -133,6 +153,11 @@ namespace MapGeneration
             }
         }
 
+        /// <summary>
+        /// Generates a new map with the specified seed.
+        /// </summary>
+        /// <param name="seed"></param>
+        /// <returns></returns>
         public bool GenerateMapFromSeed(int seed)
         {
             LastUsedSeed = seed;
@@ -151,10 +176,15 @@ namespace MapGeneration
             }
         }
 
+        /// <summary>
+        /// Generates a unique signature based on the current map state.
+        /// </summary>
+        /// <returns>A string representing the unique signature of the generated map.</returns>
         private string BuildGenerationSignature()
         {
             StringBuilder sb = new StringBuilder();
 
+            // Add the map width and height to the signature
             for (int x = 0; x < mapWidth; x++)
             {
                 for (int y = 0; y < mapHeight; y++)
@@ -167,6 +197,7 @@ namespace MapGeneration
                 }
             }
 
+            // Add the track length to the signature
             List<string> placements = new List<string>();
             foreach (Transform child in transform)
             {
@@ -185,6 +216,10 @@ namespace MapGeneration
             return sb.ToString();
         }
 
+        /// <summary>
+        /// Initializes the WFC grid and categorizes tile variants
+        /// based on their types (start, finish, checkpoint, standard).
+        /// </summary>
         private void InitializeGrid()
         {
             standardVariants = new List<TileVariant>();
@@ -215,6 +250,10 @@ namespace MapGeneration
             }
         }
         
+        /// <summary>
+        /// Runs the Wave Function Collapse algorithm to collapse the grid
+        /// based on the constraints defined by the tile variants.
+        /// </summary>
         private void RunWFC()
         {
             while (!IsFullyCollapsed())
@@ -227,6 +266,11 @@ namespace MapGeneration
             }
         }
         
+        /// <summary>
+        /// Applies the path to the WFC grid, setting the available variants
+        /// for each cell along the path to ensure that the path is preserved in the final collapsed state.
+        /// </summary>
+        /// <param name="path"></param>
         private void ApplyPathToWFC(List<Vector2Int> path)
         {
             for (int i = 0; i < path.Count; i++)
@@ -239,16 +283,19 @@ namespace MapGeneration
 
                 List<TileVariant> validForPath = new List<TileVariant>();
 
+                // Determine the source variants based on the path position
                 List<TileVariant> sourceVariants = standardVariants; 
                 if (i == 0) sourceVariants = startVariants;
                 else if (i == path.Count - 1) sourceVariants = finishVariants;
                 else if (i % 5 == 0 && targetTrackLength > 5) sourceVariants = checkpointVariants;
 
+                // Filter the variants based on the path connection and road socket status
                 foreach (var variant in sourceVariants)
                 {
                     bool matches = true;
                     Vector2Int[] dirs = { new Vector2Int(0, 1), new Vector2Int(1, 0), new Vector2Int(0, -1), new Vector2Int(-1, 0) };
 
+                    // Check if the variant matches the path connection and road socket status
                     for (int d = 0; d < 4; d++)
                     {
                         Vector2Int neighborPos = current + dirs[d];
@@ -262,6 +309,7 @@ namespace MapGeneration
                     if (matches) validForPath.Add(variant);
                 }
 
+                // Set the available variants for the cell based on the path variants
                 if (validForPath.Count > 0)
                 {
                     cell.AvailableVariants = new List<TileVariant> { validForPath[Random.Range(0, validForPath.Count)] };
@@ -276,6 +324,12 @@ namespace MapGeneration
             }
         }
         
+        /// <summary>
+        /// Instantiates the path and scenery tiles on the map,
+        /// ensuring that the path is placed correctly and that
+        /// scenery tiles are placed around it without blocking the path.
+        /// </summary>
+        /// <param name="path"></param>
         private void InstantiatePathAndScenery(List<Vector2Int> path)
         {
             HashSet<Vector2Int> pathSet = new HashSet<Vector2Int>(path);
@@ -298,6 +352,7 @@ namespace MapGeneration
                 }
             }
 
+            // Instantiate the path tiles
             for (int i = 0; i < path.Count; i++)
             {
                 Vector2Int pos = path[i];
@@ -310,6 +365,7 @@ namespace MapGeneration
             
                     GameObject spawnedTile = Instantiate(cell.CollapsedVariant.Data.prefab, worldPos, rot, transform);
 
+                    // Check if the tile is a checkpoint and set the correct rotation
                     if (i > 0 && i % 5 == 0 && i < path.Count - 1)
                     {
                         Checkpoint cp = spawnedTile.GetComponentInChildren<Checkpoint>();
@@ -325,6 +381,7 @@ namespace MapGeneration
 
             List<Vector2Int> orderedScenery = scenerySet.OrderBy(p => p.x).ThenBy(p => p.y).ToList();
 
+            // Instantiate the scenery tiles
             foreach (Vector2Int pos in orderedScenery)
             {
                 if (sceneryTiles == null || sceneryTiles.Count == 0) continue;
@@ -338,12 +395,22 @@ namespace MapGeneration
             }
         }
 
+        /// <summary>
+        /// Gets the cell at the specified grid coordinates.
+        /// </summary>
+        /// <param name="x">X coordinate of the cell</param>
+        /// <param name="y">Y coordinate of the cell</param>
+        /// <returns>The Cell object at the specified coordinates, or null if out of bounds.</returns>
         public Cell GetCell(int x, int y)
         {
             if (x >= 0 && x < mapWidth && y >= 0 && y < mapHeight) return grid[x, y];
             return null;
         }
 
+        /// <summary>
+        /// Gets the cell at the specified grid coordinates.
+        /// </summary>
+        /// <returns>True if the map is fully collapsed, false otherwise.</returns>
         private bool IsFullyCollapsed()
         {
             foreach (var cell in grid)
@@ -353,6 +420,10 @@ namespace MapGeneration
             return true;
         }
 
+        /// <summary>
+        /// Gets the cell with the lowest entropy.
+        /// </summary>
+        /// <returns>The Cell object with the lowest entropy, or null if all cells are collapsed.</returns>
         private Cell GetCellWithLowestEntropy()
         {
             Cell bestCell = null;
@@ -373,6 +444,10 @@ namespace MapGeneration
             return bestCell;
         }
 
+        /// <summary>
+        /// Collapses the specified cell by randomly selecting one of its available variants
+        /// </summary>
+        /// <param name="cell">The Cell object to collapse</param>
         private void CollapseCell(Cell cell)
         {
             int randomIndex = Random.Range(0, cell.AvailableVariants.Count);
@@ -382,16 +457,23 @@ namespace MapGeneration
             cell.IsCollapsed = true;
         }
         
+        /// <summary>
+        /// Propagates the changes in the collapsed state of neighboring cells
+        /// based on the constraints defined by the tile variants.
+        /// </summary>
+        /// <param name="collapsedCell">The Cell object that was just collapsed, which will be the starting point for propagation</param>
         private void Propagate(Cell collapsedCell)
         {
             Stack<Cell> stack = new Stack<Cell>();
             stack.Push(collapsedCell);
 
+            // Propagate changes to neighboring cells
             while (stack.Count > 0)
             {
                 Cell current = stack.Pop();
                 Vector2Int[] directions = { new Vector2Int(0, 1), new Vector2Int(1, 0), new Vector2Int(0, -1), new Vector2Int(-1, 0) };
 
+                // Check if the current cell is a valid neighbor and apply constraints
                 for (int i = 0; i < 4; i++)
                 {
                     Vector2Int neighborPos = current.GridPosition + directions[i];
@@ -408,15 +490,25 @@ namespace MapGeneration
             }
         }
 
+        /// <summary>
+        /// Applies the constraints between the current cell and its neighbor based on their available variants.
+        /// </summary>
+        /// <param name="current">The Cell object that has just been collapsed, which will be used to constrain the neighboring cell</param>
+        /// <param name="neighbor">The neighboring Cell object that will be constrained based on the collapsed state of the current cell</param>
+        /// <param name="directionIndex">The index representing the direction from the current cell to the neighbor</param>
+        /// <returns></returns>
         private bool ConstrainNeighbor(Cell current, Cell neighbor, int directionIndex)
         {
             bool changed = false;
             int neighborSideIndex = (directionIndex + 2) % 4;
             List<TileVariant> toRemove = new List<TileVariant>();
 
+            // Check if the current cell is a start cell
             foreach (var neighborVariant in neighbor.AvailableVariants)
             {
                 bool possible = false;
+                
+                // Check if the neighbor variant is a start variant
                 foreach (var currentVariant in current.AvailableVariants)
                 {
                     if (currentVariant.Sockets[directionIndex] == neighborVariant.Sockets[neighborSideIndex])
@@ -426,6 +518,7 @@ namespace MapGeneration
                     }
                 }
 
+                // If the neighbor variant is a start variant, remove it from the neighbor's available variants'
                 if (!possible)
                 {
                     toRemove.Add(neighborVariant);
@@ -433,11 +526,18 @@ namespace MapGeneration
                 }
             }
 
+            // Remove the removed variants from the neighbor's available variants'
             foreach (var variant in toRemove) neighbor.AvailableVariants.Remove(variant);
 
             return changed;
         }
         
+        /// <summary>
+        /// Generates a valid map by first clearing the scene and obstacles, initializing the WFC grid,
+        /// generating a path using the TrackPathfinder, applying the path to the WFC grid,
+        /// running the WFC algorithm, and finally instantiating the path and scenery tiles on the map
+        /// </summary>
+        /// <returns>True if the map was successfully generated, false otherwise.</returns>
         private bool GenerateValidMap()
         {
             if (transform.localScale.sqrMagnitude < 0.001f)
@@ -445,14 +545,16 @@ namespace MapGeneration
                 transform.localScale = Vector3.one;
             }
 
+            // Clear the scene and obstacles
             ClearScene();
             obstacleManager.ClearAllObstacles();
             InitializeGrid(); 
             
-            // TADY POUŽIJEME NOVOU TŘÍDU:
+            // Generate a path with desired length + 2 (start and finish)
             TrackPathfinder pathfinder = new TrackPathfinder(mapWidth, mapHeight);
             GeneratedPath = pathfinder.GeneratePath(new Vector2Int(1, 1), targetTrackLength + 2);
 
+            // Apply the path to the WFC grid and run the algorithm
             if (GeneratedPath != null)
             {
                 ApplyPathToWFC(GeneratedPath);
@@ -470,6 +572,9 @@ namespace MapGeneration
             return false;
         }
         
+        /// <summary>
+        /// Clears the scene by destroying all game objects in the scene.
+        /// </summary>
         public void ClearScene()
         {
             foreach (Transform child in transform)

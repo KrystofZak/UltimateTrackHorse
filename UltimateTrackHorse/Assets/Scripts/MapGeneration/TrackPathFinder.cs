@@ -33,6 +33,14 @@ namespace MapGeneration
             return null; 
         }
 
+        /// <summary>
+        /// Depth-First Search algorithm to generate a random path of a specific length.
+        /// </summary>
+        /// <param name="current">Current position in the path</param>
+        /// <param name="targetLength">Desired length of the path</param>
+        /// <param name="path">Current path being built</param>
+        /// <param name="visited">Set of visited positions to avoid cycles</param>
+        /// <returns></returns>
         private bool DFSPath(Vector2Int current, int targetLength, List<Vector2Int> path, HashSet<Vector2Int> visited)
         {
             path.Add(current);
@@ -40,6 +48,7 @@ namespace MapGeneration
 
             if (path.Count == targetLength) return true;
 
+            // Possible directions to move from the current position
             Vector2Int[] dirs =
             { 
                 new Vector2Int(0, 1),
@@ -80,6 +89,13 @@ namespace MapGeneration
             return false;
         }
 
+        /// <summary>
+        /// Checks if the new position creates a shortcut in the path.
+        /// </summary>
+        /// <param name="newPos">Position to check</param>
+        /// <param name="currentPos">Current position in the path</param>
+        /// <param name="path">Current path being built</param>
+        /// <returns></returns>
         private bool CreatesShortcut(Vector2Int newPos, Vector2Int currentPos, List<Vector2Int> path)
         {
             for (int x = -1; x <= 1; x++)
