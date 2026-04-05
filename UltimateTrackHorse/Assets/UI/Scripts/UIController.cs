@@ -214,6 +214,7 @@ namespace UI
             root.Q<Button>("BackToMainButton")?.RegisterCallback<ClickEvent>(evt =>
             {
                 mapGenerator.ResetSeed();
+                gameManager.isGameActive = false;
                 ReturnToMainMenu();
             });
 
@@ -264,6 +265,13 @@ namespace UI
                     carController.isInputEnabled = false;
                 }
             }
+            
+            Timer timerScript = FindObjectOfType<Timer>();
+            if (timerScript != null)
+            {
+                timerScript.StopTimer();
+            }
+            
         }
 
         /// <summary>
