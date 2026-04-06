@@ -310,12 +310,17 @@ namespace UI
             }
 
             // Immediately disable player input if passing through to main menu
-            if (gameManager != null && gameManager.playerCar != null)
+            if (gameManager != null)
             {
-                CarController carController = gameManager.playerCar.GetComponent<CarController>();
-                if (carController != null)
+                gameManager.StopRaceCountdown();
+                
+                if (gameManager.playerCar != null)
                 {
-                    carController.isInputEnabled = false;
+                    CarController carController = gameManager.playerCar.GetComponent<CarController>();
+                    if (carController != null)
+                    {
+                        carController.isInputEnabled = false;
+                    }
                 }
             }
             

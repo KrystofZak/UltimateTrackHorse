@@ -84,6 +84,8 @@ namespace GameLogic
             }
         }
 
+        private Coroutine countdownCoroutine;
+
         public void RestartCurrentLap()
         {
             Debug.Log("Restarting lap...");
@@ -97,7 +99,8 @@ namespace GameLogic
             }
             
             // Commence the 3.. 2.. 1.. Sequence
-            StartCoroutine(RaceCountdownCoroutine());
+            if (countdownCoroutine != null) StopCoroutine(countdownCoroutine);
+            countdownCoroutine = StartCoroutine(RaceCountdownCoroutine());
         }
 
         public void DestroyTrack()
@@ -140,7 +143,8 @@ namespace GameLogic
             Time.timeScale = 1f;
             isGameActive = true;
 
-            StartCoroutine(RaceCountdownCoroutine());
+            if (countdownCoroutine != null) StopCoroutine(countdownCoroutine);
+            countdownCoroutine = StartCoroutine(RaceCountdownCoroutine());
         }
 
         
@@ -203,7 +207,17 @@ namespace GameLogic
             }
 
             // Commence the 3.. 2.. 1.. Sequence
-            StartCoroutine(RaceCountdownCoroutine());
+            if (countdownCoroutine != null) StopCoroutine(countdownCoroutine);
+            countdownCoroutine = StartCoroutine(RaceCountdownCoroutine());
+        }
+
+        public void StopRaceCountdown()
+        {
+            if (countdownCoroutine != null)
+            {
+                StopCoroutine(countdownCoroutine);
+                countdownCoroutine = null;
+            }
         }
 
         /// <summary>
