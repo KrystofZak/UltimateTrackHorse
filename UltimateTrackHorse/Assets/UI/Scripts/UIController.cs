@@ -271,6 +271,26 @@ namespace UI
         }
 
         /// <summary>
+        /// Checks for input every frame, specifically handling the ESC key to toggle the pause menu.
+        /// </summary>
+        private void Update()
+        {
+            if (Input.GetKeyDown(KeyCode.Escape))
+            {
+                if (currentView == gameView)
+                {
+                    ShowView(pauseView);
+                    Time.timeScale = 0f;
+                }
+                else if (currentView == pauseView)
+                {
+                    ShowView(gameView);
+                    Time.timeScale = 1f;
+                }
+            }
+        }
+
+        /// <summary>
         /// Resets the game to its very beginning state.
         /// Displays the main menu, resumes normal time, clears any actively generated map, 
         /// and forcefully disables the car input so the player doesn't drive around in the background.
