@@ -50,6 +50,8 @@ namespace UI
         private VisualElement pauseView;
         private VisualElement settingsView;
         private VisualElement aboutUsView;
+        private VisualElement victoryView;
+        private VisualElement defeatView;
 
         // References for Lap History UI
         private VisualElement lapHistoryBox;
@@ -134,6 +136,8 @@ namespace UI
             pauseView = root.Q<VisualElement>("pauseView");
             settingsView = root.Q<VisualElement>("settingsView");
             aboutUsView = root.Q<VisualElement>("aboutUsView");
+            victoryView = root.Q<VisualElement>("victoryView");
+            defeatView = root.Q<VisualElement>("defeatView");
             
             lapHistoryBox = root.Q<VisualElement>("LapHistoryBox");
             lapListContainer = root.Q<VisualElement>("LapList");
@@ -224,6 +228,35 @@ namespace UI
             // About Us Menu
             root.Q<Button>("AboutBackButton")?.RegisterCallback<ClickEvent>(evt => RestorePreviousView());
 
+            // Post-Game Menus
+            root.Q<Button>("VictoryMainMenuButton")?.RegisterCallback<ClickEvent>(evt => 
+            {
+                mapGenerator.ResetSeed();
+                gameManager.isGameActive = false;
+                ReturnToMainMenu();
+            });
+            root.Q<Button>("DefeatMainMenuButton")?.RegisterCallback<ClickEvent>(evt => 
+            {
+                mapGenerator.ResetSeed();
+                gameManager.isGameActive = false;
+                ReturnToMainMenu();
+            });
+            root.Q<Button>("DefeatRetryButton")?.RegisterCallback<ClickEvent>(evt => 
+            {
+                // Simple retry by going map selection
+                mapGenerator.ResetSeed();
+                gameManager.isGameActive = false;
+                ShowView(mapSelectionView);
+                Time.timeScale = 1f;
+            });
+            root.Q<Button>("VictoryRetryButton")?.RegisterCallback<ClickEvent>(evt => 
+            {
+                mapGenerator.ResetSeed();
+                gameManager.isGameActive = false;
+                ShowView(mapSelectionView);
+                Time.timeScale = 1f;
+            });
+
             // Initialize default state.
             ReturnToMainMenu();
             
@@ -289,6 +322,8 @@ namespace UI
             pauseView?.AddToClassList("hidden");
             settingsView?.AddToClassList("hidden");
             aboutUsView?.AddToClassList("hidden");
+            victoryView?.AddToClassList("hidden");
+            defeatView?.AddToClassList("hidden");
         }
 
         /// <summary>
@@ -428,6 +463,41 @@ namespace UI
         {
             lapHistoryBox?.AddToClassList("hidden");
             lapListContainer?.Clear();
+        }
+
+        /// <summary>
+        /// Populates the text labels on the Victory and Defeat screens before showing them.
+        /// </summary>
+        public void UpdatePostGameStats(bool isVictory, float bestLapTime, int obstaclesCount, int lapsCompleted = 0)
+        {
+            // Format time string
+            string timeStr = "--:--";
+            if (bestLapTime > 0 && bestLapTime < float.MaxValue)
+            {
+                float seconds = Mathf.FloorToInt(bestLapTime);
+                float milliseconds = Mathf.FloorToInt((bestLapTime - seconds) * 100);
+                timeStr = string.Format("{0:00}:{1:00}", seconds, milliseconds);
+            }
+
+            if (isVictory)
+            {
+                var bestLapLabel = root.Q<Label>("VictoryBestLap");
+                if (bestLapLabel != null) bestLapLabel.text = $"Best Lap: {timeStr}";
+
+                var obsLabel = root.Q<Label>("VictoryObstacles");
+                if (obsLabel != null) obsLabel.text = $"Obstacles Count: {obstaclesCount}";
+
+                var lapsLabel = root.Q<Label>("VictoryLaps");
+                if (lapsLabel != null) lapsLabel.text = $"Laps Completed: {lapsCompleted}";
+            }
+            else
+            {
+                var bestLapLabel = root.Q<Label>("DefeatBestLap");
+                if (bestLapLabel != null) bestLapLabel.text = $"Best Lap: {timeStr}";
+
+                var obsLabel = root.Q<Label>("DefeatObstacles");
+                if (obsLabel != null) obsLabel.text = $"Obstacles Count: {obstaclesCount}";
+            }
         }
 
         /// <summary>
