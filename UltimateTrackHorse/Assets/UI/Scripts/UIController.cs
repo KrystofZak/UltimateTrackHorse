@@ -37,6 +37,11 @@ namespace UI
         [Tooltip("Drag the Virtual Camera looking at your custom Menu Diorama here")]
         public GameObject menuCamera;
 
+        [Header("UI Audio")]
+        public AudioSource uiAudioSource;
+        public AudioClip hoverSound;
+        public AudioClip clickSound;
+
         private UIDocument document;
         private VisualElement root;
 
@@ -146,6 +151,27 @@ namespace UI
             countdownText = root.Q<Label>("CountdownText");
 
             mapSeedLabel = root.Q<Label>("MapSeedLabel");
+
+            // --- Register Global Audio Callbacks for all buttons ---
+            var allButtons = root.Query<Button>().ToList();
+            foreach (var button in allButtons)
+            {
+                button.RegisterCallback<PointerEnterEvent>(evt =>
+                {
+                    if (uiAudioSource != null && hoverSound != null)
+                    {
+                        uiAudioSource.PlayOneShot(hoverSound);
+                    }
+                });
+
+                button.RegisterCallback<ClickEvent>(evt =>
+                {
+                    if (uiAudioSource != null && clickSound != null)
+                    {
+                        uiAudioSource.PlayOneShot(clickSound);
+                    }
+                });
+            }
 
             // 2. Setup Button Callbacks
 
