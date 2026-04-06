@@ -88,9 +88,10 @@
                 <ui:Button text="Settings" name="PauseSettingsButton" class="animated-button"/>
                 <ui:Button text="Main Menu" name="BackToMainButton" class="animated-button"/>
             </ui:VisualElement>
-            <ui:VisualElement class="hud-box" style="position: absolute; top: 20px; right: 20px;">
+            <ui:VisualElement class="hud-box" style="position: absolute; top: 20px; right: 20px; align-items: center;">
                 <ui:Label text="Current Map Seed:" style="font-size: 18px; color: rgb(139, 69, 19); -unity-font-style: bold; margin-bottom: 5px;"/>
                 <ui:Label text="Unknown" name="MapSeedLabel" style="font-size: 24px; color: rgb(51, 51, 51); -unity-font-style: bold;"/>
+                <ui:Button text="Copy Seed" name="CopySeedButton" class="animated-button" style="width: 120px; height: 30px; font-size: 14px; margin-top: 5px; padding: 0;"/>
             </ui:VisualElement>
         </ui:VisualElement>
         <ui:VisualElement name="settingsView" class="view-container hidden">

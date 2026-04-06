@@ -149,6 +149,16 @@ namespace UI
 
             // 2. Setup Button Callbacks
 
+            // Copy Seed
+            root.Q<Button>("CopySeedButton")?.RegisterCallback<ClickEvent>(evt => 
+            {
+                if (mapSeedLabel != null)
+                {
+                    GUIUtility.systemCopyBuffer = mapSeedLabel.text;
+                    Debug.Log("Copied seed to clipboard: " + mapSeedLabel.text);
+                }
+            });
+
             // Main Menu
             root.Q<Button>("PlayButton")?.RegisterCallback<ClickEvent>(evt => 
             {
