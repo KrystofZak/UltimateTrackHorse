@@ -28,7 +28,6 @@ namespace GameLogic.Traps
         [SerializeField] private KeyCode replaceWithSpecificTrapKey = KeyCode.F9;
 
         private GameObject[] placeholders = Array.Empty<GameObject>();
-
         private void Update()
         {
             if (!enableTestingInputs)
@@ -160,7 +159,7 @@ namespace GameLogic.Traps
                 trap.Initialize(services);
             }
             
-            ObstacleManager.Instance.RegisterObstacle(prefab, spawned.transform.position, spawned.transform.rotation, spawned.transform.localScale, parent, spawned);
+            services.ObstacleManager.RegisterObstacle(prefab, spawned.transform.position, spawned.transform.rotation, spawned.transform.localScale, parent, spawned);
             
             Destroy(source);
             return true;
