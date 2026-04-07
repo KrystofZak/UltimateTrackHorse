@@ -121,7 +121,7 @@ namespace GameLogic
             
             if (ghostSystem && mapGenerator)
             {
-                ghostSystem.SetMapId(mapGenerator.LastGenerationSignature); // unique ID for a map
+                ghostSystem.SetMapId(mapGenerator.LastUsedSeed.ToString()); // unique ID for a map
             }
 
             StartCoroutine(InitializeGameStateDelayed());
