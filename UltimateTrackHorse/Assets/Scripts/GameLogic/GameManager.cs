@@ -5,6 +5,7 @@ using Cinemachine;
 using MapGeneration;
 using UI;
 using GameLogic.Traps;
+using GameLogic.Ghost;
 using UnityEngine.Rendering.UI;
 
 namespace GameLogic
@@ -20,6 +21,7 @@ namespace GameLogic
         [SerializeField] private GameStateManager gameStateManager;
         [SerializeField] private ObstacleManager obstacleManager;
         [SerializeField] private MapGenerator mapGenerator;
+        [SerializeField] private GhostSystem ghostSystem;
 
         // Replaced old UIManager with the new UIController
         private UIController uiController;
@@ -116,6 +118,11 @@ namespace GameLogic
             }
             
             lapCount = 0; // Reset lap count
+            
+            if (ghostSystem && mapGenerator)
+            {
+                ghostSystem.SetMapId(mapGenerator.LastGenerationSignature); // unique ID for a map
+            }
 
             StartCoroutine(InitializeGameStateDelayed());
 
@@ -237,6 +244,12 @@ namespace GameLogic
             {
                 timer.StartTimer();
             }
+            
+            // Begin recording lap for a ghost car
+            if (ghostSystem != null)
+            {
+                ghostSystem.StartLap();
+            }
 
             // Hold the "GO!" sign on screen for just one final second before hiding it
             yield return new WaitForSecondsRealtime(1f);
@@ -278,6 +291,9 @@ namespace GameLogic
                 Debug.Log("Lap time: " + timer.timeElapsed);
                 // Record the lap time into the history tracker
                 currentMapLapTimes.Add(timer.timeElapsed);
+                
+                // Finish recording data for ghost car
+                if (ghostSystem) ghostSystem.FinishLap(timer.timeElapsed);
             }
 
             // Immediately send the updated history list to the UI Controller to be drawn
