@@ -4622,7 +4622,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 718208730479398267}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.37605318, y: -0.03557959, z: 0.014452137, w: 0.925802}
+  m_LocalRotation: {x: 0.3760532, y: -0.035579596, z: 0.014452144, w: 0.92580193}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -15177,7 +15177,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4828620875266352830}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.40943474, y: -0.03503114, z: 0.01573503, w: 0.91153085}
+  m_LocalRotation: {x: 0.40943474, y: -0.035031144, z: 0.015735032, w: 0.91153085}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -24677,6 +24677,10 @@ MonoBehaviour:
   dragCoefficient: 5
   minPitch: 1
   maxPitch: 5
+  minSkidPitch: 0.5
+  maxSkidPitch: 1.5
+  skidIntensityRange: 15
+  skidSmoothSpeed: 10
   surfaceSettings:
   - name: Asphalt
     layer:
@@ -24791,7 +24795,7 @@ AudioSource:
   m_audioClip: {fileID: 0}
   m_Resource: {fileID: 8300000, guid: 771ce407ce807b74885ec23ebd1e6647, type: 3}
   m_PlayOnAwake: 1
-  m_Volume: 1
+  m_Volume: 0.519
   m_Pitch: 1
   Loop: 1
   Mute: 0
@@ -29852,7 +29856,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8251759288116263377}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.3927867, y: -0.035311542, z: 0.015095214, w: 0.9188275}
+  m_LocalRotation: {x: 0.3927868, y: -0.03531156, z: 0.015095233, w: 0.9188274}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0

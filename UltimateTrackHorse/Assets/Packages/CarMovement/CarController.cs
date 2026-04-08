@@ -16,6 +16,8 @@ public class CarController : MonoBehaviour
         public float dragCoefficientMultiplier;
         public bool killMomentum;
         public float lingerTime;
+        
+
 
         public static SurfaceSettings Default => new SurfaceSettings
         {
@@ -52,6 +54,7 @@ public class CarController : MonoBehaviour
     private bool preventReverse = false;
     public float reverseSpeedThreshold = 1f;
     public bool isInputEnabled = true;
+    public bool isPlaying = false;
 
 
     [Header("Car Settings")]
@@ -134,7 +137,11 @@ public class CarController : MonoBehaviour
         Movement();
         Visuals();
         Vfx();
-        Audio();
+        if (isPlaying)
+        {
+            Audio();
+        }
+        
     }
 
     private void Update()
@@ -461,20 +468,17 @@ public class CarController : MonoBehaviour
             if (skidSound.mute) skidSound.mute = false;
             if (!skidSound.isPlaying) skidSound.Play();
 
-            // Výpoèet intenzity od 0 do 1 podle tvého nastavení v Inspectoru
             float maxSkidIntensitySpeed = minSkidVelocity + skidIntensityRange;
             float skidIntensity = Mathf.InverseLerp(minSkidVelocity, maxSkidIntensitySpeed, sidewaysSpeed);
 
-            // Hlasitost
             skidSound.volume = Mathf.Lerp(skidSound.volume, skidIntensity, Time.deltaTime * skidSmoothSpeed);
 
-            // Pitch - TADY se to teï bude mìnit víc, protože minSkidPitch a maxSkidPitch nastavíš v Unity!
             float targetSkidPitch = Mathf.Lerp(minSkidPitch, maxSkidPitch, skidIntensity);
             skidSound.pitch = Mathf.Lerp(skidSound.pitch, targetSkidPitch, Time.deltaTime * skidSmoothSpeed);
         }
         else
         {
-            // Smyk skonèil - plynulé ztlumení o nìco rychleji než nábìh (skidSmoothSpeed * 1.5f)
+            
             skidSound.volume = Mathf.Lerp(skidSound.volume, 0f, Time.deltaTime * (skidSmoothSpeed * 1.5f));
 
             if (skidSound.volume < 0.05f && !skidSound.mute)
