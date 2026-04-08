@@ -346,7 +346,7 @@ namespace UI
             }
 
             // Immediately disable player input if passing through to main menu
-            if (gameManager != null)
+            if (gameManager != null && gameManager.playerCar != null)
             {
                 gameManager.StopRaceCountdown();
                 
@@ -403,6 +403,17 @@ namespace UI
             HideAllViews();
             newView.RemoveFromClassList("hidden");
             currentView = newView;
+
+            if (gameManager != null && gameManager.playerCar != null)
+            {
+                CarController carController = gameManager.playerCar.GetComponent<CarController>();
+                if (carController != null)
+                {
+                    // Hra b�� pouze pokud je aktivn� hern� obrazovka (gameView)
+                    carController.isPlaying = (newView == gameView);
+                }
+            }
+
 
             // If entering the Pause View, instantly ping the MapGenerator for the active seed and display it.
             if (newView == pauseView && mapSeedLabel != null && mapGenerator != null)
