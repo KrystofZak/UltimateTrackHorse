@@ -37,6 +37,11 @@ namespace UI
         [Tooltip("Drag the Virtual Camera looking at your custom Menu Diorama here")]
         public GameObject menuCamera;
 
+        [Header("UI Audio")]
+        public AudioSource uiAudioSource;
+        public AudioClip hoverSound;
+        public AudioClip clickSound;
+
         private UIDocument document;
         private VisualElement root;
 
@@ -50,6 +55,8 @@ namespace UI
         private VisualElement pauseView;
         private VisualElement settingsView;
         private VisualElement aboutUsView;
+        private VisualElement victoryView;
+        private VisualElement defeatView;
 
         // References for Lap History UI
         private VisualElement lapHistoryBox;
@@ -134,6 +141,8 @@ namespace UI
             pauseView = root.Q<VisualElement>("pauseView");
             settingsView = root.Q<VisualElement>("settingsView");
             aboutUsView = root.Q<VisualElement>("aboutUsView");
+            victoryView = root.Q<VisualElement>("victoryView");
+            defeatView = root.Q<VisualElement>("defeatView");
             
             lapHistoryBox = root.Q<VisualElement>("LapHistoryBox");
             lapListContainer = root.Q<VisualElement>("LapList");
@@ -143,7 +152,38 @@ namespace UI
 
             mapSeedLabel = root.Q<Label>("MapSeedLabel");
 
+            // --- Register Global Audio Callbacks for all buttons ---
+            var allButtons = root.Query<Button>().ToList();
+            foreach (var button in allButtons)
+            {
+                button.RegisterCallback<PointerEnterEvent>(evt =>
+                {
+                    if (uiAudioSource != null && hoverSound != null)
+                    {
+                        uiAudioSource.PlayOneShot(hoverSound);
+                    }
+                });
+
+                button.RegisterCallback<ClickEvent>(evt =>
+                {
+                    if (uiAudioSource != null && clickSound != null)
+                    {
+                        uiAudioSource.PlayOneShot(clickSound);
+                    }
+                });
+            }
+
             // 2. Setup Button Callbacks
+
+            // Copy Seed
+            root.Q<Button>("CopySeedButton")?.RegisterCallback<ClickEvent>(evt => 
+            {
+                if (mapSeedLabel != null)
+                {
+                    GUIUtility.systemCopyBuffer = mapSeedLabel.text;
+                    Debug.Log("Copied seed to clipboard: " + mapSeedLabel.text);
+                }
+            });
 
             // Main Menu
             root.Q<Button>("PlayButton")?.RegisterCallback<ClickEvent>(evt => 
@@ -224,6 +264,35 @@ namespace UI
             // About Us Menu
             root.Q<Button>("AboutBackButton")?.RegisterCallback<ClickEvent>(evt => RestorePreviousView());
 
+            // Post-Game Menus
+            root.Q<Button>("VictoryMainMenuButton")?.RegisterCallback<ClickEvent>(evt => 
+            {
+                mapGenerator.ResetSeed();
+                gameManager.isGameActive = false;
+                ReturnToMainMenu();
+            });
+            root.Q<Button>("DefeatMainMenuButton")?.RegisterCallback<ClickEvent>(evt => 
+            {
+                mapGenerator.ResetSeed();
+                gameManager.isGameActive = false;
+                ReturnToMainMenu();
+            });
+            root.Q<Button>("DefeatRetryButton")?.RegisterCallback<ClickEvent>(evt => 
+            {
+                // Simple retry by going map selection
+                mapGenerator.ResetSeed();
+                gameManager.isGameActive = false;
+                ShowView(mapSelectionView);
+                Time.timeScale = 1f;
+            });
+            root.Q<Button>("VictoryRetryButton")?.RegisterCallback<ClickEvent>(evt => 
+            {
+                mapGenerator.ResetSeed();
+                gameManager.isGameActive = false;
+                ShowView(mapSelectionView);
+                Time.timeScale = 1f;
+            });
+
             // Initialize default state.
             ReturnToMainMenu();
             
@@ -234,6 +303,26 @@ namespace UI
                 menuCamera.SetActive(true);
                 var vcam = menuCamera.GetComponent<Cinemachine.CinemachineVirtualCameraBase>();
                 if (vcam != null) vcam.Priority = 100;
+            }
+        }
+
+        /// <summary>
+        /// Checks for input every frame, specifically handling the ESC key to toggle the pause menu.
+        /// </summary>
+        private void Update()
+        {
+            if (Input.GetKeyDown(KeyCode.Escape))
+            {
+                if (currentView == gameView)
+                {
+                    ShowView(pauseView);
+                    Time.timeScale = 0f;
+                }
+                else if (currentView == pauseView)
+                {
+                    ShowView(gameView);
+                    Time.timeScale = 1f;
+                }
             }
         }
 
@@ -257,12 +346,17 @@ namespace UI
             }
 
             // Immediately disable player input if passing through to main menu
-            if (gameManager != null && gameManager.playerCar != null)
+            if (gameManager != null)
             {
-                CarController carController = gameManager.playerCar.GetComponent<CarController>();
-                if (carController != null)
+                gameManager.StopRaceCountdown();
+                
+                if (gameManager.playerCar != null)
                 {
-                    carController.isInputEnabled = false;
+                    CarController carController = gameManager.playerCar.GetComponent<CarController>();
+                    if (carController != null)
+                    {
+                        carController.isInputEnabled = false;
+                    }
                 }
             }
             
@@ -289,6 +383,8 @@ namespace UI
             pauseView?.AddToClassList("hidden");
             settingsView?.AddToClassList("hidden");
             aboutUsView?.AddToClassList("hidden");
+            victoryView?.AddToClassList("hidden");
+            defeatView?.AddToClassList("hidden");
         }
 
         /// <summary>
@@ -391,6 +487,22 @@ namespace UI
         }
 
         /// <summary>
+        /// Directly triggers the UI transition to the Victory screen.
+        /// </summary>
+        public void ShowVictoryView()
+        {
+            ShowView(victoryView);
+        }
+
+        /// <summary>
+        /// Directly triggers the UI transition to the Defeat screen.
+        /// </summary>
+        public void ShowDefeatView()
+        {
+            ShowView(defeatView);
+        }
+
+        /// <summary>
         /// Toggles the massive full-screen countdown sequence graphics.
         /// </summary>
         public void ShowCountdown(bool show)
@@ -428,6 +540,41 @@ namespace UI
         {
             lapHistoryBox?.AddToClassList("hidden");
             lapListContainer?.Clear();
+        }
+
+        /// <summary>
+        /// Populates the text labels on the Victory and Defeat screens before showing them.
+        /// </summary>
+        public void UpdatePostGameStats(bool isVictory, float bestLapTime, int obstaclesCount, int lapsCompleted = 0)
+        {
+            // Format time string
+            string timeStr = "--:--";
+            if (bestLapTime > 0 && bestLapTime < float.MaxValue)
+            {
+                float seconds = Mathf.FloorToInt(bestLapTime);
+                float milliseconds = Mathf.FloorToInt((bestLapTime - seconds) * 100);
+                timeStr = string.Format("{0:00}:{1:00}", seconds, milliseconds);
+            }
+
+            if (isVictory)
+            {
+                var bestLapLabel = root.Q<Label>("VictoryBestLap");
+                if (bestLapLabel != null) bestLapLabel.text = $"Best Lap: {timeStr}";
+
+                var obsLabel = root.Q<Label>("VictoryObstacles");
+                if (obsLabel != null) obsLabel.text = $"Obstacles Count: {obstaclesCount}";
+
+                var lapsLabel = root.Q<Label>("VictoryLaps");
+                if (lapsLabel != null) lapsLabel.text = $"Laps Completed: {lapsCompleted}";
+            }
+            else
+            {
+                var bestLapLabel = root.Q<Label>("DefeatBestLap");
+                if (bestLapLabel != null) bestLapLabel.text = $"Best Lap: {timeStr}";
+
+                var obsLabel = root.Q<Label>("DefeatObstacles");
+                if (obsLabel != null) obsLabel.text = $"Obstacles Count: {obstaclesCount}";
+            }
         }
 
         /// <summary>
