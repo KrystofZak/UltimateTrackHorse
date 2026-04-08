@@ -17,8 +17,6 @@ public class CarController : MonoBehaviour
         public bool killMomentum;
         public float lingerTime;
 
-
-
         public static SurfaceSettings Default => new SurfaceSettings
         {
             name = "Default",
@@ -38,7 +36,7 @@ public class CarController : MonoBehaviour
     [SerializeField] private GameObject[] tires = new GameObject[4];
     [SerializeField] private TrailRenderer[] skidMarks = new TrailRenderer[2];
     [SerializeField] private ParticleSystem[] skidSmokes = new ParticleSystem[2];
-    [SerializeField] private AudioSource engineSound, skidSound;
+    [SerializeField] private AudioSource engineSound,skidSound;
 
     [Header("Suspension Settings")]
     [SerializeField] private float springStiffness;
@@ -54,8 +52,6 @@ public class CarController : MonoBehaviour
     private bool preventReverse = false;
     public float reverseSpeedThreshold = 1f;
     public bool isInputEnabled = true;
-    public bool isPlaying = false;
-    private bool wasPlaying = true;
 
 
     [Header("Car Settings")]
@@ -71,12 +67,8 @@ public class CarController : MonoBehaviour
     [SerializeField]
     [Range(0f, 1f)] private float minPitch = 1f;
     [SerializeField]
-    [Range(1, 5)] private float maxPitch = 5f;
+    [Range(1,5)] private float maxPitch = 5f;
     private float pitchSmoothSpeed = 3f;
-    [SerializeField] private float minSkidPitch = 0.5f;
-    [SerializeField] private float maxSkidPitch = 1.5f;
-    [SerializeField] private float skidIntensityRange = 15f;
-    [SerializeField] private float skidSmoothSpeed = 10f;
 
     [Header("Surface Settings")]
     [Tooltip("Override car behaviour per surface layer. Layers not listed here use default multipliers (1.0).")]
@@ -128,11 +120,6 @@ public class CarController : MonoBehaviour
         carRB.angularDamping = 2f;
 
         carRB.centerOfMass = new Vector3(0, -0.5f, 0);
-        if (engineSound != null)
-        {
-            engineSound.Play();  
-            engineSound.Pause(); 
-        }
     }
 
     private void FixedUpdate()
@@ -143,11 +130,7 @@ public class CarController : MonoBehaviour
         Movement();
         Visuals();
         Vfx();
-        if (isPlaying)
-        {
-            Audio();
-        }
-
+        Audio();
     }
 
     private void Update()
@@ -162,32 +145,6 @@ public class CarController : MonoBehaviour
             steerInput = 0;
             isBraking = false;
         }
-
-        if (isPlaying != wasPlaying)
-        {
-            wasPlaying = isPlaying;
-
-            if (engineSound != null)
-            {
-                if (isPlaying)
-                {
-                    
-                    if (!engineSound.isPlaying) engineSound.Play();
-                    else engineSound.UnPause();
-                }
-                else
-                {
-                    engineSound.Pause();
-                }
-            }
-
-            if (skidSound != null)
-            {
-                if (isPlaying) skidSound.UnPause();
-                else skidSound.Pause();
-            }
-        }
-
     }
     #endregion
 
@@ -273,7 +230,7 @@ public class CarController : MonoBehaviour
     {
         if (Mathf.Abs(moveInput) < 0.1f)
         {
-
+           
             float dragForce = -currentCarLocalVelocity.z * (deceleration * 0.1f);
             carRB.AddForceAtPosition(transform.forward * dragForce, accelerationPoint.position, ForceMode.Acceleration);
         }
@@ -281,7 +238,7 @@ public class CarController : MonoBehaviour
     private void BrakeToStop()
     {
         float forwardSpeed = currentCarLocalVelocity.z;
-
+        
         float stoppingForce = -forwardSpeed * (deceleration * 1.2f);
         carRB.AddForceAtPosition(transform.forward * stoppingForce, accelerationPoint.position, ForceMode.Acceleration);
 
@@ -349,19 +306,6 @@ public class CarController : MonoBehaviour
         float finalSteerInput = Mathf.Clamp(steerInput + flatTireSteerBias, -1.5f, 1.5f);
 
         carRB.AddTorque(currentSteerStrength * finalSteerInput * steerCurve.Evaluate(speedRatioAbs) * direction * transform.up, ForceMode.Acceleration);
-        if (Mathf.Abs(steerInput) < 0.1f)
-        {
-
-            if (Mathf.Abs(currentCarLocalVelocity.x) <= minSkidVelocity)
-            {
-
-                float currentAngularSpin = transform.InverseTransformDirection(carRB.angularVelocity).y;
-
-                float counterTorque = -currentAngularSpin * 15f;
-                carRB.AddTorque(transform.up * counterTorque, ForceMode.Acceleration);
-            }
-        }
-
     }
 
     private void SidewaysDrag()
@@ -385,7 +329,7 @@ public class CarController : MonoBehaviour
     }
     private void RotateTires()
     {
-
+        
         currentTireSpinAngle += tireRotationSpeed * carVelocityRatio * Time.deltaTime;
 
         float targetSteerAngle = steerInput * maxVisualSteerAngle;
@@ -394,7 +338,7 @@ public class CarController : MonoBehaviour
 
         for (int i = 0; i < tires.Length; i++)
         {
-
+           
             float applySteer = (i < 2) ? currentVisualSteerAngle : 0f;
 
             tires[i].transform.localRotation = Quaternion.Euler(currentTireSpinAngle, applySteer, 0f);
@@ -408,13 +352,18 @@ public class CarController : MonoBehaviour
 
     private void Vfx()
     {
-        float sidewaysSpeed = Mathf.Abs(currentCarLocalVelocity.x);
-        bool isSkidding = isGrounded && sidewaysSpeed > minSkidVelocity;
-
-        ToggleSkidMarks(isSkidding);
-        ToggleSkidSmokes(isSkidding);
-
-        UpdateSkidSound(isSkidding, sidewaysSpeed);
+        if (isGrounded && Mathf.Abs(currentCarLocalVelocity.x) > minSkidVelocity)
+        {
+            ToggleSkidMarks(true);
+            ToggleSkidSmokes(true);
+            ToggleSkidSound(true);
+        }
+        else
+        {
+            ToggleSkidMarks(false);
+            ToggleSkidSmokes(false);
+            ToggleSkidSound(false);
+        }
     }
 
     private void ToggleSkidMarks(bool toggle)
@@ -482,8 +431,8 @@ public class CarController : MonoBehaviour
     {
         if (engineSound != null)
         {
-
-
+           
+          
             float currentRatio = Mathf.Abs(carVelocityRatio);
 
             float targetPitch = Mathf.Lerp(minPitch, maxPitch, currentRatio);
@@ -491,34 +440,11 @@ public class CarController : MonoBehaviour
             engineSound.pitch = Mathf.Lerp(engineSound.pitch, targetPitch, Time.deltaTime * pitchSmoothSpeed);
         }
     }
-    private void UpdateSkidSound(bool isSkidding, float sidewaysSpeed)
+    private void ToggleSkidSound(bool toggle)
     {
-        if (skidSound == null) return;
-
-        if (isSkidding)
-        {
-            if (skidSound.mute) skidSound.mute = false;
-            if (!skidSound.isPlaying) skidSound.Play();
-
-            float maxSkidIntensitySpeed = minSkidVelocity + skidIntensityRange;
-            float skidIntensity = Mathf.InverseLerp(minSkidVelocity, maxSkidIntensitySpeed, sidewaysSpeed);
-
-            skidSound.volume = Mathf.Lerp(skidSound.volume, skidIntensity, Time.deltaTime * skidSmoothSpeed);
-
-            float targetSkidPitch = Mathf.Lerp(minSkidPitch, maxSkidPitch, skidIntensity);
-            skidSound.pitch = Mathf.Lerp(skidSound.pitch, targetSkidPitch, Time.deltaTime * skidSmoothSpeed);
-        }
-        else
-        {
-
-            skidSound.volume = Mathf.Lerp(skidSound.volume, 0f, Time.deltaTime * (skidSmoothSpeed * 1.5f));
-
-            if (skidSound.volume < 0.05f && !skidSound.mute)
-            {
-                skidSound.mute = true;
-            }
-        }
+        skidSound.mute = !toggle;
     }
+
     #endregion
 
     #region Car Status Check
@@ -547,7 +473,7 @@ public class CarController : MonoBehaviour
         {
             if (isTireFlat[i])
             {
-
+              
                 Vector3 localWheelPos = transform.InverseTransformPoint(rayPoints[i].position);
                 if (localWheelPos.z < 0)
                 {
@@ -591,7 +517,7 @@ public class CarController : MonoBehaviour
     }
     public float GetMaxSpeedOnAsphalt()
     {
-
+        
         foreach (SurfaceSettings surface in surfaceSettings)
         {
             string sName = surface.name.ToLower();
@@ -618,7 +544,7 @@ public class CarController : MonoBehaviour
         if (pressingBrake && !isBraking)
         {
             isBraking = true;
-
+           
             if (currentCarLocalVelocity.z > reverseSpeedThreshold)
             {
                 preventReverse = true;
@@ -631,7 +557,7 @@ public class CarController : MonoBehaviour
         else if (!pressingBrake)
         {
             isBraking = false;
-
+            
             preventReverse = false;
         }
     }
