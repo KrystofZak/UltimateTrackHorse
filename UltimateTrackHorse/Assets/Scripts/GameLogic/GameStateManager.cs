@@ -9,7 +9,7 @@ namespace GameLogic
         
         [Header("Loss Conditions")]
         [SerializeField] private Rigidbody playerCarRigidbody;
-        [SerializeField] private float stoppedVelocityThreshold = 0.1f;
+        [SerializeField] private float stoppedVelocityThreshold = 0.5f;
 
         private int _initialPlaceholderCount;
 

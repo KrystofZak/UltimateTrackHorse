@@ -314,8 +314,13 @@ namespace GameLogic
             Debug.Log("Victory! All obstacles placed and lap finished!");
             if (uiController != null)
             {
-                // TODO: Žegy - Show some victory screen with smting like lap history,
-                // TODO: total time, and a "Next Track" button that generates a new track or idk
+                float bestLap = float.MaxValue;
+                foreach (float t in currentMapLapTimes) if (t < bestLap) bestLap = t;
+                if (bestLap == float.MaxValue) bestLap = 0f;
+
+                int obsCount = obstacleManager != null ? obstacleManager.ActiveObstacleCount : 0;
+                uiController.UpdatePostGameStats(true, bestLap, obsCount, lapCount);
+                uiController.ShowVictoryView();
             }
             
             if (timer != null)
@@ -338,7 +343,13 @@ namespace GameLogic
             Debug.Log("Loss! The car has stopped after time ran out.");
             if (uiController != null)
             {
-                //
+                float bestLap = float.MaxValue;
+                foreach (float t in currentMapLapTimes) if (t < bestLap) bestLap = t;
+                if (bestLap == float.MaxValue) bestLap = 0f;
+
+                int obsCount = obstacleManager != null ? obstacleManager.ActiveObstacleCount : 0;
+                uiController.UpdatePostGameStats(false, bestLap, obsCount);
+                uiController.ShowDefeatView();
             }
 
             CarController carController = playerCar.GetComponent<CarController>();

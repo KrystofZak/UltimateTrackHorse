@@ -487,6 +487,22 @@ namespace UI
         }
 
         /// <summary>
+        /// Directly triggers the UI transition to the Victory screen.
+        /// </summary>
+        public void ShowVictoryView()
+        {
+            ShowView(victoryView);
+        }
+
+        /// <summary>
+        /// Directly triggers the UI transition to the Defeat screen.
+        /// </summary>
+        public void ShowDefeatView()
+        {
+            ShowView(defeatView);
+        }
+
+        /// <summary>
         /// Toggles the massive full-screen countdown sequence graphics.
         /// </summary>
         public void ShowCountdown(bool show)
