@@ -296,3 +296,13 @@
 .countdown-pop {
     scale: 1.4; /* Huge pop in size when numbers jump onto the screen! */
 }
+
+/* Stats text for Victory/Defeat popups */
+.stat-text {
+    font-size: 24px;
+    -unity-font-style: bold;
+    color: var(--color-text);
+    margin-bottom: 5px;
+    text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.3);
+}
+
