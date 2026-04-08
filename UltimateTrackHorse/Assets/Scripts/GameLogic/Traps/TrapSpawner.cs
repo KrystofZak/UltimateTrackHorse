@@ -5,13 +5,13 @@ using Random = UnityEngine.Random;
 namespace GameLogic.Traps
 {
     /// <summary>
-    /// Replaces tagged placeholder objects in the scene with randomly selected trap prefabs.
+    /// Replaces tagged placeholder objects in the scene with trap prefabs.
     /// </summary>
     public class TrapSpawner : MonoBehaviour
     {
         [Header("Runtime")]
         [SerializeField] private TrapCatalog catalog;
-        [SerializeField] private TrapServices services;
+        [SerializeField] private TrapFactory trapFactory;
         [SerializeField] private string placeholderTag = "Obstacle";
         [SerializeField] private bool keepParent = true;
         [SerializeField] private bool keepScale = true;
@@ -28,6 +28,7 @@ namespace GameLogic.Traps
         [SerializeField] private KeyCode replaceWithSpecificTrapKey = KeyCode.F9;
 
         private GameObject[] placeholders = Array.Empty<GameObject>();
+
         private void Update()
         {
             if (!enableTestingInputs)
@@ -55,13 +56,33 @@ namespace GameLogic.Traps
             }
         }
 
+        /// <summary>
+        /// Finds placeholders, shuffles them, and replaces up to <paramref name="count"/> of them with random traps.
+        /// </summary>
+        /// <param name="count">Maximum number of placeholders to replace.</param>
+        public void SpawnNewTraps(int count)
+        {
+            RefreshPlaceholders();
+
+            count = Mathf.Clamp(count, 0, placeholders.Length);
+            if (count == 0)
+                return;
+
+            Shuffle(placeholders);
+
+            for (int i = 0; i < count; i++)
+            {
+                ReplacePlaceholder(placeholders[i], catalog ? catalog.GetRandomAny() : null);
+            }
+        }
+
         private void ReplaceAllWithRandom()
         {
             RefreshPlaceholders();
 
-            foreach (var cube in placeholders)
+            foreach (var placeholder in placeholders)
             {
-                ReplaceObject(cube, catalog.GetRandomAny());
+                ReplacePlaceholder(placeholder, catalog ? catalog.GetRandomAny() : null);
             }
         }
 
@@ -69,9 +90,9 @@ namespace GameLogic.Traps
         {
             RefreshPlaceholders();
 
-            foreach (var cube in placeholders)
+            foreach (var placeholder in placeholders)
             {
-                ReplaceObject(cube, catalog.GetRandomFog());
+                ReplacePlaceholder(placeholder, catalog ? catalog.GetRandomFog() : null);
             }
         }
 
@@ -79,9 +100,9 @@ namespace GameLogic.Traps
         {
             RefreshPlaceholders();
 
-            foreach (var cube in placeholders)
+            foreach (var placeholder in placeholders)
             {
-                ReplaceObject(cube, catalog.GetRandomWall());
+                ReplacePlaceholder(placeholder, catalog ? catalog.GetRandomWall() : null);
             }
         }
 
@@ -89,9 +110,9 @@ namespace GameLogic.Traps
         {
             RefreshPlaceholders();
 
-            foreach (var cube in placeholders)
+            foreach (var placeholder in placeholders)
             {
-                ReplaceObject(cube, catalog.GetRandomSurface());
+                ReplacePlaceholder(placeholder, catalog ? catalog.GetRandomSurface() : null);
             }
         }
 
@@ -101,34 +122,13 @@ namespace GameLogic.Traps
 
             if (!specificTrapPrefab)
             {
-                Debug.LogWarning("[TrapSpawner] Specific trap prefab is not assigned. Check Trap catalog");
+                Debug.LogWarning("[TrapSpawner] Specific trap prefab is not assigned.");
                 return;
             }
 
-            foreach (var cube in placeholders)
+            foreach (var placeholder in placeholders)
             {
-                ReplaceObject(cube, specificTrapPrefab);
-            }
-        }
-
-        
-        /// <summary>
-        /// Finds placeholders, shuffles them, and replaces up to <paramref name="count"/> of them with traps.
-        /// </summary>
-        /// <param name="count">Maximum number of placeholders to replace.</param>
-        public void SpawnNewTraps(int count)
-        {
-            RefreshPlaceholders();
-
-            count = Mathf.Clamp(count, 0, placeholders.Length);
-            if (count == 0) return;
-
-            Shuffle(placeholders);
-
-            for (int i = 0; i < count; i++)
-            {
-                GameObject prefab = catalog.GetRandomAny();
-                ReplaceObject(placeholders[i], prefab);
+                ReplacePlaceholder(placeholder, specificTrapPrefab);
             }
         }
 
@@ -137,31 +137,67 @@ namespace GameLogic.Traps
             placeholders = GameObject.FindGameObjectsWithTag(placeholderTag) ?? Array.Empty<GameObject>();
         }
 
-        private bool ReplaceObject(GameObject source, GameObject prefab)
+        /// <summary>
+        /// Replaces a placeholder object with a spawned trap instance.
+        /// </summary>
+        /// <param name="placeholder">Scene object to replace.</param>
+        /// <param name="trapPrefab">Trap prefab to spawn.</param>
+        /// <returns>True when replacement succeeded; otherwise false.</returns>
+        private bool ReplacePlaceholder(GameObject placeholder, GameObject trapPrefab)
         {
-            if (!source || !prefab) return false;
+            if (!placeholder)
+                return false;
 
-            var parent = keepParent ? source.transform.parent : null;
-            var rotation = source.transform.rotation * prefab.transform.rotation;
-            var position = source.transform.position + prefab.transform.position;
+            if (!trapPrefab)
+            {
+                Debug.LogWarning("[TrapSpawner] Cannot replace placeholder. Trap prefab is null.");
+                return false;
+            }
 
-            var spawned = Instantiate(prefab, position, rotation, parent);
+            if (!trapFactory)
+            {
+                Debug.LogError("[TrapSpawner] Cannot replace placeholder. TrapFactory reference is missing.");
+                return false;
+            }
 
+            if (!trapFactory.Services || !trapFactory.Services.ObstacleManager)
+            {
+                Debug.LogError("[TrapSpawner] Cannot replace placeholder. ObstacleManager is missing from TrapServices.");
+                return false;
+            }
+
+            var parent = keepParent ? placeholder.transform.parent : null;
+
+            var spawnRotation = placeholder.transform.rotation * trapPrefab.transform.rotation;
+            var spawnPosition = placeholder.transform.position + trapPrefab.transform.position;
+
+            Vector3? scaleToApply = null;
             if (keepScale)
             {
-                spawned.transform.localScale = keepParent
-                    ? source.transform.localScale
-                    : source.transform.lossyScale;
+                scaleToApply = keepParent
+                    ? placeholder.transform.localScale
+                    : placeholder.transform.lossyScale;
             }
 
-            foreach (var trap in spawned.GetComponentsInChildren<TrapRuntime>(true))
-            {
-                trap.Initialize(services);
-            }
-            
-            services.ObstacleManager.RegisterObstacle(prefab, spawned.transform.position, spawned.transform.rotation, spawned.transform.localScale, parent, spawned);
-            
-            Destroy(source);
+            var spawned = trapFactory.SpawnTrap(
+                trapPrefab,
+                spawnPosition,
+                spawnRotation,
+                parent,
+                scaleToApply);
+
+            if (!spawned)
+                return false;
+
+            trapFactory.Services.ObstacleManager.RegisterObstacle(
+                trapPrefab,
+                spawned.transform.position,
+                spawned.transform.rotation,
+                spawned.transform.localScale,
+                parent,
+                spawned);
+
+            Destroy(placeholder);
             return true;
         }
 
