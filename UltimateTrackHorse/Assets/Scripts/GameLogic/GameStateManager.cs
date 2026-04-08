@@ -13,11 +13,11 @@ namespace GameLogic
 
         private int _initialPlaceholderCount;
 
-        public bool AreAllObstaclesPlaced(int activeObstacleCount)
+        public bool AreAllObstaclesPlaced(int registeredObstacleCount)
         {
             if (_initialPlaceholderCount == 0) return false;
             
-            return activeObstacleCount >= _initialPlaceholderCount;
+            return registeredObstacleCount >= _initialPlaceholderCount;
         }
 
         public bool IsLost(bool isTimeUp)

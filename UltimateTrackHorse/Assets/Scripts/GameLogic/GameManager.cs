@@ -288,10 +288,32 @@ namespace GameLogic
                 hasTimeExpired = false; // Reset the flag
             }
 
-            if (gameStateManager != null && obstacleManager != null && gameStateManager.AreAllObstaclesPlaced(obstacleManager.ActiveObstacleCount))
+            if (gameStateManager == null)
             {
-                HandleVictory();
-                return;
+                Debug.LogError("[GameManager] Victory check failed: gameStateManager is NULL.");
+            }
+            else if (obstacleManager == null)
+            {
+                Debug.LogError("[GameManager] Victory check failed: obstacleManager is NULL.");
+            }
+            else
+            {
+                Debug.Log(
+                    $"[GameManager] Victory check | RegisteredObstacleCount={obstacleManager.RegisteredObstacleCount} | ActiveObstacleCount={obstacleManager.ActiveObstacleCount}");
+            }
+            
+            if (gameStateManager != null && obstacleManager != null)
+            {
+                bool allPlaced = gameStateManager.AreAllObstaclesPlaced(obstacleManager.RegisteredObstacleCount);
+
+                Debug.Log($"[GameManager] AreAllObstaclesPlaced returned: {allPlaced}");
+
+                if (allPlaced)
+                {
+                    Debug.Log("[GameManager] Calling HandleVictory().");
+                    HandleVictory();
+                    return;
+                }
             }
 
             if (uiController != null)
@@ -334,7 +356,7 @@ namespace GameLogic
                 foreach (float t in currentMapLapTimes) if (t < bestLap) bestLap = t;
                 if (bestLap == float.MaxValue) bestLap = 0f;
 
-                int obsCount = obstacleManager != null ? obstacleManager.ActiveObstacleCount : 0;
+                int obsCount = obstacleManager != null ? obstacleManager.RegisteredObstacleCount : 0;
                 uiController.UpdatePostGameStats(true, bestLap, obsCount, lapCount);
                 uiController.ShowVictoryView();
             }

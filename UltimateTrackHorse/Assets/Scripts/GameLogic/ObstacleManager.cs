@@ -23,9 +23,15 @@ namespace GameLogic
             public Vector3 Scale;
             public Transform Parent;
         }
-
+        
+        
         private readonly List<ObstacleState> initialObstacleStates = new();
         private readonly List<GameObject> activeObstacles = new();
+        /// <summary>
+        /// Number of traps registered for this round.
+        /// This does not decrease when traps are consumed.
+        /// </summary>
+        public int RegisteredObstacleCount => initialObstacleStates.Count;
 
         /// <summary>
         /// Number of currently active tracked obstacles.
