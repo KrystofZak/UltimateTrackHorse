@@ -77,10 +77,7 @@ public class CarController : MonoBehaviour
     [SerializeField] private float maxSkidPitch = 1.5f;
     [SerializeField] private float skidIntensityRange = 15f;
     [SerializeField] private float skidSmoothSpeed = 10f;
-    [SerializeField] private float minSkidPitch = 0.5f;
-    [SerializeField] private float maxSkidPitch = 1.5f;
-    [SerializeField] private float skidIntensityRange = 15f;
-    [SerializeField] private float skidSmoothSpeed = 10f;
+    
 
     [Header("Surface Settings")]
     [Tooltip("Override car behaviour per surface layer. Layers not listed here use default multipliers (1.0).")]
@@ -419,13 +416,7 @@ public class CarController : MonoBehaviour
         ToggleSkidSmokes(isSkidding);
 
         UpdateSkidSound(isSkidding, sidewaysSpeed);
-        float sidewaysSpeed = Mathf.Abs(currentCarLocalVelocity.x);
-        bool isSkidding = isGrounded && sidewaysSpeed > minSkidVelocity;
-
-        ToggleSkidMarks(isSkidding);
-        ToggleSkidSmokes(isSkidding);
-
-        UpdateSkidSound(isSkidding, sidewaysSpeed);
+        
     }
 
     private void ToggleSkidMarks(bool toggle)
