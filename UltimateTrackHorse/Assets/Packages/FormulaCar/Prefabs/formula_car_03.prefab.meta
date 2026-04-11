@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 3091c576cf5cd92468b5afb7c5a9b584
+timeCreated: 1441543302
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 45502
+  packageName: Cartoon Formula One Car
+  packageVersion: 1.0
+  assetPath: Assets/FormulaCar/Prefabs/formula_car_03.prefab
+  uploadId: 158227

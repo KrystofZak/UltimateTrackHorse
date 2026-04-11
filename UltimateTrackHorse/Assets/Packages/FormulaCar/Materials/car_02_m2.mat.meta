@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 58e8a063bb4811a48aee1e9a571e9645
+timeCreated: 1441543225
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 45502
+  packageName: Cartoon Formula One Car
+  packageVersion: 1.0
+  assetPath: Assets/FormulaCar/Materials/car_02_m2.mat
+  uploadId: 158227
