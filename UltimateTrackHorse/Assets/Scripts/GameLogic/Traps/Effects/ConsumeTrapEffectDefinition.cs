@@ -1,6 +1,8 @@
-﻿using UnityEngine;
+﻿using GameLogic.Traps.Collisions;
+using GameLogic.Traps.Definitions;
+using UnityEngine;
 
-namespace GameLogic.Traps
+namespace GameLogic.Traps.Effects
 {
     /// <summary>
     /// Trap effect that marks the trap as consumed and destroys its runtime object.

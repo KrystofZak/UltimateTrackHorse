@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace GameLogic.Traps
+namespace GameLogic.Traps.Core
 {
     /// <summary>
     /// Creates fully initialized trap instances.

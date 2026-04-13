@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace GameLogic.Traps
+namespace GameLogic.Traps.Core
 {
     /// <summary>
     /// Asset containing categorized trap prefab pools and helper methods for random selection.

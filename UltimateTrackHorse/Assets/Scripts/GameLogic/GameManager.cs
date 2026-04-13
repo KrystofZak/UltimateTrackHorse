@@ -6,6 +6,7 @@ using MapGeneration;
 using UI;
 using GameLogic.Traps;
 using GameLogic.Ghost;
+using GameLogic.Traps.Core;
 using UnityEngine.Rendering.UI;
 
 namespace GameLogic

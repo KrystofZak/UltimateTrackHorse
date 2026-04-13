@@ -1,6 +1,7 @@
-﻿using UnityEngine;
+﻿using GameLogic.Traps.Collisions;
+using UnityEngine;
 
-namespace GameLogic.Traps
+namespace GameLogic.Traps.Definitions
 {
     /// <summary>
     /// Base asset for a single action performed when a trap activates.

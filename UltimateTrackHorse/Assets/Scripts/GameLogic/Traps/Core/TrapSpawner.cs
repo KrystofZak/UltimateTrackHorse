@@ -2,7 +2,7 @@
 using UnityEngine;
 using Random = UnityEngine.Random;
 
-namespace GameLogic.Traps
+namespace GameLogic.Traps.Core
 {
     /// <summary>
     /// Replaces tagged placeholder objects in the scene with trap prefabs.

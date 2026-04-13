@@ -1,6 +1,7 @@
-﻿using UnityEngine;
+﻿using GameLogic.Audio;
+using UnityEngine;
 
-namespace GameLogic.Traps
+namespace GameLogic.Traps.Core
 {
     /// <summary>
     /// Central container for shared systems used by trap runtimes and effects.
@@ -9,7 +10,8 @@ namespace GameLogic.Traps
     {
         [SerializeField] private ScreenOverlayService screenOverlay;
         [SerializeField] private ObstacleManager obstacleManager;
-
+        [SerializeField] private AudioManager audioManager;
+        
         /// <summary>
         /// Service responsible for playing and clearing screen overlays.
         /// </summary>
@@ -19,5 +21,10 @@ namespace GameLogic.Traps
         /// Service responsible for managing obstacles.
         /// </summary>
         public ObstacleManager ObstacleManager => obstacleManager;
+        
+        /// <summary>
+        /// Service responsible for managing trap sfx.
+        /// </summary>
+        public AudioManager Audio => audioManager;
     }
 }

@@ -1,6 +1,8 @@
-﻿using UnityEngine;
+﻿using GameLogic.Traps.Collisions;
+using GameLogic.Traps.Definitions;
+using UnityEngine;
 
-namespace GameLogic.Traps
+namespace GameLogic.Traps.Core
 {
     /// <summary>
     /// Runtime component responsible for validating and executing a trap definition.

@@ -1,6 +1,7 @@
-﻿using UnityEngine;
+﻿using GameLogic.Traps.Core;
+using UnityEngine;
 
-namespace GameLogic.Traps
+namespace GameLogic.Traps.Collisions
 {
     /// <summary>
     /// Forwards collision and trigger callbacks to the owning <see cref="TrapRuntime"/>.

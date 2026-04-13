@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace GameLogic.Traps
+namespace GameLogic.Traps.Definitions
 {
     /// <summary>
     /// Enum for different types of overlays

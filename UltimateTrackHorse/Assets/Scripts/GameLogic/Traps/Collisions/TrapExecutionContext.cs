@@ -1,6 +1,7 @@
-﻿using UnityEngine;
+﻿using GameLogic.Traps.Core;
+using UnityEngine;
 
-namespace GameLogic.Traps
+namespace GameLogic.Traps.Collisions
 {
     /// <summary>
     /// Immutable data bundle passed to trap effects during activation.

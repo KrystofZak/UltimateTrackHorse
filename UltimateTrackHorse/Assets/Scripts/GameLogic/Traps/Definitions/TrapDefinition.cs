@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace GameLogic.Traps
+namespace GameLogic.Traps.Definitions
 {
     /// <summary>
     /// High-level grouping used to categorize trap prefabs.
