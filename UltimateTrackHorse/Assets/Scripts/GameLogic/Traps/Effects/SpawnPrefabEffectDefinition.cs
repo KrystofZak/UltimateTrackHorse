@@ -11,6 +11,7 @@ namespace GameLogic.Traps
         [SerializeField] private GameObject prefab;
         [SerializeField] private Vector3 localOffset;
         [SerializeField] private bool useTrapRotation = true;
+        [SerializeField] private float effectDuration = 2f;
 
         /// <summary>
         /// Instantiates the configured prefab at the trap position plus the configured local offset.
@@ -26,7 +27,8 @@ namespace GameLogic.Traps
             var rotation = useTrapRotation
                 ? context.Trap.transform.rotation
                 : Quaternion.identity;
-            Instantiate(prefab, position, rotation);
+            var effect = Instantiate(prefab, position, rotation);
+            Destroy(effect, effectDuration);
         }
     }
 }
