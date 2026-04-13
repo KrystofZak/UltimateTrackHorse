@@ -13,6 +13,22 @@ namespace GameLogic.Ghost
         private void Start()
         {
             LoadAndApplyCurrentMapGhost();
+            LoadReferences();
+        }
+
+        private void LoadReferences()
+        {
+            if (!recorder)
+            {
+                recorder = FindAnyObjectByType<GhostLapRecorder>();
+                Debug.LogWarning("Recorder is not assigned. Loaded from scene.");
+            }
+
+            if (!replayController)
+            {
+                replayController = FindAnyObjectByType<GhostReplayController>();
+                Debug.LogWarning("ReplayController is not assigned. Loaded from scene.");
+            }
         }
 
         public void StartLap()
