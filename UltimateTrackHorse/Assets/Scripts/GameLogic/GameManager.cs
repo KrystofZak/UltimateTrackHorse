@@ -5,6 +5,7 @@ using Cinemachine;
 using MapGeneration;
 using UI;
 using GameLogic.Traps;
+using GameLogic.Ghost;
 using UnityEngine.Rendering.UI;
 
 namespace GameLogic
@@ -20,6 +21,7 @@ namespace GameLogic
         [SerializeField] private GameStateManager gameStateManager;
         [SerializeField] private ObstacleManager obstacleManager;
         [SerializeField] private MapGenerator mapGenerator;
+        [SerializeField] private GhostSystem ghostSystem;
 
         // Replaced old UIManager with the new UIController
         private UIController uiController;
@@ -84,6 +86,8 @@ namespace GameLogic
             }
         }
 
+        private Coroutine countdownCoroutine;
+
         public void RestartCurrentLap()
         {
             Debug.Log("Restarting lap...");
@@ -97,7 +101,8 @@ namespace GameLogic
             }
             
             // Commence the 3.. 2.. 1.. Sequence
-            StartCoroutine(RaceCountdownCoroutine());
+            if (countdownCoroutine != null) StopCoroutine(countdownCoroutine);
+            countdownCoroutine = StartCoroutine(RaceCountdownCoroutine());
         }
 
         public void DestroyTrack()
@@ -116,6 +121,11 @@ namespace GameLogic
             }
             
             lapCount = 0; // Reset lap count
+            
+            if (ghostSystem && mapGenerator)
+            {
+                ghostSystem.SetMapId(mapGenerator.LastUsedSeed.ToString()); // unique ID for a map
+            }
 
             StartCoroutine(InitializeGameStateDelayed());
 
@@ -140,7 +150,8 @@ namespace GameLogic
             Time.timeScale = 1f;
             isGameActive = true;
 
-            StartCoroutine(RaceCountdownCoroutine());
+            if (countdownCoroutine != null) StopCoroutine(countdownCoroutine);
+            countdownCoroutine = StartCoroutine(RaceCountdownCoroutine());
         }
 
         
@@ -203,7 +214,17 @@ namespace GameLogic
             }
 
             // Commence the 3.. 2.. 1.. Sequence
-            StartCoroutine(RaceCountdownCoroutine());
+            if (countdownCoroutine != null) StopCoroutine(countdownCoroutine);
+            countdownCoroutine = StartCoroutine(RaceCountdownCoroutine());
+        }
+
+        public void StopRaceCountdown()
+        {
+            if (countdownCoroutine != null)
+            {
+                StopCoroutine(countdownCoroutine);
+                countdownCoroutine = null;
+            }
         }
 
         /// <summary>
@@ -237,6 +258,12 @@ namespace GameLogic
             {
                 timer.StartTimer();
             }
+            
+            // Begin recording lap for a ghost car
+            if (ghostSystem != null)
+            {
+                ghostSystem.StartLap();
+            }
 
             // Hold the "GO!" sign on screen for just one final second before hiding it
             yield return new WaitForSecondsRealtime(1f);
@@ -261,10 +288,32 @@ namespace GameLogic
                 hasTimeExpired = false; // Reset the flag
             }
 
-            if (gameStateManager != null && obstacleManager != null && gameStateManager.AreAllObstaclesPlaced(obstacleManager.ActiveObstacleCount))
+            if (gameStateManager == null)
             {
-                HandleVictory();
-                return;
+                Debug.LogError("[GameManager] Victory check failed: gameStateManager is NULL.");
+            }
+            else if (obstacleManager == null)
+            {
+                Debug.LogError("[GameManager] Victory check failed: obstacleManager is NULL.");
+            }
+            else
+            {
+                Debug.Log(
+                    $"[GameManager] Victory check | RegisteredObstacleCount={obstacleManager.RegisteredObstacleCount} | ActiveObstacleCount={obstacleManager.ActiveObstacleCount}");
+            }
+            
+            if (gameStateManager != null && obstacleManager != null)
+            {
+                bool allPlaced = gameStateManager.AreAllObstaclesPlaced(obstacleManager.RegisteredObstacleCount);
+
+                Debug.Log($"[GameManager] AreAllObstaclesPlaced returned: {allPlaced}");
+
+                if (allPlaced)
+                {
+                    Debug.Log("[GameManager] Calling HandleVictory().");
+                    HandleVictory();
+                    return;
+                }
             }
 
             if (uiController != null)
@@ -278,6 +327,9 @@ namespace GameLogic
                 Debug.Log("Lap time: " + timer.timeElapsed);
                 // Record the lap time into the history tracker
                 currentMapLapTimes.Add(timer.timeElapsed);
+                
+                // Finish recording data for ghost car
+                if (ghostSystem) ghostSystem.FinishLap(timer.timeElapsed);
             }
 
             // Immediately send the updated history list to the UI Controller to be drawn
@@ -300,8 +352,13 @@ namespace GameLogic
             Debug.Log("Victory! All obstacles placed and lap finished!");
             if (uiController != null)
             {
-                // TODO: Žegy - Show some victory screen with smting like lap history,
-                // TODO: total time, and a "Next Track" button that generates a new track or idk
+                float bestLap = float.MaxValue;
+                foreach (float t in currentMapLapTimes) if (t < bestLap) bestLap = t;
+                if (bestLap == float.MaxValue) bestLap = 0f;
+
+                int obsCount = obstacleManager != null ? obstacleManager.RegisteredObstacleCount : 0;
+                uiController.UpdatePostGameStats(true, bestLap, obsCount, lapCount);
+                uiController.ShowVictoryView();
             }
             
             if (timer != null)
@@ -324,7 +381,13 @@ namespace GameLogic
             Debug.Log("Loss! The car has stopped after time ran out.");
             if (uiController != null)
             {
-                //
+                float bestLap = float.MaxValue;
+                foreach (float t in currentMapLapTimes) if (t < bestLap) bestLap = t;
+                if (bestLap == float.MaxValue) bestLap = 0f;
+
+                int obsCount = obstacleManager != null ? obstacleManager.ActiveObstacleCount : 0;
+                uiController.UpdatePostGameStats(false, bestLap, obsCount);
+                uiController.ShowDefeatView();
             }
 
             CarController carController = playerCar.GetComponent<CarController>();

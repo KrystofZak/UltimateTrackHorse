@@ -35,7 +35,7 @@ namespace GameLogic
                 if (gm != null)
                 {
                     Vector3 pos = respawnPoint != null ? respawnPoint.position : transform.position;
-                    gm.SetRespawnPoint(pos + new Vector3(0, 0.5f, 0), correctRotation);
+                    gm.SetRespawnPoint(pos + new Vector3(0, 1f, 0), correctRotation);
                     Debug.Log("Checkpoint activated! New respawn point set.");
                 }
             }

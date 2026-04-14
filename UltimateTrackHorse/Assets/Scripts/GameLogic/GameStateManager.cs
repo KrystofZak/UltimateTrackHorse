@@ -9,15 +9,15 @@ namespace GameLogic
         
         [Header("Loss Conditions")]
         [SerializeField] private Rigidbody playerCarRigidbody;
-        [SerializeField] private float stoppedVelocityThreshold = 0.1f;
+        [SerializeField] private float stoppedVelocityThreshold = 0.5f;
 
         private int _initialPlaceholderCount;
 
-        public bool AreAllObstaclesPlaced(int activeObstacleCount)
+        public bool AreAllObstaclesPlaced(int registeredObstacleCount)
         {
             if (_initialPlaceholderCount == 0) return false;
             
-            return activeObstacleCount >= _initialPlaceholderCount;
+            return registeredObstacleCount >= _initialPlaceholderCount;
         }
 
         public bool IsLost(bool isTimeUp)
