@@ -1,6 +1,7 @@
-﻿using UnityEngine;
+﻿using GameLogic.Traps.Services;
+using UnityEngine;
 
-namespace GameLogic.Traps
+namespace GameLogic
 {
     /// <summary>
     /// Provides player input for manually wiping the active trap screen overlay.
