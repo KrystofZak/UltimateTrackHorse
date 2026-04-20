@@ -1,5 +1,7 @@
-﻿using UnityEngine;
+﻿using System.Diagnostics;
+using UnityEngine;
 using UnityEngine.Audio;
+using Debug = UnityEngine.Debug;
 
 namespace GameLogic.Audio
 {
@@ -62,7 +64,11 @@ namespace GameLogic.Audio
 
         private void SetVolume(string parameterName, float normalized)
         {
-            if (!mixer) return;
+            if (!mixer)
+            {
+                Debug.Log("Mixer not set");
+                return;
+            }
 
             normalized = Mathf.Clamp(normalized, 0.0001f, 1f);
             var decibels = Mathf.Log10(normalized) * 20f;
