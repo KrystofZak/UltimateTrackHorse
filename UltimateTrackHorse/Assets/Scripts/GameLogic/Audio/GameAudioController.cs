@@ -48,7 +48,7 @@ namespace GameLogic.Audio
         private void HandleCountdownGo() => audioManager?.PlayUI(countdownGoCue);
         private void HandleRaceStarted() => audioManager?.PlayMusic(gameplayMusicCue);
         private void HandleLapFinished() => audioManager?.PlaySfx2D(lapFinishedCue);
-        private void HandleVictory() => audioManager?.PlaySfx2D(victoryCue);
-        private void HandleDefeat() => audioManager?.PlaySfx2D(defeatCue);
+        private void HandleVictory() => audioManager?.PlayMusic(victoryCue);
+        private void HandleDefeat() => audioManager?.PlayMusic(defeatCue);
     }
 }

@@ -41,7 +41,7 @@ namespace GameLogic.Audio
             musicSource.clip = clip;
             musicSource.volume = cue.GetRandomVolume();
             musicSource.pitch = cue.GetRandomPitch();
-            musicSource.loop = true;
+            musicSource.loop = cue.Loop;
             musicSource.spatialBlend = 0f;
             musicSource.Play();
         }
