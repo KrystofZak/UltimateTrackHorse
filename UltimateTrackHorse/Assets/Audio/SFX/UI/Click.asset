@@ -12,8 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 327f12ab155b434abfc813ace7a636be, type: 3}
   m_Name: Click
   m_EditorClassIdentifier: Assembly-CSharp::GameLogic.Audio.AudioCue
-  clips: []
-  category: 2
+  clips:
+  - {fileID: 8300000, guid: 4f6ac70b983857343a2df284492eb729, type: 3}
+  category: 1
   spatial: 0
   loop: 0
   volumeRange: {x: 1, y: 1}

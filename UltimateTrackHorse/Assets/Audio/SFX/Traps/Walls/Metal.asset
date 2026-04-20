@@ -10,12 +10,11 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 327f12ab155b434abfc813ace7a636be, type: 3}
-  m_Name: Defeat
+  m_Name: Metal
   m_EditorClassIdentifier: Assembly-CSharp::GameLogic.Audio.AudioCue
   clips:
-  - {fileID: 8300000, guid: 1b4cad4fa97a11944a0d1ce51b34cb89, type: 3}
-  - {fileID: 8300000, guid: e10d0312e010b5341a8794d1f9c7f70b, type: 3}
-  category: 0
+  - {fileID: 8300000, guid: 8eed44270dc2a074fabfb9047078e068, type: 3}
+  category: 2
   spatial: 0
   loop: 0
   volumeRange: {x: 1, y: 1}

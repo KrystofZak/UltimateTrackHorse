@@ -10,13 +10,12 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 327f12ab155b434abfc813ace7a636be, type: 3}
-  m_Name: Defeat
+  m_Name: Splash
   m_EditorClassIdentifier: Assembly-CSharp::GameLogic.Audio.AudioCue
   clips:
-  - {fileID: 8300000, guid: 1b4cad4fa97a11944a0d1ce51b34cb89, type: 3}
-  - {fileID: 8300000, guid: e10d0312e010b5341a8794d1f9c7f70b, type: 3}
-  category: 0
-  spatial: 0
+  - {fileID: 8300000, guid: a6dde8d00fe5e084a8e4bd52fb3e7c74, type: 3}
+  category: 2
+  spatial: 1
   loop: 0
   volumeRange: {x: 1, y: 1}
   pitchRange: {x: 1, y: 1}

@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Menu
   m_EditorClassIdentifier: Assembly-CSharp::GameLogic.Audio.AudioCue
   clips: []
-  category: 2
+  category: 0
   spatial: 0
   loop: 0
   volumeRange: {x: 1, y: 1}

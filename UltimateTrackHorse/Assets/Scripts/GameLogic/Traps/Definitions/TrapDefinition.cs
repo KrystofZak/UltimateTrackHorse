@@ -64,10 +64,5 @@ namespace GameLogic.Traps.Definitions
         /// Effects executed in order when the trap activates.
         /// </summary>
         public TrapEffectDefinition[] effects;
-        
-        /// <summary>
-        /// Sound effects 
-        /// </summary>
-        public AudioClip[] audioClips;
     }
 }

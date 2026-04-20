@@ -32,5 +32,5 @@ MonoBehaviour:
   - {fileID: 7835453267651020157, guid: e30903231f6dca247849cc746125dc3b, type: 3}
   surfacePrefabs:
   - {fileID: 952152659579891679, guid: 25dda98240d7c0e43a434583a6c258ff, type: 3}
-  - {fileID: 9059011431584462864, guid: 3e32e660ef4467a49b7c81b3454c9874, type: 3}
+  - {fileID: 1269551705240797111, guid: bab6d10bf4f8c3f40a73254542fd5edf, type: 3}
   - {fileID: 7573716507071989479, guid: 1ac106775435b4342affdae0a430ff1d, type: 3}

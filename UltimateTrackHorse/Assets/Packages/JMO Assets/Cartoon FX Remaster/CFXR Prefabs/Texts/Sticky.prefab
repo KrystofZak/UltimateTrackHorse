@@ -34796,7 +34796,7 @@ GameObject:
   - component: {fileID: 2079330610454654873}
   - component: {fileID: 6752173579200253914}
   m_Layer: 0
-  m_Name: Splash_Effect 1
+  m_Name: Sticky
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

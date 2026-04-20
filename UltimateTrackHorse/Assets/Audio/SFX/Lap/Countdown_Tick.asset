@@ -12,7 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 327f12ab155b434abfc813ace7a636be, type: 3}
   m_Name: Countdown_Tick
   m_EditorClassIdentifier: Assembly-CSharp::GameLogic.Audio.AudioCue
-  clips: []
+  clips:
+  - {fileID: 8300000, guid: a96282af38e35244f8aea5bca2560aac, type: 3}
   category: 2
   spatial: 0
   loop: 0

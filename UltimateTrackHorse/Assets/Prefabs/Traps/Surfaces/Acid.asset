@@ -12,8 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: eaa3982a7290443dbdcfb2434ea3a062, type: 3}
   m_Name: Acid
   m_EditorClassIdentifier: Assembly-CSharp::GameLogic.Traps.TrapDefinition
-  category: 0
-  activationMode: 0
-  repeatCooldown: 0
+  category: 2
+  activationMode: 1
+  repeatCooldown: 1
   effects:
   - {fileID: 11400000, guid: 0dc2ab45a14346f4db68241227c2f7f0, type: 2}
+  audioClips: []

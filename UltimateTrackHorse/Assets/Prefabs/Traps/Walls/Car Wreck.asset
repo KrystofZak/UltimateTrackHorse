@@ -13,7 +13,9 @@ MonoBehaviour:
   m_Name: Car Wreck
   m_EditorClassIdentifier: Assembly-CSharp::GameLogic.Traps.TrapDefinition
   category: 0
-  activationMode: 0
-  repeatCooldown: 0
+  activationMode: 1
+  repeatCooldown: 0.5
   effects:
   - {fileID: 11400000, guid: 0b51d9aef5ddadc4d8390e6a9915a353, type: 2}
+  - {fileID: 11400000, guid: cb5083ab79899e840bff0c82258a6554, type: 2}
+  - {fileID: 11400000, guid: 93b13e48bf3f0db478e89106657f4c59, type: 2}
