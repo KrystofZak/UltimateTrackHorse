@@ -1,0 +1,21 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 23c095b56cef4fecb715bbd556366caf, type: 3}
+  m_Name: Blue Particle Profile
+  m_EditorClassIdentifier: Assembly-CSharp::GameLogic.Traps.Definitions.ScreenParticleProfile
+  particlePrefab: {fileID: 3310023809540067669, guid: fd5746852e8ed304b9c2b3667d0b3a87, type: 3}
+  tint: {r: 0.08627451, g: 0.20784314, b: 0.8509804, a: 0.9}
+  localPosition: {x: 0, y: -1, z: 4}
+  localEulerAngles: {x: 0, y: -1, z: 0}
+  localScale: {x: 0.6, y: 0.5, z: 0.6}
+  cleanupDelay: 4
+  interruptFadeOut: 0.15

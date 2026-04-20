@@ -16,4 +16,5 @@ MonoBehaviour:
   activationMode: 1
   repeatCooldown: 0.2
   effects:
-  - {fileID: 11400000, guid: 5919c96208ba4bc44bd94a102ad1f46c, type: 2}
+  - {fileID: 11400000, guid: c70dd3f37e405a244a2a884f7b8b595e, type: 2}
+  - {fileID: 11400000, guid: ce334f873b47ac147b0e45a33524b6d9, type: 2}
