@@ -5,7 +5,7 @@ using GameLogic.Traps.Definitions;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace GameLogic.Traps
+namespace GameLogic.Traps.Services
 {
     /// <summary>
     /// Manages temporary full-screen overlay splats used by trap effects.

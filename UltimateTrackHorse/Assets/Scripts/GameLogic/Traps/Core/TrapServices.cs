@@ -1,5 +1,6 @@
 ﻿using System;
 using GameLogic.Audio;
+using GameLogic.Traps.Services;
 using UnityEngine;
 
 namespace GameLogic.Traps.Core
@@ -12,11 +13,17 @@ namespace GameLogic.Traps.Core
         [SerializeField] private ScreenOverlayService screenOverlay;
         [SerializeField] private ObstacleManager obstacleManager;
         [SerializeField] private AudioManager audioManager;
+        [SerializeField] private ScreenParticleService screenParticles;
         
         /// <summary>
         /// Service responsible for playing and clearing screen overlays.
         /// </summary>
         public ScreenOverlayService ScreenOverlay => screenOverlay;
+        
+        /// <summary>
+        /// Service responsible for playing screen-space particles.
+        /// </summary>
+        public ScreenParticleService ScreenParticles => screenParticles;
 
         /// <summary>
         /// Service responsible for managing obstacles.
@@ -31,6 +38,7 @@ namespace GameLogic.Traps.Core
         private void Awake()
         {
             if (!screenOverlay) screenOverlay = FindAnyObjectByType<ScreenOverlayService>();
+            if (!screenParticles) screenParticles = FindAnyObjectByType<ScreenParticleService>();
             if (!obstacleManager) obstacleManager = FindAnyObjectByType<ObstacleManager>();
             if (!audioManager) audioManager = FindAnyObjectByType<AudioManager>();
         }
