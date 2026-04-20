@@ -1,13 +1,12 @@
+using System;
 using System.Collections.Generic;
 using System.Collections; // Added for Coroutines
 using UnityEngine;
 using Cinemachine;
 using MapGeneration;
 using UI;
-using GameLogic.Traps;
 using GameLogic.Ghost;
 using GameLogic.Traps.Core;
-using UnityEngine.Rendering.UI;
 
 namespace GameLogic
 {
@@ -23,6 +22,13 @@ namespace GameLogic
         [SerializeField] private ObstacleManager obstacleManager;
         [SerializeField] private MapGenerator mapGenerator;
         [SerializeField] private GhostSystem ghostSystem;
+        
+        public event Action<int> OnCountdownTick;
+        public event Action OnCountdownGo;
+        public event Action OnRaceStarted;
+        public event Action OnLapFinished;
+        public event Action OnVictory;
+        public event Action OnDefeat;
 
         // Replaced old UIManager with the new UIController
         private UIController uiController;
@@ -245,11 +251,16 @@ namespace GameLogic
             {
                 if (uiController != null) uiController.UpdateCountdownText(i.ToString());
                 // Crucial to use real time just in case TimeScale somehow locked up
+                OnCountdownTick?.Invoke(i);
                 yield return new WaitForSecondsRealtime(1f); 
             }
 
             // "GO!" state
-            if (uiController != null) uiController.UpdateCountdownText("GO!");
+            if (uiController != null)
+            {
+                uiController.UpdateCountdownText("GO!");
+                OnCountdownGo?.Invoke();
+            }
             
             // Release the physical brakes
             if (carController != null) carController.isInputEnabled = true;
@@ -265,6 +276,8 @@ namespace GameLogic
             {
                 ghostSystem.StartLap();
             }
+            
+            OnRaceStarted?.Invoke();
 
             // Hold the "GO!" sign on screen for just one final second before hiding it
             yield return new WaitForSecondsRealtime(1f);
@@ -301,6 +314,7 @@ namespace GameLogic
             {
                 Debug.Log(
                     $"[GameManager] Victory check | RegisteredObstacleCount={obstacleManager.RegisteredObstacleCount} | ActiveObstacleCount={obstacleManager.ActiveObstacleCount}");
+                OnLapFinished?.Invoke();
             }
             
             if (gameStateManager != null && obstacleManager != null)
@@ -350,6 +364,7 @@ namespace GameLogic
             if (!isGameActive) return;
             isGameActive = false;
 
+            OnVictory?.Invoke();
             Debug.Log("Victory! All obstacles placed and lap finished!");
             if (uiController != null)
             {
@@ -379,6 +394,7 @@ namespace GameLogic
             if (!isGameActive) return;
             isGameActive = false;
 
+            OnDefeat?.Invoke();
             Debug.Log("Loss! The car has stopped after time ran out.");
             if (uiController != null)
             {
