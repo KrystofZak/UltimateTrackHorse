@@ -1,4 +1,5 @@
-﻿using GameLogic.Audio;
+﻿using System;
+using GameLogic.Audio;
 using UnityEngine;
 
 namespace GameLogic.Traps.Core
@@ -26,5 +27,12 @@ namespace GameLogic.Traps.Core
         /// Service responsible for managing trap sfx.
         /// </summary>
         public AudioManager Audio => audioManager;
+
+        private void Awake()
+        {
+            if (!screenOverlay) screenOverlay = FindAnyObjectByType<ScreenOverlayService>();
+            if (!obstacleManager) obstacleManager = FindAnyObjectByType<ObstacleManager>();
+            if (!audioManager) audioManager = FindAnyObjectByType<AudioManager>();
+        }
     }
 }
