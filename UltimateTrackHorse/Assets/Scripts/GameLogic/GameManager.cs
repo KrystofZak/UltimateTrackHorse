@@ -36,6 +36,7 @@ namespace GameLogic
         private int lapCount;
         private float totalTimeComplexity;
         private Timer timer;
+        private bool hasRaceStartedThisSession = false; // Temp fix for Game soundtrack
         
         // List to hold the history of lap completion times for the current track session
         private List<float> currentMapLapTimes = new List<float>();
@@ -122,6 +123,8 @@ namespace GameLogic
             // Fully wipe the history list and hide the panel when generating a brand new track
             currentMapLapTimes.Clear();
             hasTimeExpired = false;
+            hasRaceStartedThisSession = false;
+                
             if (uiController != null)
             {
                 uiController.HideLapHistory();
@@ -259,8 +262,9 @@ namespace GameLogic
             if (uiController != null)
             {
                 uiController.UpdateCountdownText("GO!");
-                OnCountdownGo?.Invoke();
             }
+            
+            OnCountdownGo?.Invoke();
             
             // Release the physical brakes
             if (carController != null) carController.isInputEnabled = true;
@@ -277,7 +281,11 @@ namespace GameLogic
                 ghostSystem.StartLap();
             }
             
-            OnRaceStarted?.Invoke();
+            if (!hasRaceStartedThisSession)
+            {
+                hasRaceStartedThisSession = true;
+                OnRaceStarted?.Invoke();
+            }
 
             // Hold the "GO!" sign on screen for just one final second before hiding it
             yield return new WaitForSecondsRealtime(1f);
