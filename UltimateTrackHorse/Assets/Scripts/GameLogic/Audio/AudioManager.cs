@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.Collections;
+using UnityEngine;
 using UnityEngine.Audio;
 
 namespace GameLogic.Audio
@@ -13,6 +14,7 @@ namespace GameLogic.Audio
         [SerializeField] private AudioMixerGroup musicMixerGroup;
         [SerializeField] private AudioMixerGroup uiMixerGroup;
         [SerializeField] private AudioMixerGroup sfxMixerGroup;
+        [SerializeField] private AudioMixerGroup vehicleMixerGroup;
 
         [Header("Optional Parent")]
         [SerializeField] private Transform oneShotRoot;
@@ -26,16 +28,16 @@ namespace GameLogic.Audio
                 oneShotRoot = root.transform;
             }
 
-            ConfigurePersistentSource(musicSource, musicMixerGroup, loop: true);
-            ConfigurePersistentSource(uiSource, uiMixerGroup, loop: false);
+            ConfigurePersistentSource(musicSource, musicMixerGroup, true);
+            ConfigurePersistentSource(uiSource, uiMixerGroup, false);
         }
 
         public void PlayMusic(AudioCue cue)
         {
-            if (!cue) return;
+            if (!cue || musicSource == null) return;
 
             var clip = cue.GetRandomClip();
-            if (!clip || !musicSource) return;
+            if (!clip) return;
 
             musicSource.outputAudioMixerGroup = musicMixerGroup;
             musicSource.clip = clip;
@@ -48,12 +50,13 @@ namespace GameLogic.Audio
 
         public void StopMusic()
         {
-            if (musicSource) musicSource.Stop();
+            if (musicSource != null)
+                musicSource.Stop();
         }
 
         public void PlayUI(AudioCue cue)
         {
-            if (!cue || !uiSource) return;
+            if (!cue || uiSource == null) return;
 
             var clip = cue.GetRandomClip();
             if (!clip) return;
@@ -91,6 +94,74 @@ namespace GameLogic.Audio
             Destroy(source.gameObject, clip.length / Mathf.Max(0.01f, source.pitch));
         }
 
+        public AudioSource CreateManagedLoop(AudioCue cue, Transform followTarget, string objectName = "ManagedLoop")
+        {
+            if (cue == null || followTarget == null)
+                return null;
+
+            var clip = cue.GetRandomClip();
+            if (!clip)
+                return null;
+
+            var go = new GameObject(objectName);
+            go.transform.SetParent(followTarget, false);
+            go.transform.localPosition = Vector3.zero;
+
+            var source = go.AddComponent<AudioSource>();
+            source.playOnAwake = false;
+
+            ApplyCue(source, cue, clip);
+            source.loop = true;
+            source.volume = 0f;
+
+            source.Play();
+            return source;
+        }
+
+        public void SetManagedLoopState(AudioSource source, float normalizedVolume, float pitch)
+        {
+            if (source == null) return;
+
+            source.volume = Mathf.Clamp01(normalizedVolume);
+            source.pitch = Mathf.Max(0.01f, pitch);
+        }
+
+        public void StopManagedLoop(AudioSource source, float fadeOutDuration = 0f)
+        {
+            if (source == null) return;
+
+            if (fadeOutDuration <= 0f)
+            {
+                source.Stop();
+                Destroy(source.gameObject);
+                return;
+            }
+
+            StartCoroutine(FadeOutAndDestroy(source, fadeOutDuration));
+        }
+
+        private IEnumerator FadeOutAndDestroy(AudioSource source, float duration)
+        {
+            if (source == null) yield break;
+
+            float startVolume = source.volume;
+            float time = 0f;
+
+            while (time < duration && source != null)
+            {
+                time += Time.unscaledDeltaTime;
+                float t = Mathf.Clamp01(time / duration);
+                source.volume = Mathf.Lerp(startVolume, 0f, t);
+                yield return null;
+            }
+
+            if (source != null)
+            {
+                source.Stop();
+                Destroy(source.gameObject);
+            }
+        }
+
         private AudioSource CreateTempSource(string objectName, Vector3 position, bool spatial)
         {
             var go = new GameObject(objectName);
@@ -123,13 +194,14 @@ namespace GameLogic.Audio
             {
                 AudioCategory.Music => musicMixerGroup,
                 AudioCategory.UI => uiMixerGroup,
+                AudioCategory.Vehicle => vehicleMixerGroup != null ? vehicleMixerGroup : sfxMixerGroup,
                 _ => sfxMixerGroup
             };
         }
 
         private static void ConfigurePersistentSource(AudioSource source, AudioMixerGroup group, bool loop)
         {
-            if (!source) return;
+            if (source == null) return;
 
             source.playOnAwake = false;
             source.loop = loop;

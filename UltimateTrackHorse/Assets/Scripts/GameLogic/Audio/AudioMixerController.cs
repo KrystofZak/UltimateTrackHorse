@@ -14,11 +14,14 @@ namespace GameLogic.Audio
         [SerializeField] private string musicVolumeParameter = "MusicVolume";
         [SerializeField] private string sfxVolumeParameter = "SfxVolume";
         [SerializeField] private string uiVolumeParameter = "UiVolume";
+        [SerializeField] private string carVolumeParameter = "CarVolume";
+
 
         private const string MasterKey = "audio.master";
         private const string MusicKey = "audio.music";
         private const string SfxKey = "audio.sfx";
         private const string UiKey = "audio.ui";
+        private const string CarKey = "audio.car";
 
         private void Start()
         {
@@ -48,11 +51,17 @@ namespace GameLogic.Audio
             SetVolume(uiVolumeParameter, normalized);
             PlayerPrefs.SetFloat(UiKey, normalized);
         }
+        public void SetCarVolume(float normalized)
+        {
+            SetVolume(carVolumeParameter, normalized);
+            PlayerPrefs.SetFloat(CarKey, normalized);
+        }
 
         public float GetSavedMasterVolume() => PlayerPrefs.GetFloat(MasterKey, 1f);
         public float GetSavedMusicVolume() => PlayerPrefs.GetFloat(MusicKey, 1f);
         public float GetSavedSfxVolume() => PlayerPrefs.GetFloat(SfxKey, 1f);
         public float GetSavedUiVolume() => PlayerPrefs.GetFloat(UiKey, 1f);
+        public float GetSavedCarVolume() => PlayerPrefs.GetFloat(CarKey, 1f);
 
         private void LoadVolumes()
         {
@@ -60,6 +69,7 @@ namespace GameLogic.Audio
             SetVolume(musicVolumeParameter, GetSavedMusicVolume());
             SetVolume(sfxVolumeParameter, GetSavedSfxVolume());
             SetVolume(uiVolumeParameter, GetSavedUiVolume());
+            SetVolume(carVolumeParameter, GetSavedCarVolume());
         }
 
         private void SetVolume(string parameterName, float normalized)

@@ -6,7 +6,8 @@ namespace GameLogic.Audio
     {
         Music,
         UI,
-        Sfx
+        Sfx,
+        Vehicle
     }
 
     [CreateAssetMenu(menuName = "Game/Audio/Audio Cue")]
