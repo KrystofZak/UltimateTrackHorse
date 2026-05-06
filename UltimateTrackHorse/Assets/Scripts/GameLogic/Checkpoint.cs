@@ -21,7 +21,7 @@ namespace GameLogic
         }
 
         // Reset checkpoint to be ready for the next round
-        private void ResetCheckpoint()
+        public void ResetCheckpoint()
         {
             isActivated = false;
         }
@@ -36,6 +36,7 @@ namespace GameLogic
                 {
                     Vector3 pos = respawnPoint != null ? respawnPoint.position : transform.position;
                     gm.SetRespawnPoint(pos + new Vector3(0, 1f, 0), correctRotation);
+                    gm.CheckpointCrossed();
                     Debug.Log("Checkpoint activated! New respawn point set.");
                 }
             }

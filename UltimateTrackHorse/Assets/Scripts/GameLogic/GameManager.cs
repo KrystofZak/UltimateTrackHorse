@@ -30,6 +30,9 @@ namespace GameLogic
         private float totalTimeComplexity;
         private Timer timer;
         
+        public int totalCheckpoints;
+        public int crossedCheckpoints;
+        
         // List to hold the history of lap completion times for the current track session
         private List<float> currentMapLapTimes = new List<float>();
 
@@ -93,6 +96,9 @@ namespace GameLogic
             Debug.Log("Restarting lap...");
             PlaceCarOnStart();
             obstacleManager.ResetObstacles();
+            crossedCheckpoints = 0;
+            Checkpoint[] checkpoints = FindObjectsOfType<Checkpoint>();
+            foreach(var cp in checkpoints) cp.ResetCheckpoint();
 
             if (timer != null)
             {
@@ -164,6 +170,21 @@ namespace GameLogic
             {
                 gameStateManager.InitializePlaceholderCount();
             }
+
+            totalCheckpoints = 0;
+            if (mapGenerator != null && mapGenerator.GeneratedPath != null && mapGenerator.targetTrackLength > 5)
+            {
+                for (int i = 1; i < mapGenerator.GeneratedPath.Count - 1; i++)
+                {
+                    if (i % 6 == 0)
+                    {
+                        totalCheckpoints++;
+                    }
+                }
+            }
+            
+            crossedCheckpoints = 0;
+            Debug.Log($"Total checkpoints on map: {totalCheckpoints}");
         }
 
         private void HandleTimeUp()
@@ -342,6 +363,18 @@ namespace GameLogic
             Debug.Log("Completed laps: " + lapCount);
             PlaceCarOnStart();
             obstacleManager.ResetObstacles();
+            crossedCheckpoints = 0;
+        }
+
+        public void CheckpointCrossed()
+        {
+            crossedCheckpoints++;
+            Debug.Log($"Checkpoint crossed! ({crossedCheckpoints}/{totalCheckpoints})");
+        }
+
+        public bool CanFinishLap()
+        {
+            return crossedCheckpoints >= totalCheckpoints;
         }
 
         private void HandleVictory()
