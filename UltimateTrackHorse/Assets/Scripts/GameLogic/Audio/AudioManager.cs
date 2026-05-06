@@ -194,7 +194,7 @@ namespace GameLogic.Audio
             {
                 AudioCategory.Music => musicMixerGroup,
                 AudioCategory.UI => uiMixerGroup,
-                AudioCategory.Vehicle => vehicleMixerGroup != null ? vehicleMixerGroup : sfxMixerGroup,
+                AudioCategory.Vehicle => vehicleMixerGroup,
                 _ => sfxMixerGroup
             };
         }
