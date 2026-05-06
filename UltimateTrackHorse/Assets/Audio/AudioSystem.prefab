@@ -52,6 +52,7 @@ MonoBehaviour:
   musicMixerGroup: {fileID: 123846316100469097, guid: 9cec16e7a95b5a6419cc9fd6ac6e931f, type: 2}
   uiMixerGroup: {fileID: -8086300783892559166, guid: 9cec16e7a95b5a6419cc9fd6ac6e931f, type: 2}
   sfxMixerGroup: {fileID: -6308583631463299213, guid: 9cec16e7a95b5a6419cc9fd6ac6e931f, type: 2}
+  vehicleMixerGroup: {fileID: -4781905427700706322, guid: 9cec16e7a95b5a6419cc9fd6ac6e931f, type: 2}
   oneShotRoot: {fileID: 0}
 --- !u!114 &6345745683482662563
 MonoBehaviour:
@@ -70,6 +71,7 @@ MonoBehaviour:
   musicVolumeParameter: MusicVolume
   sfxVolumeParameter: SfxVolume
   uiVolumeParameter: UiVolume
+  carVolumeParameter: CarVolume
 --- !u!114 &7570284753926652383
 MonoBehaviour:
   m_ObjectHideFlags: 0
