@@ -1,5 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
+using GameLogic.Traps.Core;
+using GameLogic.Audio;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -31,16 +33,16 @@ namespace UI
         /// Reference to the script that handles placing obstacles on the generated track.
         /// </summary>
         [Tooltip("Drag the GameManager GameObject here (it has the SpawnObstacle script)")]
-        public GameLogic.Traps.TrapSpawner spawnObstacle;
+        public TrapSpawner spawnObstacle;
 
         [Header("Menu 3D Background")]
         [Tooltip("Drag the Virtual Camera looking at your custom Menu Diorama here")]
         public GameObject menuCamera;
 
         [Header("UI Audio")]
-        public AudioSource uiAudioSource;
-        public AudioClip hoverSound;
-        public AudioClip clickSound;
+        [SerializeField] private AudioManager audioManager;
+        [SerializeField] private AudioCue hoverCue;
+        [SerializeField] private AudioCue clickCue;
 
         private UIDocument document;
         private VisualElement root;
@@ -118,7 +120,8 @@ namespace UI
             // but preferring your manual Drag-and-Drop assignments in the Inspector to prevent any weird Unity bugs!
             if (mapGenerator == null) mapGenerator = FindObjectOfType<MapGeneration.MapGenerator>();
             if (gameManager == null) gameManager = FindObjectOfType<GameLogic.GameManager>();
-            if (spawnObstacle == null) spawnObstacle = FindObjectOfType<GameLogic.Traps.TrapSpawner>();
+            if (spawnObstacle == null) spawnObstacle = FindObjectOfType<TrapSpawner>();
+            if (audioManager == null) audioManager = FindObjectOfType<AudioManager>();
             
             if (menuCamera == null) 
             {
@@ -158,18 +161,12 @@ namespace UI
             {
                 button.RegisterCallback<PointerEnterEvent>(evt =>
                 {
-                    if (uiAudioSource != null && hoverSound != null)
-                    {
-                        uiAudioSource.PlayOneShot(hoverSound);
-                    }
+                    audioManager?.PlayUI(hoverCue);
                 });
 
                 button.RegisterCallback<ClickEvent>(evt =>
                 {
-                    if (uiAudioSource != null && clickSound != null)
-                    {
-                        uiAudioSource.PlayOneShot(clickSound);
-                    }
+                    audioManager?.PlayUI(clickCue);
                 });
             }
 

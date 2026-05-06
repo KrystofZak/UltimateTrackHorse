@@ -50,7 +50,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 91729265beaf413d8c42cb291e180385, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GameLogic.Traps.TrapRuntime
-  definition: {fileID: 11400000, guid: 55d661313909d734f9149d9d8d9513e6, type: 2}
+  definition: {fileID: 11400000, guid: 5c6420a35e428284a86a632e5a354c94, type: 2}
   playerTag: Player
 --- !u!1001 &5719548606940193931
 PrefabInstance:
