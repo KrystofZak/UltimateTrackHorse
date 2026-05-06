@@ -4,100 +4,92 @@ using UnityEngine;
 namespace MapGeneration
 {
     /// <summary>
-    /// Purely logical class responsible for generating the track layout (path).
-    /// Currently uses Depth-First Search (DFS).
+    /// Generates the track path using Greedy Local Search (GLS).
+    /// Iterative crawler — no backtracking. Returns null on dead end.
     /// </summary>
     public class TrackPathfinder
     {
-        private int mapWidth;
-        private int mapHeight;
+        private readonly int mapWidth;
+        private readonly int mapHeight;
+
+        private static readonly Vector2Int[] Dirs =
+        {
+            new Vector2Int(0,  1),
+            new Vector2Int(1,  0),
+            new Vector2Int(0, -1),
+            new Vector2Int(-1, 0)
+        };
 
         public TrackPathfinder(int width, int height)
         {
-            this.mapWidth = width;
-            this.mapHeight = height;
+            mapWidth  = width;
+            mapHeight = height;
         }
 
         /// <summary>
-        /// Generates a random contiguous path of a specific length using DFS.
+        /// Generates a random contiguous path of a specific length using GLS.
+        /// Returns null if the crawler reaches a dead end.
         /// </summary>
         public List<Vector2Int> GeneratePath(Vector2Int startPos, int targetLength)
         {
-            List<Vector2Int> currentPath = new List<Vector2Int>();
-            HashSet<Vector2Int> visited = new HashSet<Vector2Int>();
-            
-            if (DFSPath(startPos, targetLength, currentPath, visited))
-            {
-                return currentPath;
-            }
-            return null; 
+            return GLSPath(startPos, targetLength);
         }
 
         /// <summary>
-        /// Depth-First Search algorithm to generate a random path of a specific length.
+        /// Greedy Local Search crawler: at each step, valid neighbours are scored by
+        /// their distance from the start position plus a small random noise for variety.
+        /// The highest-scoring candidate is chosen. No backtracking.
         /// </summary>
-        /// <param name="current">Current position in the path</param>
-        /// <param name="targetLength">Desired length of the path</param>
-        /// <param name="path">Current path being built</param>
-        /// <param name="visited">Set of visited positions to avoid cycles</param>
-        /// <returns></returns>
-        private bool DFSPath(Vector2Int current, int targetLength, List<Vector2Int> path, HashSet<Vector2Int> visited)
+        private List<Vector2Int> GLSPath(Vector2Int startPos, int targetLength)
         {
-            path.Add(current);
-            visited.Add(current);
+            var path = new List<Vector2Int>(targetLength);
+            var visited = new HashSet<Vector2Int>();
 
-            if (path.Count == targetLength) return true;
+            path.Add(startPos);
+            visited.Add(startPos);
 
-            // Possible directions to move from the current position
-            Vector2Int[] dirs =
-            { 
-                new Vector2Int(0, 1),
-                new Vector2Int(1, 0),
-                new Vector2Int(0, -1),
-                new Vector2Int(-1, 0)
-            };
-            
-            // Shuffle the directions to randomize the path
-            for (int i = 0; i < dirs.Length; i++)
+            while (path.Count < targetLength)
             {
-                int rnd = Random.Range(0, dirs.Length);
-                (dirs[i], dirs[rnd]) = (dirs[rnd], dirs[i]);
-            }
+                Vector2Int current = path[path.Count - 1];
+                var candidates = new List<(Vector2Int pos, float score)>();
 
-            foreach (var dir in dirs)
-            {
-                Vector2Int next = current + dir;
-                
-                // One tile border around the map for start and finish
-                if (next.x >= 1 && next.x < mapWidth - 1 && next.y >= 1 && next.y < mapHeight - 1)
+                foreach (var dir in Dirs)
                 {
-                    if (!visited.Contains(next))
-                    {
-                        // Check if the next position creates a shortcut
-                        if (!CreatesShortcut(next, current, path))
-                        {
-                            if (DFSPath(next, targetLength, path, visited))
-                                return true;
-                        }
-                    }
+                    Vector2Int next = current + dir;
+
+                    if (next.x < 1 || next.x >= mapWidth  - 1 ||
+                        next.y < 1 || next.y >= mapHeight - 1) continue;
+                    if (visited.Contains(next)) continue;
+                    if (CreatesShortcut(next, path)) continue;
+
+                    // Greedy heuristic: prefer cells farther from start.
+                    // Noise range must be wide enough to let turns compete with straight moves,
+                    // producing curved tracks rather than a straight diagonal trajectory.
+                    float score = Vector2Int.Distance(next, startPos) + Random.Range(0f, 10f);
+                    candidates.Add((next, score));
                 }
+
+                if (candidates.Count == 0)
+                    return null; // dead end — no backtracking, caller must retry
+
+                candidates.Sort((a, b) => b.score.CompareTo(a.score));
+                Vector2Int chosen = candidates[0].pos;
+
+                path.Add(chosen);
+                visited.Add(chosen);
             }
 
-            // Backtracking
-            path.RemoveAt(path.Count - 1);
-            visited.Remove(current);
-            return false;
+            return path;
         }
 
         /// <summary>
-        /// Checks if the new position creates a shortcut in the path.
+        /// Returns true if placing newPos would create a shortcut between distant
+        /// sections of the path (detected via diagonal adjacency to non-consecutive tiles).
         /// </summary>
-        /// <param name="newPos">Position to check</param>
-        /// <param name="currentPos">Current position in the path</param>
-        /// <param name="path">Current path being built</param>
-        /// <returns></returns>
-        private bool CreatesShortcut(Vector2Int newPos, Vector2Int currentPos, List<Vector2Int> path)
+        private bool CreatesShortcut(Vector2Int newPos, List<Vector2Int> path)
         {
+            int currentIndex = path.Count - 1;
+
             for (int x = -1; x <= 1; x++)
             {
                 for (int y = -1; y <= 1; y++)
@@ -105,16 +97,15 @@ namespace MapGeneration
                     if (x == 0 && y == 0) continue;
 
                     Vector2Int neighbor = new Vector2Int(newPos.x + x, newPos.y + y);
-                    
                     int neighborIndex = path.IndexOf(neighbor);
-                    if (neighborIndex == -1) continue; 
-                    
-                    int currentIndex = path.IndexOf(currentPos);
-                    int distance = Mathf.Abs(neighborIndex - currentIndex);
-                    
-                    if (distance > 1)
+
+                    if (neighborIndex == -1)
                     {
-                        return true; 
+                        continue;
+                    }
+                    if (Mathf.Abs(neighborIndex - currentIndex) > 1)
+                    {
+                        return true;
                     }
                 }
             }
