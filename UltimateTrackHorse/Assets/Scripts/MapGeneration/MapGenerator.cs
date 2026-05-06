@@ -287,7 +287,7 @@ namespace MapGeneration
                 List<TileVariant> sourceVariants = standardVariants; 
                 if (i == 0) sourceVariants = startVariants;
                 else if (i == path.Count - 1) sourceVariants = finishVariants;
-                else if (i % 5 == 0 && targetTrackLength > 5) sourceVariants = checkpointVariants;
+                else if (i % 6 == 0 && targetTrackLength > 5) sourceVariants = checkpointVariants;
 
                 // Filter the variants based on the path connection and road socket status
                 foreach (var variant in sourceVariants)
@@ -366,7 +366,7 @@ namespace MapGeneration
                     GameObject spawnedTile = Instantiate(cell.CollapsedVariant.Data.prefab, worldPos, rot, transform);
 
                     // Check if the tile is a checkpoint and set the correct rotation
-                    if (i > 0 && i % 5 == 0 && i < path.Count - 1)
+                    if (i > 0 && i % 6 == 0 && i < path.Count - 1)
                     {
                         Checkpoint cp = spawnedTile.GetComponentInChildren<Checkpoint>();
                         if (cp != null)
@@ -550,9 +550,11 @@ namespace MapGeneration
             obstacleManager.ClearAllObstacles();
             InitializeGrid(); 
             
-            // Generate a path with desired length + 2 (start and finish)
+            // Generate a path with desired length + 2 (start and finish).
             TrackPathfinder pathfinder = new TrackPathfinder(mapWidth, mapHeight);
-            GeneratedPath = pathfinder.GeneratePath(new Vector2Int(1, 1), targetTrackLength + 2);
+            GeneratedPath = null;
+            for (int attempt = 0; attempt < 20 && GeneratedPath == null; attempt++)
+                GeneratedPath = pathfinder.GeneratePath(new Vector2Int(1, 1), targetTrackLength + 2);
 
             // Apply the path to the WFC grid and run the algorithm
             if (GeneratedPath != null)
