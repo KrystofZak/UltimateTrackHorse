@@ -17,6 +17,13 @@ namespace GameLogic
             // Check if the collider belongs to the player
             if (other.CompareTag("Player"))
             {
+                GameManager gm = FindObjectOfType<GameManager>();
+                if (gm != null && !gm.CanFinishLap())
+                {
+                    Debug.Log("Cannot finish lap yet: Not all checkpoints have been crossed.");
+                    return;
+                }
+                
                 OnPlayerFinished?.Invoke();
             }
         }
