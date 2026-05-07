@@ -16,6 +16,10 @@ namespace GameLogic
     public class GameManager : MonoBehaviour
     {
         public GameObject playerCar;
+        [Header("Car Selection")]
+        [Tooltip("Add the Car Prefabs here (e.g. 0: Monster, 1: F1, 2: Muscle)")]
+        public GameObject[] carPrefabs;
+        
         [Header("Component References")]
         [SerializeField] private TrapSpawner trapSpawner;
         [SerializeField] private GameStateManager gameStateManager;
@@ -98,6 +102,49 @@ namespace GameLogic
         }
 
         private Coroutine countdownCoroutine;
+
+        public void SetPlayerCarPrefab(int index)
+        {
+            if (carPrefabs != null && carPrefabs.Length > index && carPrefabs[index] != null)
+            {
+                // Destroy the current car if it exists and is currently in the scene
+                if (playerCar != null)
+                {
+                    Destroy(playerCar);
+                }
+
+                // Instantiate the chosen one
+                playerCar = Instantiate(carPrefabs[index]);
+                
+                // Keep the old camera follow setup working
+                CinemachineVirtualCamera[] vcams = FindObjectsOfType<CinemachineVirtualCamera>();
+                foreach(var vcam in vcams)
+                {
+                    if(vcam.Name != "MenuCamera")
+                    {
+                        vcam.Follow = playerCar.transform;
+                        vcam.LookAt = playerCar.transform;
+                    }
+                }
+                CinemachineFreeLook freeLook = FindObjectOfType<CinemachineFreeLook>();
+                if(freeLook != null)
+                {
+                    freeLook.Follow = playerCar.transform;
+                    freeLook.LookAt = playerCar.transform;
+                }
+
+                // Update the Speedometer HUD reference
+                Spedometer speedScript = FindObjectOfType<Spedometer>();
+                if(speedScript != null)
+                {
+                    speedScript.car = playerCar.GetComponent<Rigidbody>();
+                }
+            }
+            else
+            {
+                Debug.LogWarning("Car Prefab missing or index out of bounds! Returning to default car if any.");
+            }
+        }
 
         public void RestartCurrentLap()
         {

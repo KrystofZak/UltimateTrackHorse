@@ -50,12 +50,14 @@ namespace UI
         [Header("Views")]
         private VisualElement mainMenuView;
         private VisualElement mapSelectionView;
+        private VisualElement carSelectionView;
         private VisualElement randomSelectionView;
         private VisualElement seededSelectionView;
         private VisualElement gameView;
         private VisualElement obstacleChoiceView;
         private VisualElement pauseView;
         private VisualElement settingsView;
+        private VisualElement audioSettingsView;
         private VisualElement aboutUsView;
         private VisualElement victoryView;
         private VisualElement defeatView;
@@ -75,6 +77,11 @@ namespace UI
         /// Stores the last active view so that the "Back" button functions properly (e.g., from Settings back to Pause or Main Menu).
         /// </summary>
         private VisualElement previousView;
+        
+        /// <summary>
+        /// Stores the menu from which Settings was opened, as previousView may get overwritten by child menus like Audio Settings.
+        /// </summary>
+        private VisualElement settingsSourceView;
         
         /// <summary>
         /// Tracks the currently active visual element in the UI.
@@ -137,12 +144,14 @@ namespace UI
             // 1. Query Views
             mainMenuView = root.Q<VisualElement>("mainMenuView");
             mapSelectionView = root.Q<VisualElement>("mapSelectionView");
+            carSelectionView = root.Q<VisualElement>("carSelectionView");
             randomSelectionView = root.Q<VisualElement>("randomSelectionView");
             seededSelectionView = root.Q<VisualElement>("seededSelectionView");
             gameView = root.Q<VisualElement>("gameView");
             obstacleChoiceView = root.Q<VisualElement>("obstacleChoiceView");
             pauseView = root.Q<VisualElement>("pauseView");
             settingsView = root.Q<VisualElement>("settingsView");
+            audioSettingsView = root.Q<VisualElement>("audioSettingsView");
             aboutUsView = root.Q<VisualElement>("aboutUsView");
             victoryView = root.Q<VisualElement>("victoryView");
             defeatView = root.Q<VisualElement>("defeatView");
@@ -225,6 +234,12 @@ namespace UI
             root.Q<Button>("SeededPlayButton")?.RegisterCallback<ClickEvent>(evt => StartSeededRun());
             root.Q<Button>("SeededBackButton")?.RegisterCallback<ClickEvent>(evt => ShowView(mapSelectionView));
 
+            // Car Selection
+            root.Q<Button>("BtnMonsterTruck")?.RegisterCallback<ClickEvent>(evt => OnCarSelected(0));
+            root.Q<Button>("BtnF1")?.RegisterCallback<ClickEvent>(evt => OnCarSelected(1));
+            root.Q<Button>("BtnMuscle")?.RegisterCallback<ClickEvent>(evt => OnCarSelected(2));
+            root.Q<Button>("CarSelectionBackButton")?.RegisterCallback<ClickEvent>(evt => ShowView(mapSelectionView));
+
             // Obstacles
             root.Q<Button>("Zero")?.RegisterCallback<ClickEvent>(evt => OnObstacleSelected(0));
             root.Q<Button>("One")?.RegisterCallback<ClickEvent>(evt => OnObstacleSelected(1));
@@ -256,7 +271,27 @@ namespace UI
             });
 
             // Settings Menu
-            root.Q<Button>("SettingsBackButton")?.RegisterCallback<ClickEvent>(evt => RestorePreviousView());
+            root.Q<Button>("SettingsAudioButton")?.RegisterCallback<ClickEvent>(evt => ShowView(audioSettingsView));
+
+            root.Q<Slider>("MasterVolumeSlider")?.RegisterValueChangedCallback(evt => {
+                if (audioManager != null) audioManager.SetVolume("MasterVolume", evt.newValue);
+            });
+            root.Q<Slider>("MusicVolumeSlider")?.RegisterValueChangedCallback(evt => {
+                if (audioManager != null) audioManager.SetVolume("MusicVolume", evt.newValue);
+            });
+            root.Q<Slider>("SfxVolumeSlider")?.RegisterValueChangedCallback(evt => {
+                if (audioManager != null) audioManager.SetVolume("SfxVolume", evt.newValue);
+            });
+            root.Q<Slider>("UiVolumeSlider")?.RegisterValueChangedCallback(evt => {
+                if (audioManager != null) audioManager.SetVolume("UiVolume", evt.newValue);
+            });
+            
+            root.Q<Button>("SettingsBackButton")?.RegisterCallback<ClickEvent>(evt => 
+            {
+                if (settingsSourceView != null) ShowView(settingsSourceView);
+                else RestorePreviousView();
+            });
+            root.Q<Button>("AudioSettingsBackButton")?.RegisterCallback<ClickEvent>(evt => ShowView(settingsView));
 
             // About Us Menu
             root.Q<Button>("AboutBackButton")?.RegisterCallback<ClickEvent>(evt => RestorePreviousView());
@@ -365,6 +400,11 @@ namespace UI
             
         }
 
+        private int pendingRandomLength = 0;
+        private string pendingRandomCustom = "";
+        private string pendingSeed = "";
+        private bool isPendingRandom = true;
+
         /// <summary>
         /// Applies the 'hidden' CSS class to every single view element in the document.
         /// This creates a blank slate before un-hiding the specifically requested view.
@@ -373,12 +413,14 @@ namespace UI
         {
             mainMenuView?.AddToClassList("hidden");
             mapSelectionView?.AddToClassList("hidden");
+            carSelectionView?.AddToClassList("hidden");
             randomSelectionView?.AddToClassList("hidden");
             seededSelectionView?.AddToClassList("hidden");
             gameView?.AddToClassList("hidden");
             obstacleChoiceView?.AddToClassList("hidden");
             pauseView?.AddToClassList("hidden");
             settingsView?.AddToClassList("hidden");
+            audioSettingsView?.AddToClassList("hidden");
             aboutUsView?.AddToClassList("hidden");
             victoryView?.AddToClassList("hidden");
             defeatView?.AddToClassList("hidden");
@@ -662,6 +704,46 @@ namespace UI
         /// <param name="lengthStr">The custom input string from the TextField for variable track lengths.</param>
         private void StartRandomRun(int length, string lengthStr = "")
         {
+            isPendingRandom = true;
+            pendingRandomLength = length;
+            pendingRandomCustom = lengthStr;
+            ShowView(carSelectionView);
+        }
+
+        /// <summary>
+        /// Reads input from the Seeded UI Selection and attempts to generate the map deterministically.
+        /// Parses the string via MapGenerator.SetSeed and immediately launches gameplay.
+        /// </summary>
+        private void StartSeededRun()
+        {
+            var input = root.Q<TextField>("SeedInput");
+            if (input != null && !string.IsNullOrEmpty(input.value))
+            {
+                isPendingRandom = false;
+                pendingSeed = input.value;
+                ShowView(carSelectionView);
+            }
+        }
+
+        private void OnCarSelected(int carIndex)
+        {
+            if (gameManager != null)
+            {
+                gameManager.SetPlayerCarPrefab(carIndex);
+            }
+
+            if (isPendingRandom)
+            {
+                StartRandomRunCommit(pendingRandomLength, pendingRandomCustom);
+            }
+            else
+            {
+                StartSeededRunCommit(pendingSeed);
+            }
+        }
+
+        private void StartRandomRunCommit(int length, string lengthStr = "")
+        {
             Debug.Log($"UIController: StartRandomRun requested with length {length}");
 
             if (mapGenerator != null)
@@ -685,18 +767,13 @@ namespace UI
             Time.timeScale = 1f;
         }
 
-        /// <summary>
-        /// Reads input from the Seeded UI Selection and attempts to generate the map deterministically.
-        /// Parses the string via MapGenerator.SetSeed and immediately launches gameplay.
-        /// </summary>
-        private void StartSeededRun()
+        private void StartSeededRunCommit(string seed)
         {
-            var input = root.Q<TextField>("SeedInput");
-            if (input != null && !string.IsNullOrEmpty(input.value))
+            if (!string.IsNullOrEmpty(seed))
             {
                 if (mapGenerator != null)
                 {
-                    mapGenerator.SetSeed(input.value);
+                    mapGenerator.SetSeed(seed);
                     Debug.Log("UIController: Telling MapGenerator to play seeded...");
                     mapGenerator.OnPlayClicked();
                 }
@@ -764,6 +841,7 @@ namespace UI
         /// <param name="sourceView">The menu we are leaving to enter Settings.</param>
         private void ShowSettingsFrom(VisualElement sourceView)
         {
+            settingsSourceView = sourceView;
             previousView = sourceView;
             ShowView(settingsView);
         }
