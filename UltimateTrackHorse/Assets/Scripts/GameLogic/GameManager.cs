@@ -116,8 +116,8 @@ namespace GameLogic
                 // Instantiate the chosen one
                 playerCar = Instantiate(carPrefabs[index]);
                 
-                // Keep the old camera follow setup working
-                CinemachineVirtualCamera[] vcams = FindObjectsOfType<CinemachineVirtualCamera>();
+                // Keep the old camera follow setup working (ensure we grab inactive cameras too!)
+                CinemachineVirtualCamera[] vcams = FindObjectsOfType<CinemachineVirtualCamera>(true);
                 foreach(var vcam in vcams)
                 {
                     if(vcam.Name != "MenuCamera")
@@ -126,7 +126,7 @@ namespace GameLogic
                         vcam.LookAt = playerCar.transform;
                     }
                 }
-                CinemachineFreeLook freeLook = FindObjectOfType<CinemachineFreeLook>();
+                CinemachineFreeLook freeLook = FindObjectOfType<CinemachineFreeLook>(true);
                 if(freeLook != null)
                 {
                     freeLook.Follow = playerCar.transform;
@@ -134,7 +134,7 @@ namespace GameLogic
                 }
 
                 // Update the Speedometer HUD reference
-                Spedometer speedScript = FindObjectOfType<Spedometer>();
+                Spedometer speedScript = FindObjectOfType<Spedometer>(true);
                 if(speedScript != null)
                 {
                     speedScript.car = playerCar.GetComponent<Rigidbody>();
@@ -602,18 +602,20 @@ namespace GameLogic
                     }
                 }
 
-                CinemachineVirtualCamera vcam = FindObjectOfType<CinemachineVirtualCamera>();
-
-                if (vcam != null)
+                CinemachineVirtualCamera[] vcams = FindObjectsOfType<CinemachineVirtualCamera>(true);
+                foreach (var vcam in vcams)
                 {
-                    vcam.PreviousStateIsValid = false;
-
-                    // Restart Cinemachine
-                    vcam.enabled = false;
-                    vcam.enabled = true;
+                    if (vcam != null)
+                    {
+                        vcam.PreviousStateIsValid = false;
+    
+                        // Restart Cinemachine
+                        vcam.enabled = false;
+                        vcam.enabled = true;
+                    }
                 }
                 
-                CinemachineFreeLook freeLookCamera = FindObjectOfType<CinemachineFreeLook>();
+                CinemachineFreeLook freeLookCamera = FindObjectOfType<CinemachineFreeLook>(true);
                 if (freeLookCamera != null)
                 {
                     freeLookCamera.PreviousStateIsValid = false;

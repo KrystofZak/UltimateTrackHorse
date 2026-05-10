@@ -447,7 +447,7 @@ namespace UI
                 CarController carController = gameManager.playerCar.GetComponent<CarController>();
                 if (carController != null)
                 {
-                    // Hra b   pouze pokud je aktivn  hern  obrazovka (gameView)
+                    // Hra bìží pouze pokud je aktivní herní obrazovka (gameView)
                     carController.isPlaying = (newView == gameView);
                 }
             }
