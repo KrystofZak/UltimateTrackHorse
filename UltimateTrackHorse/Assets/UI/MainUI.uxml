@@ -40,6 +40,26 @@
                 <ui:Button text="Back" name="SeededBackButton" class="animated-button" style="margin-top: 20px;"/>
             </ui:VisualElement>
         </ui:VisualElement>
+        <ui:VisualElement name="carSelectionView" class="view-container hidden">
+            <ui:VisualElement name="WhiteBoard" class="panel" style="width: 800px;">
+                <ui:Label text="Choose Your Car" class="title-label"/>
+                <ui:VisualElement style="flex-direction: row; justify-content: space-around; width: 100%; margin-top: 20px;">
+                    <ui:VisualElement class="car-option" style="align-items: center;">
+                        <ui:Button name="BtnMonsterTruck" class="animated-button" style="width: 150px; height: 150px; border-radius: 20px; background-image: url(&quot;project://database/Assets/UI/Images/Monster_car.jpg?fileID=2800000&amp;guid=5f8bc2112d084c44ba96375f7dfce384&amp;type=3#Monster_car&quot;);"/>
+                        <ui:Label text="Monster Truck" style="font-size: 20px; -unity-font-style: bold; margin-top: 10px; color: rgb(51, 51, 51);"/>
+                    </ui:VisualElement>
+                    <ui:VisualElement class="car-option" style="align-items: center;">
+                        <ui:Button name="BtnF1" class="animated-button" style="width: 150px; height: 150px; border-radius: 20px; background-image: url(&quot;project://database/Assets/UI/Images/F1_car.jpg?fileID=2800000&amp;guid=9adf7138dbf104546ba831d85f9be837&amp;type=3#F1_car&quot;);"/>
+                        <ui:Label text="F1 Car" style="font-size: 20px; -unity-font-style: bold; margin-top: 10px; color: rgb(51, 51, 51);"/>
+                    </ui:VisualElement>
+                    <ui:VisualElement class="car-option" style="align-items: center;">
+                        <ui:Button name="BtnMuscle" class="animated-button" style="width: 150px; height: 150px; border-radius: 20px; background-image: url(&quot;project://database/Assets/UI/Images/Muscle_car.jpg?fileID=2800000&amp;guid=18b829f787f675f4ebbffe7573960660&amp;type=3#Muscle_car&quot;);"/>
+                        <ui:Label text="Muscle Car" style="font-size: 20px; -unity-font-style: bold; margin-top: 10px; color: rgb(51, 51, 51);"/>
+                    </ui:VisualElement>
+                </ui:VisualElement>
+                <ui:Button text="Back" name="CarSelectionBackButton" class="animated-button" style="margin-top: 40px;"/>
+            </ui:VisualElement>
+        </ui:VisualElement>
         <ui:VisualElement name="obstacleChoiceView" class="view-container hidden">
             <ui:VisualElement name="WhiteBoard" class="panel">
                 <ui:Label text="Obstacle Amount" class="title-label"/>
@@ -97,9 +117,31 @@
         <ui:VisualElement name="settingsView" class="view-container hidden">
             <ui:VisualElement class="panel">
                 <ui:Label text="Settings" class="title-label"/>
-                <ui:Slider text="Volume" name="VolumeSlider" class="input-field"/>
+                <ui:Button text="Audio" name="SettingsAudioButton" class="animated-button"/>
                 <ui:Toggle label="Fullscreen" name="FullscreenToggle" class="input-field"/>
                 <ui:Button text="Back" name="SettingsBackButton" class="animated-button"/>
+            </ui:VisualElement>
+        </ui:VisualElement>
+        <ui:VisualElement name="audioSettingsView" class="view-container hidden">
+            <ui:VisualElement class="panel" style="width: 600px;">
+                <ui:Label text="Audio Settings" class="title-label"/>
+                <ui:VisualElement style="margin-bottom: 12px;">
+                    <ui:Label text="Master Volume" style="-unity-font-style: bold; color: rgb(51, 51, 51); font-size: 18px; margin-bottom: 5px;"/>
+                    <ui:Slider name="MasterVolumeSlider" class="input-field" low-value="0" high-value="1" value="0.8"/>
+                </ui:VisualElement>
+                <ui:VisualElement style="margin-bottom: 12px;">
+                    <ui:Label text="Music Volume" style="-unity-font-style: bold; color: rgb(51, 51, 51); font-size: 18px; margin-bottom: 5px;"/>
+                    <ui:Slider name="MusicVolumeSlider" class="input-field" low-value="0" high-value="1" value="0.8"/>
+                </ui:VisualElement>
+                <ui:VisualElement style="margin-bottom: 12px;">
+                    <ui:Label text="SFX Volume" style="-unity-font-style: bold; color: rgb(51, 51, 51); font-size: 18px; margin-bottom: 5px;"/>
+                    <ui:Slider name="SfxVolumeSlider" class="input-field" low-value="0" high-value="1" value="0.8"/>
+                </ui:VisualElement>
+                <ui:VisualElement style="margin-bottom: 12px;">
+                    <ui:Label text="UI Volume" style="-unity-font-style: bold; color: rgb(51, 51, 51); font-size: 18px; margin-bottom: 5px;"/>
+                    <ui:Slider name="UiVolumeSlider" class="input-field" low-value="0" high-value="1" value="0.8"/>
+                </ui:VisualElement>
+                <ui:Button text="Back" name="AudioSettingsBackButton" class="animated-button" style="margin-top: 20px;"/>
             </ui:VisualElement>
         </ui:VisualElement>
         <ui:VisualElement name="aboutUsView" class="view-container hidden">
