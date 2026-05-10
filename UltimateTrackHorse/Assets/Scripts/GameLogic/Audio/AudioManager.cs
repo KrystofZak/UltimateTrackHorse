@@ -16,11 +16,19 @@ namespace GameLogic.Audio
         [SerializeField] private AudioMixerGroup sfxMixerGroup;
         [SerializeField] private AudioMixerGroup vehicleMixerGroup;
 
+        [Header("Audio Mixer")]
+        [SerializeField] private AudioMixer masterMixer;
+
         [Header("Optional Parent")]
         [SerializeField] private Transform oneShotRoot;
 
         private void Awake()
         {
+            if (masterMixer == null && musicMixerGroup != null)
+            {
+                masterMixer = musicMixerGroup.audioMixer;
+            }
+
             if (oneShotRoot == null)
             {
                 var root = new GameObject("OneShotAudio");
@@ -207,6 +215,15 @@ namespace GameLogic.Audio
             source.loop = loop;
             source.spatialBlend = 0f;
             source.outputAudioMixerGroup = group;
+        }
+
+        public void SetVolume(string parameterName, float sliderValue)
+        {
+            if (masterMixer != null)
+            {
+                float db = Mathf.Log10(Mathf.Clamp(sliderValue, 0.0001f, 1f)) * 20f;
+                masterMixer.SetFloat(parameterName, db);
+            }
         }
     }
 }
