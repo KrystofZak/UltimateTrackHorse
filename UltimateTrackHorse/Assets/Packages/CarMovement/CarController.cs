@@ -36,7 +36,6 @@ public class CarController : MonoBehaviour
     [SerializeField] private GameObject[] tires = new GameObject[4];
     [SerializeField] private TrailRenderer[] skidMarks = new TrailRenderer[2];
     [SerializeField] private ParticleSystem[] skidSmokes = new ParticleSystem[2];
-    [SerializeField] private AudioSource engineSound, skidSound;
 
     [Header("Suspension Settings")]
     [SerializeField] private float springStiffness;
@@ -68,17 +67,6 @@ public class CarController : MonoBehaviour
 
     private float currentActualDrag;
 
-    [Header("Audio")]
-    [SerializeField]
-    [Range(0f, 1f)] private float minPitch = 1f;
-    [SerializeField]
-    [Range(1, 5)] private float maxPitch = 5f;
-    private float pitchSmoothSpeed = 3f;
-    [SerializeField] private float minSkidPitch = 0.5f;
-    [SerializeField] private float maxSkidPitch = 1.5f;
-    [SerializeField] private float skidIntensityRange = 15f;
-    [SerializeField] private float skidSmoothSpeed = 10f;
-    
     [Header("Surface Settings")]
     [Tooltip("Override car behaviour per surface layer. Layers not listed here use default multipliers (1.0).")]
     [SerializeField] private SurfaceSettings[] surfaceSettings = new SurfaceSettings[0];
@@ -129,11 +117,6 @@ public class CarController : MonoBehaviour
         carRB.angularDamping = 2f;
 
         carRB.centerOfMass = new Vector3(0, -0.5f, 0);
-        if (engineSound != null)
-        {
-            engineSound.Play();
-            engineSound.Pause();
-        }
     }
 
     private void FixedUpdate()
@@ -144,10 +127,6 @@ public class CarController : MonoBehaviour
         Movement();
         Visuals();
         Vfx();
-        if (isPlaying)
-        {
-            Audio();
-        }
 
     }
 
@@ -167,26 +146,6 @@ public class CarController : MonoBehaviour
         if (isPlaying != wasPlaying)
         {
             wasPlaying = isPlaying;
-
-            if (engineSound != null)
-            {
-                if (isPlaying)
-                {
-
-                    if (!engineSound.isPlaying) engineSound.Play();
-                    else engineSound.UnPause();
-                }
-                else
-                {
-                    engineSound.Pause();
-                }
-            }
-
-            if (skidSound != null)
-            {
-                if (isPlaying) skidSound.UnPause();
-                else skidSound.Pause();
-            }
         }
 
     }
@@ -425,8 +384,6 @@ public class CarController : MonoBehaviour
 
         ToggleSkidMarks(isSkidding);
         ToggleSkidSmokes(isSkidding);
-
-        UpdateSkidSound(isSkidding, sidewaysSpeed);
     }
 
     private void ToggleSkidMarks(bool toggle)
@@ -487,50 +444,6 @@ public class CarController : MonoBehaviour
         return false;
     }
 
-    #endregion
-
-    #region Audio
-    private void Audio()
-    {
-        if (engineSound != null)
-        {
-
-
-            float currentRatio = Mathf.Abs(carVelocityRatio);
-
-            float targetPitch = Mathf.Lerp(minPitch, maxPitch, currentRatio);
-
-            engineSound.pitch = Mathf.Lerp(engineSound.pitch, targetPitch, Time.deltaTime * pitchSmoothSpeed);
-        }
-    }
-    private void UpdateSkidSound(bool isSkidding, float sidewaysSpeed)
-    {
-        if (skidSound == null) return;
-
-        if (isSkidding)
-        {
-            if (skidSound.mute) skidSound.mute = false;
-            if (!skidSound.isPlaying) skidSound.Play();
-
-            float maxSkidIntensitySpeed = minSkidVelocity + skidIntensityRange;
-            float skidIntensity = Mathf.InverseLerp(minSkidVelocity, maxSkidIntensitySpeed, sidewaysSpeed);
-
-            skidSound.volume = Mathf.Lerp(skidSound.volume, skidIntensity, Time.deltaTime * skidSmoothSpeed);
-
-            float targetSkidPitch = Mathf.Lerp(minSkidPitch, maxSkidPitch, skidIntensity);
-            skidSound.pitch = Mathf.Lerp(skidSound.pitch, targetSkidPitch, Time.deltaTime * skidSmoothSpeed);
-        }
-        else
-        {
-
-            skidSound.volume = Mathf.Lerp(skidSound.volume, 0f, Time.deltaTime * (skidSmoothSpeed * 1.5f));
-
-            if (skidSound.volume < 0.05f && !skidSound.mute)
-            {
-                skidSound.mute = true;
-            }
-        }
-    }
     #endregion
 
     #region Car Status Check

@@ -10,15 +10,15 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 327f12ab155b434abfc813ace7a636be, type: 3}
-  m_Name: Engine
+  m_Name: V8
   m_EditorClassIdentifier: Assembly-CSharp::GameLogic.Audio.AudioCue
   clips:
-  - {fileID: 8300000, guid: 771ce407ce807b74885ec23ebd1e6647, type: 3}
+  - {fileID: 8300000, guid: 5426407fbed481a49a87ea4d49c37b26, type: 3}
   category: 3
   spatial: 0
   loop: 1
   volumeRange: {x: 1, y: 1}
-  pitchRange: {x: 1, y: 2}
+  pitchRange: {x: 0.5, y: 1.5}
   spatialBlend: 1
   minDistance: 2
   maxDistance: 20

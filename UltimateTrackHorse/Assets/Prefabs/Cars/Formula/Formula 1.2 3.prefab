@@ -1344,12 +1344,17 @@ PrefabInstance:
       propertyPath: m_LocalRotation.z
       value: -0.38083237
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    m_RemovedComponents:
+    - {fileID: 318948553550066748, guid: f1fb4fb6ace523944b77b04342b5e5ef, type: 3}
+    - {fileID: 5716342048409023043, guid: f1fb4fb6ace523944b77b04342b5e5ef, type: 3}
     m_RemovedGameObjects:
     - {fileID: 3344039120298147605, guid: f1fb4fb6ace523944b77b04342b5e5ef, type: 3}
     - {fileID: 612645858777114539, guid: f1fb4fb6ace523944b77b04342b5e5ef, type: 3}
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 6847896830040504019, guid: f1fb4fb6ace523944b77b04342b5e5ef, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 7674873924164483842}
   m_SourcePrefab: {fileID: 100100000, guid: f1fb4fb6ace523944b77b04342b5e5ef, type: 3}
 --- !u!4 &2785474741480003783 stripped
 Transform:
@@ -1361,3 +1366,38 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 7383739325146422590, guid: f1fb4fb6ace523944b77b04342b5e5ef, type: 3}
   m_PrefabInstance: {fileID: 2344097443261432267}
   m_PrefabAsset: {fileID: 0}
+--- !u!54 &5456486224645537770 stripped
+Rigidbody:
+  m_CorrespondingSourceObject: {fileID: 7727822347762204193, guid: f1fb4fb6ace523944b77b04342b5e5ef, type: 3}
+  m_PrefabInstance: {fileID: 2344097443261432267}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1 &9191694926963390232 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 6847896830040504019, guid: f1fb4fb6ace523944b77b04342b5e5ef, type: 3}
+  m_PrefabInstance: {fileID: 2344097443261432267}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &7674873924164483842
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9191694926963390232}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c7e92712967946d284ded25ca076f66e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GameLogic.Audio.CarAudioController
+  audioManager: {fileID: 0}
+  rb: {fileID: 5456486224645537770}
+  engineLoopCue: {fileID: 11400000, guid: 4ddf4a0cae1719247a70051d92e282a5, type: 2}
+  skidLoopCue: {fileID: 11400000, guid: aa2eea3b90dd0ef49914a43038eaa38f, type: 2}
+  referenceTopSpeed: 18
+  idleVolume: 0.2
+  driveVolume: 0.9
+  idlePitch: 0.85
+  drivePitch: 1.6
+  skidStartSidewaysSpeed: 1.5
+  skidMaxSidewaysSpeed: 6
+  skidMinPitch: 0.95
+  skidMaxPitch: 1.15
