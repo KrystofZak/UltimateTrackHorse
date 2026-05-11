@@ -17,8 +17,6 @@ public class CarController : MonoBehaviour
         public bool killMomentum;
         public float lingerTime;
 
-
-
         public static SurfaceSettings Default => new SurfaceSettings
         {
             name = "Default",
@@ -56,7 +54,8 @@ public class CarController : MonoBehaviour
     public bool isInputEnabled = true;
     public bool isPlaying = false;
     private bool wasPlaying = true;
-
+    private float smoothedSteerInput = 0f;
+    [SerializeField] private float steeringSpeed = 5f;
 
     [Header("Car Settings")]
     [SerializeField] private float acceleration = 25f;
@@ -65,7 +64,9 @@ public class CarController : MonoBehaviour
     [SerializeField] private float steerStrength = 15f;
     [SerializeField] private AnimationCurve steerCurve;
     [SerializeField] private float dragCoefficient = 1f;
+    [SerializeField] private float gripRecoverySpeed = 5f;
 
+    private float currentActualDrag;
 
     [Header("Audio")]
     [SerializeField]
@@ -120,7 +121,7 @@ public class CarController : MonoBehaviour
     private void Start()
     {
         carRB = GetComponent<Rigidbody>();
-
+        currentActualDrag = dragCoefficient;
         carRB.interpolation = RigidbodyInterpolation.Interpolate;
         carRB.collisionDetectionMode = CollisionDetectionMode.Continuous;
 
@@ -323,6 +324,7 @@ public class CarController : MonoBehaviour
         float leftSteerLoss = 0f;
         float rightSteerLoss = 0f;
 
+        // Vliv prasklých pneumatik (acid hazard)
         for (int i = 0; i < rayPoints.Length; i++)
         {
             if (isTireFlat[i])
@@ -348,28 +350,38 @@ public class CarController : MonoBehaviour
 
         float finalSteerInput = Mathf.Clamp(steerInput + flatTireSteerBias, -1.5f, 1.5f);
 
-        carRB.AddTorque(currentSteerStrength * finalSteerInput * steerCurve.Evaluate(speedRatioAbs) * direction * transform.up, ForceMode.Acceleration);
+        // --- ØEŠENÍ OTÁÈENÍ NA MÍSTÌ ---
+        // Získáme absolutní rychlost dopøedu/dozadu
+        float forwardSpeedAbs = Mathf.Abs(currentCarLocalVelocity.z);
+
+        // Ztlumíme zatáèení pøi nízkých rychlostech (pod 3 jednotky)
+        // Èím blíž nule, tím menší síla zatáèení se aplikuje.
+        float lowSpeedSteerMultiplier = Mathf.Clamp01(forwardSpeedAbs / 3f);
+
+        // Aplikace zatáèení vèetnì lowSpeedSteerMultiplier
+        carRB.AddTorque(currentSteerStrength * finalSteerInput * steerCurve.Evaluate(speedRatioAbs) * lowSpeedSteerMultiplier * direction * transform.up, ForceMode.Acceleration);
+
+        // Stabilizace rotace (vyrovnání auta), když hráè nedrží zatáèení
         if (Mathf.Abs(steerInput) < 0.1f)
         {
-
-            if (Mathf.Abs(currentCarLocalVelocity.x) <= minSkidVelocity)
-            {
-
-                float currentAngularSpin = transform.InverseTransformDirection(carRB.angularVelocity).y;
-
-                float counterTorque = -currentAngularSpin * 15f;
-                carRB.AddTorque(transform.up * counterTorque, ForceMode.Acceleration);
-            }
+            float currentAngularSpin = transform.InverseTransformDirection(carRB.angularVelocity).y;
+            // Auto se vždy snaží zastavit rotaci, když pustíš volant
+            float counterTorque = -currentAngularSpin * 15f;
+            carRB.AddTorque(transform.up * counterTorque, ForceMode.Acceleration);
         }
-
     }
 
     private void SidewaysDrag()
     {
         float currentSidewaysSpeed = currentCarLocalVelocity.x;
 
-        float effectiveDrag = dragCoefficient * activeSurface.dragCoefficientMultiplier;
-        float dragForceMagnitude = -currentSidewaysSpeed * effectiveDrag;
+        float targetDrag = dragCoefficient * activeSurface.dragCoefficientMultiplier;
+
+        float shiftSpeed = (targetDrag < currentActualDrag) ? 15f : gripRecoverySpeed;
+
+        currentActualDrag = Mathf.MoveTowards(currentActualDrag, targetDrag, shiftSpeed * Time.fixedDeltaTime);
+
+        float dragForceMagnitude = -currentSidewaysSpeed * currentActualDrag;
 
         Vector3 dragForce = transform.right * dragForceMagnitude;
 
@@ -612,29 +624,37 @@ public class CarController : MonoBehaviour
         float lastInput = moveInput;
         moveInput = Input.GetAxisRaw("Vertical");
         steerInput = Input.GetAxisRaw("Horizontal");
+        float targetSteer = Input.GetAxisRaw("Horizontal");
+        smoothedSteerInput = Mathf.MoveTowards(smoothedSteerInput, targetSteer, Time.deltaTime * steeringSpeed);
+
+        steerInput = smoothedSteerInput;
 
         bool pressingBrake = moveInput < -0.1f;
-
-        if (pressingBrake && !isBraking)
+        if (pressingBrake)
         {
-            isBraking = true;
-
-            if (currentCarLocalVelocity.z > reverseSpeedThreshold)
+            // Kód se provede jen v prvním framu, kdy hráè zmáèkne brzdu
+            if (!isBraking)
             {
-                preventReverse = true;
+                isBraking = true;
+                // Pokud jedeme dopøedu rychleji než threshold, zabráníme okamžitému couvání
+                preventReverse = currentCarLocalVelocity.z > reverseSpeedThreshold;
             }
-            else
+
+            // NOVÉ: Pokud už brzdíme (preventReverse je aktivní), ale auto už 
+            // prakticky zastavilo (rychlost klesla pod 0.2f), odemkneme couvání.
+            if (preventReverse && currentCarLocalVelocity.z < 0.2f)
             {
                 preventReverse = false;
             }
         }
-        else if (!pressingBrake)
+        else
         {
+            // Jakmile hráè pustí klávesu, vše resetujeme
             isBraking = false;
-
             preventReverse = false;
         }
     }
+
     #endregion
 
     #region Surface Detection

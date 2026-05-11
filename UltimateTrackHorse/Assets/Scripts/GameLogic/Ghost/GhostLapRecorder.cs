@@ -52,6 +52,11 @@ namespace GameLogic.Ghost
             }
         }
 
+        public void SetPlayerTransform(Transform target)
+        {
+            playerTransform = target;
+        }
+
         private void RecordFrame()
         {
             frames.Add(new GhostFrame(

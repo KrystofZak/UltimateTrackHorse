@@ -7,6 +7,7 @@ using MapGeneration;
 using UI;
 using GameLogic.Ghost;
 using GameLogic.Traps.Core;
+using GameLogic.Network;
 
 namespace GameLogic
 {
@@ -16,6 +17,7 @@ namespace GameLogic
     public class GameManager : MonoBehaviour
     {
         public GameObject playerCar;
+        private GameObject currentInstantiatedPrefab;
         [Header("Car Selection")]
         [Tooltip("Add the Car Prefabs here (e.g. 0: Monster, 1: F1, 2: Muscle)")]
         public GameObject[] carPrefabs;
@@ -104,48 +106,72 @@ namespace GameLogic
         private Coroutine countdownCoroutine;
 
         public void SetPlayerCarPrefab(int index)
+{
+    if (carPrefabs != null && carPrefabs.Length > index && carPrefabs[index] != null)
+    {
+       
+        if (currentInstantiatedPrefab != null)
         {
-            if (carPrefabs != null && carPrefabs.Length > index && carPrefabs[index] != null)
-            {
-                // Destroy the current car if it exists and is currently in the scene
-                if (playerCar != null)
-                {
-                    Destroy(playerCar);
-                }
-
-                // Instantiate the chosen one
-                playerCar = Instantiate(carPrefabs[index]);
-                
-                // Keep the old camera follow setup working (ensure we grab inactive cameras too!)
-                CinemachineVirtualCamera[] vcams = FindObjectsOfType<CinemachineVirtualCamera>(true);
-                foreach(var vcam in vcams)
-                {
-                    if(vcam.Name != "MenuCamera")
-                    {
-                        vcam.Follow = playerCar.transform;
-                        vcam.LookAt = playerCar.transform;
-                    }
-                }
-                CinemachineFreeLook freeLook = FindObjectOfType<CinemachineFreeLook>(true);
-                if(freeLook != null)
-                {
-                    freeLook.Follow = playerCar.transform;
-                    freeLook.LookAt = playerCar.transform;
-                }
-
-                // Update the Speedometer HUD reference
-                Spedometer speedScript = FindObjectOfType<Spedometer>(true);
-                if(speedScript != null)
-                {
-                    speedScript.car = playerCar.GetComponent<Rigidbody>();
-                }
-            }
-            else
-            {
-                Debug.LogWarning("Car Prefab missing or index out of bounds! Returning to default car if any.");
-            }
+            Destroy(currentInstantiatedPrefab);
+        }
+        else if (playerCar != null)
+        {
+            Destroy(playerCar.transform.root.gameObject);
+        }
+        currentInstantiatedPrefab = Instantiate(carPrefabs[index]);
+        CarController carComponent = currentInstantiatedPrefab.GetComponentInChildren<CarController>();
+        
+        if (carComponent != null)
+        {
+            
+            playerCar = carComponent.gameObject;
+        }
+        else
+        {
+            Debug.LogWarning("CarController nebyl nalezen v potomcích prefabu! Hra se pokusí použít root objekt.");
+            playerCar = currentInstantiatedPrefab;
         }
 
+        CinemachineVirtualCamera[] vcams = FindObjectsOfType<CinemachineVirtualCamera>(true);
+        foreach(var vcam in vcams)
+        {
+            if(vcam.Name != "MenuCamera")
+            {
+                
+                vcam.Follow = playerCar.transform;
+                vcam.LookAt = playerCar.transform;
+            }
+        }
+        
+        CinemachineFreeLook freeLook = FindObjectOfType<CinemachineFreeLook>(true);
+        if(freeLook != null)
+        {
+            freeLook.Follow = playerCar.transform;
+            freeLook.LookAt = playerCar.transform;
+        }
+
+        Spedometer speedScript = FindObjectOfType<Spedometer>(true);
+        if(speedScript != null)
+        {
+            speedScript.car = playerCar.GetComponent<Rigidbody>();
+        }
+        
+        GhostLapRecorder ghostRecorder = FindObjectOfType<GhostLapRecorder>(true);
+        if (ghostRecorder != null)
+        {
+            ghostRecorder.SetPlayerTransform(playerCar.transform);
+        }
+        if (gameStateManager != null)
+        {
+            gameStateManager.SetPlayerRigidbody(playerCar.GetComponent<Rigidbody>());
+        }
+
+    }
+    else
+    {
+        Debug.LogWarning("Car Prefab missing or index out of bounds! Returning to default car if any.");
+    }
+}
         public void RestartCurrentLap()
         {
             Debug.Log("Restarting lap...");
@@ -463,6 +489,15 @@ namespace GameLogic
                 int obsCount = obstacleManager != null ? obstacleManager.RegisteredObstacleCount : 0;
                 uiController.UpdatePostGameStats(true, bestLap, obsCount, lapCount);
                 uiController.ShowVictoryView();
+                DiscordManager discordManager = FindObjectOfType<DiscordManager>();
+                DatabaseManager databaseManager = FindObjectOfType<DatabaseManager>();
+                if (discordManager != null && databaseManager != null && DiscordManager.IsLinked)
+                {
+                    string seed = mapGenerator.LastUsedSeed.ToString();
+                    databaseManager.SendGameResult(seed, lapCount, bestLap);
+                    Debug.Log($"Sent game result to database: Seed={seed}, Laps={lapCount}, BestLap={bestLap}");
+
+                }
             }
             
             if (timer != null)

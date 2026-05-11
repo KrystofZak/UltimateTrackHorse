@@ -10450,7 +10450,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5339210108367428076, guid: 10f6a70228b2e044b8699dc5530e8ab3, type: 3}
       propertyPath: minSkidVelocity
-      value: 5
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 5339210108367428076, guid: 10f6a70228b2e044b8699dc5530e8ab3, type: 3}
       propertyPath: springStiffness
