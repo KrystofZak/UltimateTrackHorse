@@ -16,17 +16,18 @@ namespace GameLogic
     public class GameManager : MonoBehaviour
     {
         public GameObject playerCar;
+        private GameObject currentInstantiatedPrefab;
         [Header("Car Selection")]
         [Tooltip("Add the Car Prefabs here (e.g. 0: Monster, 1: F1, 2: Muscle)")]
         public GameObject[] carPrefabs;
-        
+
         [Header("Component References")]
         [SerializeField] private TrapSpawner trapSpawner;
         [SerializeField] private GameStateManager gameStateManager;
         [SerializeField] private ObstacleManager obstacleManager;
         [SerializeField] private MapGenerator mapGenerator;
         [SerializeField] private GhostSystem ghostSystem;
-        
+
         public event Action<int> OnCountdownTick;
         public event Action OnCountdownGo;
         public event Action OnRaceStarted;
@@ -41,17 +42,17 @@ namespace GameLogic
         private float totalTimeComplexity;
         private Timer timer;
         private bool hasRaceStartedThisSession = false; // Temp fix for Game soundtrack
-        
+
         public int totalCheckpoints;
         public int crossedCheckpoints;
-        
+
         // List to hold the history of lap completion times for the current track session
         private List<float> currentMapLapTimes = new List<float>();
 
         // Variables to hold the current respawn position and rotation, set by checkpoints
         private Vector3 currentRespawnPos;
         private Quaternion currentRespawnRot;
-        
+
         // Track whether time has expired to prevent respawning
         private bool hasTimeExpired = false;
         public bool isGameActive = false;
@@ -59,13 +60,13 @@ namespace GameLogic
         /// <summary>
         /// Subscribe to the finish line event when the game manager is enabled, and unsubscribe when disabled.
         /// </summary>
-        void OnEnable() 
-        { 
-            FinishLine.OnPlayerFinished += ResetToStart; 
+        void OnEnable()
+        {
+            FinishLine.OnPlayerFinished += ResetToStart;
             uiController = FindObjectOfType<UIController>();
         }
-        void OnDisable() 
-        { 
+        void OnDisable()
+        {
             FinishLine.OnPlayerFinished -= ResetToStart;
             if (timer != null)
             {
@@ -107,37 +108,69 @@ namespace GameLogic
         {
             if (carPrefabs != null && carPrefabs.Length > index && carPrefabs[index] != null)
             {
-                // Destroy the current car if it exists and is currently in the scene
-                if (playerCar != null)
+
+                if (currentInstantiatedPrefab != null)
                 {
-                    Destroy(playerCar);
+                    Destroy(currentInstantiatedPrefab);
+                }
+                else if (playerCar != null)
+                {
+                    Destroy(playerCar.transform.root.gameObject);
+                }
+                currentInstantiatedPrefab = Instantiate(carPrefabs[index]);
+                CarController carComponent = currentInstantiatedPrefab.GetComponentInChildren<CarController>();
+
+                if (carComponent != null)
+                {
+
+                    playerCar = carComponent.gameObject;
+                }
+                else
+                {
+                    Debug.LogWarning("CarController nebyl nalezen v potomcích prefabu! Hra se pokusí použít root objekt.");
+                    playerCar = currentInstantiatedPrefab;
                 }
 
-                // Instantiate the chosen one
-                playerCar = Instantiate(carPrefabs[index]);
-                
-                // Keep the old camera follow setup working (ensure we grab inactive cameras too!)
+                // Find menu camera GameObject reference so we can avoid touching its virtual cameras
+                GameObject menuCamObj = GameObject.Find("MenuCamera");
+
+                // Assign follow/LookAt only to gameplay cameras; do not modify menu camera vcams
                 CinemachineVirtualCamera[] vcams = FindObjectsOfType<CinemachineVirtualCamera>(true);
-                foreach(var vcam in vcams)
+                foreach (var vcam in vcams)
                 {
-                    if(vcam.Name != "MenuCamera")
+                    if (vcam == null) continue;
+
+                    // If this vcam is the menu camera or a child of it, skip
+                    if (menuCamObj != null && (vcam.gameObject == menuCamObj || vcam.transform.IsChildOf(menuCamObj.transform)))
+                        continue;
+
+                    vcam.Follow = playerCar.transform;
+                    vcam.LookAt = playerCar.transform;
+                    vcam.PreviousStateIsValid = false;
+                }
+
+                CinemachineFreeLook freeLook = FindObjectOfType<CinemachineFreeLook>(true);
+                if (freeLook != null)
+                {
+                    // If the freeLook camera is part of the menu camera, skip updating it
+                    if (!(menuCamObj != null && (freeLook.gameObject == menuCamObj || freeLook.transform.IsChildOf(menuCamObj.transform))))
                     {
-                        vcam.Follow = playerCar.transform;
-                        vcam.LookAt = playerCar.transform;
+                        freeLook.Follow = playerCar.transform;
+                        freeLook.LookAt = playerCar.transform;
+                        freeLook.PreviousStateIsValid = false;
                     }
                 }
-                CinemachineFreeLook freeLook = FindObjectOfType<CinemachineFreeLook>(true);
-                if(freeLook != null)
-                {
-                    freeLook.Follow = playerCar.transform;
-                    freeLook.LookAt = playerCar.transform;
-                }
 
-                // Update the Speedometer HUD reference
                 Spedometer speedScript = FindObjectOfType<Spedometer>(true);
-                if(speedScript != null)
+                if (speedScript != null)
                 {
                     speedScript.car = playerCar.GetComponent<Rigidbody>();
+                }
+                
+                // Make sure the ghost system points to the new car!
+                if (ghostSystem != null)
+                {
+                    ghostSystem.SetTarget(playerCar.transform);
                 }
             }
             else
@@ -145,7 +178,6 @@ namespace GameLogic
                 Debug.LogWarning("Car Prefab missing or index out of bounds! Returning to default car if any.");
             }
         }
-
         public void RestartCurrentLap()
         {
             Debug.Log("Restarting lap...");
@@ -153,14 +185,14 @@ namespace GameLogic
             obstacleManager.ResetObstacles();
             crossedCheckpoints = 0;
             Checkpoint[] checkpoints = FindObjectsOfType<Checkpoint>();
-            foreach(var cp in checkpoints) cp.ResetCheckpoint();
+            foreach (var cp in checkpoints) cp.ResetCheckpoint();
 
             if (timer != null)
             {
                 timer.ResetTimer();
                 timer.SetStartTime(totalTimeComplexity, false); // Don't tick down yet!
             }
-            
+
             // Commence the 3.. 2.. 1.. Sequence
             if (countdownCoroutine != null) StopCoroutine(countdownCoroutine);
             countdownCoroutine = StartCoroutine(RaceCountdownCoroutine());
@@ -168,7 +200,7 @@ namespace GameLogic
 
         public void DestroyTrack()
         {
-            
+
         }
 
         public void SetupNewTrack()
@@ -177,14 +209,14 @@ namespace GameLogic
             currentMapLapTimes.Clear();
             hasTimeExpired = false;
             hasRaceStartedThisSession = false;
-                
+
             if (uiController != null)
             {
                 uiController.HideLapHistory();
             }
-            
+
             lapCount = 0; // Reset lap count
-            
+
             if (ghostSystem && mapGenerator)
             {
                 ghostSystem.SetMapId(mapGenerator.LastUsedSeed.ToString()); // unique ID for a map
@@ -193,14 +225,14 @@ namespace GameLogic
             StartCoroutine(InitializeGameStateDelayed());
 
             CalculateTotalTimeComplexity();
-            
+
             timer = FindObjectOfType<Timer>();
 
             if (timer != null)
             {
                 timer.ResetIncrement();
-                timer.SetStartTime(totalTimeComplexity, false); 
-                
+                timer.SetStartTime(totalTimeComplexity, false);
+
                 // FIX 2: Vždy se nejprve odhlásíme, abychom zabránili hromadění eventů
                 timer.OnTimeUp -= HandleTimeUp;
                 timer.OnTimeUp += HandleTimeUp;
@@ -217,12 +249,12 @@ namespace GameLogic
             countdownCoroutine = StartCoroutine(RaceCountdownCoroutine());
         }
 
-        
+
         private IEnumerator InitializeGameStateDelayed()
         {
             // Wait for one frame to ensure the game state manager is fully initialized and the new map is generated before counting placeholders
             yield return new WaitForEndOfFrame();
-            
+
             if (gameStateManager != null)
             {
                 gameStateManager.InitializePlaceholderCount();
@@ -239,7 +271,7 @@ namespace GameLogic
                     }
                 }
             }
-            
+
             crossedCheckpoints = 0;
             Debug.Log($"Total checkpoints on map: {totalCheckpoints}");
         }
@@ -284,7 +316,7 @@ namespace GameLogic
         {
             hasTimeExpired = false;
             isGameActive = true;
-            
+
             if (timer != null)
             {
                 timer.ResetTimer();
@@ -316,14 +348,14 @@ namespace GameLogic
             if (carController != null) carController.isInputEnabled = false;
 
             if (uiController != null) uiController.ShowCountdown(true);
-            
+
             // Wait for 3, 2, 1
             for (int i = 3; i > 0; i--)
             {
                 if (uiController != null) uiController.UpdateCountdownText(i.ToString());
                 // Crucial to use real time just in case TimeScale somehow locked up
                 OnCountdownTick?.Invoke(i);
-                yield return new WaitForSecondsRealtime(1f); 
+                yield return new WaitForSecondsRealtime(1f);
             }
 
             // "GO!" state
@@ -331,24 +363,24 @@ namespace GameLogic
             {
                 uiController.UpdateCountdownText("GO!");
             }
-            
+
             OnCountdownGo?.Invoke();
-            
+
             // Release the physical brakes
             if (carController != null) carController.isInputEnabled = true;
-            
+
             // Begin counting down the real time clock!
             if (timer != null)
             {
                 timer.StartTimer();
             }
-            
+
             // Begin recording lap for a ghost car
             if (ghostSystem != null)
             {
                 ghostSystem.StartLap();
             }
-            
+
             if (!hasRaceStartedThisSession)
             {
                 hasRaceStartedThisSession = true;
@@ -357,7 +389,7 @@ namespace GameLogic
 
             // Hold the "GO!" sign on screen for just one final second before hiding it
             yield return new WaitForSecondsRealtime(1f);
-            
+
             if (uiController != null) uiController.ShowCountdown(false);
         }
 
@@ -392,7 +424,7 @@ namespace GameLogic
                     $"[GameManager] Victory check | RegisteredObstacleCount={obstacleManager.RegisteredObstacleCount} | ActiveObstacleCount={obstacleManager.ActiveObstacleCount}");
                 OnLapFinished?.Invoke();
             }
-            
+
             if (gameStateManager != null && obstacleManager != null)
             {
                 bool allPlaced = gameStateManager.AreAllObstaclesPlaced(obstacleManager.RegisteredObstacleCount);
@@ -411,14 +443,14 @@ namespace GameLogic
             {
                 uiController.ShowObstacleChoiceView();
             }
-            
+
             if (timer != null)
             {
                 timer.StopTimer();
                 Debug.Log("Lap time: " + timer.timeElapsed);
                 // Record the lap time into the history tracker
                 currentMapLapTimes.Add(timer.timeElapsed);
-                
+
                 // Finish recording data for ghost car
                 if (ghostSystem) ghostSystem.FinishLap(timer.timeElapsed);
             }
@@ -464,7 +496,7 @@ namespace GameLogic
                 uiController.UpdatePostGameStats(true, bestLap, obsCount, lapCount);
                 uiController.ShowVictoryView();
             }
-            
+
             if (timer != null)
             {
                 timer.StopTimer();
@@ -500,7 +532,7 @@ namespace GameLogic
             {
                 carController.isInputEnabled = false;
             }
-            
+
             // To be absolutely sure, stop the timer again.
             if (timer != null)
             {
@@ -518,7 +550,7 @@ namespace GameLogic
             currentRespawnPos = pos;
             currentRespawnRot = rot;
         }
-        
+
         /// <summary>
         /// Place the player's car at the starting position (1,1) on the map,
         /// with the correct rotation based on the tile variant.
@@ -526,7 +558,7 @@ namespace GameLogic
         public void PlaceCarOnStart()
         {
             if (mapGenerator == null) mapGenerator = FindObjectOfType<MapGenerator>();
-            if (mapGenerator == null) return; 
+            if (mapGenerator == null) return;
 
             var startCell = mapGenerator.GetCell(1, 1);
 
@@ -535,11 +567,11 @@ namespace GameLogic
             {
                 float size = mapGenerator.tileSize;
                 Vector3 startPos = new Vector3(1 * size, 0.05f, 1 * size);
-        
+
                 // Get the direction of the first segment of the generated path to determine the correct rotation
                 Vector2Int gridDir = mapGenerator.GeneratedPath[1] - mapGenerator.GeneratedPath[0];
                 Vector3 worldDir = new Vector3(gridDir.x, 0, gridDir.y);
-        
+
                 // Set the respawn position and rotation based on the direction of the first segment
                 Quaternion startRot = Quaternion.LookRotation(worldDir);
 
@@ -560,7 +592,7 @@ namespace GameLogic
                 rb.position = currentRespawnPos;
                 rb.rotation = currentRespawnRot;
                 playerCar.transform.SetPositionAndRotation(currentRespawnPos, currentRespawnRot);
-                
+
                 rb.isKinematic = false;
                 rb.linearVelocity = Vector3.zero;
                 rb.angularVelocity = Vector3.zero;
@@ -576,9 +608,9 @@ namespace GameLogic
             {
                 if (rb != null) rb.WakeUp();
                 carController.ResetCar();
-                
+
                 // No countdown for mid-game respawns, so we need to re-enable input immediately
-                if (isMidGameRespawn) 
+                if (isMidGameRespawn)
                 {
                     carController.isInputEnabled = true;
 
@@ -608,22 +640,22 @@ namespace GameLogic
                     if (vcam != null)
                     {
                         vcam.PreviousStateIsValid = false;
-    
+
                         // Restart Cinemachine
                         vcam.enabled = false;
                         vcam.enabled = true;
                     }
                 }
-                
+
                 CinemachineFreeLook freeLookCamera = FindObjectOfType<CinemachineFreeLook>(true);
                 if (freeLookCamera != null)
                 {
                     freeLookCamera.PreviousStateIsValid = false;
                 }
             }
-            
+
         }
-        
+
         /// <summary>
         /// Coroutine to restore the original Cinemachine blend definition after making an instant cut
         /// </summary>
