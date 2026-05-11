@@ -92,3 +92,4 @@ UltimateTrackHorse/[Aa]ssets/[Oo]bstacles/*/*.meta
 UltimateTrackHorse/[Aa]ssets/[Pp]ackages/[Tt]extMeshPro/*.*
 UltimateTrackHorseBot/BotConfig.cs
 UltimateTrackHorse/ProjectSettings/ProjectVersion.txt
+UltimateTrackHorse/Assets/Scripts/GameLogic/ConfigFile.cs
