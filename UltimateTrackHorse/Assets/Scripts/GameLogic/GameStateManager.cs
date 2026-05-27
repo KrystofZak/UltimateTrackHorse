@@ -23,6 +23,11 @@ namespace GameLogic
             return registeredObstacleCount >= _initialPlaceholderCount;
         }
 
+        public void SetPlayerRigidbody(Rigidbody rb)
+        {
+            playerCarRigidbody = rb;
+        }
+
         public bool IsLost(bool isTimeUp)
         {
             if (!isTimeUp) return false;

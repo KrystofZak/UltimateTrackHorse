@@ -17,8 +17,6 @@ public class CarController : MonoBehaviour
         public bool killMomentum;
         public float lingerTime;
 
-
-
         public static SurfaceSettings Default => new SurfaceSettings
         {
             name = "Default",
@@ -38,7 +36,6 @@ public class CarController : MonoBehaviour
     [SerializeField] private GameObject[] tires = new GameObject[4];
     [SerializeField] private TrailRenderer[] skidMarks = new TrailRenderer[2];
     [SerializeField] private ParticleSystem[] skidSmokes = new ParticleSystem[2];
-    [SerializeField] private AudioSource engineSound, skidSound;
 
     [Header("Suspension Settings")]
     [SerializeField] private float springStiffness;
@@ -56,7 +53,8 @@ public class CarController : MonoBehaviour
     public bool isInputEnabled = true;
     public bool isPlaying = false;
     private bool wasPlaying = true;
-
+    private float smoothedSteerInput = 0f;
+    [SerializeField] private float steeringSpeed = 5f;
 
     [Header("Car Settings")]
     [SerializeField] private float acceleration = 25f;
@@ -65,19 +63,10 @@ public class CarController : MonoBehaviour
     [SerializeField] private float steerStrength = 15f;
     [SerializeField] private AnimationCurve steerCurve;
     [SerializeField] private float dragCoefficient = 1f;
+    [SerializeField] private float gripRecoverySpeed = 5f;
 
+    private float currentActualDrag;
 
-    [Header("Audio")]
-    [SerializeField]
-    [Range(0f, 1f)] private float minPitch = 1f;
-    [SerializeField]
-    [Range(1, 5)] private float maxPitch = 5f;
-    private float pitchSmoothSpeed = 3f;
-    [SerializeField] private float minSkidPitch = 0.5f;
-    [SerializeField] private float maxSkidPitch = 1.5f;
-    [SerializeField] private float skidIntensityRange = 15f;
-    [SerializeField] private float skidSmoothSpeed = 10f;
-    
     [Header("Surface Settings")]
     [Tooltip("Override car behaviour per surface layer. Layers not listed here use default multipliers (1.0).")]
     [SerializeField] private SurfaceSettings[] surfaceSettings = new SurfaceSettings[0];
@@ -120,7 +109,7 @@ public class CarController : MonoBehaviour
     private void Start()
     {
         carRB = GetComponent<Rigidbody>();
-
+        currentActualDrag = dragCoefficient;
         carRB.interpolation = RigidbodyInterpolation.Interpolate;
         carRB.collisionDetectionMode = CollisionDetectionMode.Continuous;
 
@@ -128,11 +117,6 @@ public class CarController : MonoBehaviour
         carRB.angularDamping = 2f;
 
         carRB.centerOfMass = new Vector3(0, -0.5f, 0);
-        if (engineSound != null)
-        {
-            engineSound.Play();
-            engineSound.Pause();
-        }
     }
 
     private void FixedUpdate()
@@ -143,10 +127,6 @@ public class CarController : MonoBehaviour
         Movement();
         Visuals();
         Vfx();
-        if (isPlaying)
-        {
-            Audio();
-        }
 
     }
 
@@ -166,26 +146,6 @@ public class CarController : MonoBehaviour
         if (isPlaying != wasPlaying)
         {
             wasPlaying = isPlaying;
-
-            if (engineSound != null)
-            {
-                if (isPlaying)
-                {
-
-                    if (!engineSound.isPlaying) engineSound.Play();
-                    else engineSound.UnPause();
-                }
-                else
-                {
-                    engineSound.Pause();
-                }
-            }
-
-            if (skidSound != null)
-            {
-                if (isPlaying) skidSound.UnPause();
-                else skidSound.Pause();
-            }
         }
 
     }
@@ -323,6 +283,7 @@ public class CarController : MonoBehaviour
         float leftSteerLoss = 0f;
         float rightSteerLoss = 0f;
 
+        // Vliv prasklých pneumatik (acid hazard)
         for (int i = 0; i < rayPoints.Length; i++)
         {
             if (isTireFlat[i])
@@ -348,28 +309,38 @@ public class CarController : MonoBehaviour
 
         float finalSteerInput = Mathf.Clamp(steerInput + flatTireSteerBias, -1.5f, 1.5f);
 
-        carRB.AddTorque(currentSteerStrength * finalSteerInput * steerCurve.Evaluate(speedRatioAbs) * direction * transform.up, ForceMode.Acceleration);
+        // --- ØEŠENÍ OTÁÈENÍ NA MÍSTÌ ---
+        // Získáme absolutní rychlost dopøedu/dozadu
+        float forwardSpeedAbs = Mathf.Abs(currentCarLocalVelocity.z);
+
+        // Ztlumíme zatáèení pøi nízkých rychlostech (pod 3 jednotky)
+        // Èím blíž nule, tím menší síla zatáèení se aplikuje.
+        float lowSpeedSteerMultiplier = Mathf.Clamp01(forwardSpeedAbs / 3f);
+
+        // Aplikace zatáèení vèetnì lowSpeedSteerMultiplier
+        carRB.AddTorque(currentSteerStrength * finalSteerInput * steerCurve.Evaluate(speedRatioAbs) * lowSpeedSteerMultiplier * direction * transform.up, ForceMode.Acceleration);
+
+        // Stabilizace rotace (vyrovnání auta), když hráè nedrží zatáèení
         if (Mathf.Abs(steerInput) < 0.1f)
         {
-
-            if (Mathf.Abs(currentCarLocalVelocity.x) <= minSkidVelocity)
-            {
-
-                float currentAngularSpin = transform.InverseTransformDirection(carRB.angularVelocity).y;
-
-                float counterTorque = -currentAngularSpin * 15f;
-                carRB.AddTorque(transform.up * counterTorque, ForceMode.Acceleration);
-            }
+            float currentAngularSpin = transform.InverseTransformDirection(carRB.angularVelocity).y;
+            // Auto se vždy snaží zastavit rotaci, když pustíš volant
+            float counterTorque = -currentAngularSpin * 15f;
+            carRB.AddTorque(transform.up * counterTorque, ForceMode.Acceleration);
         }
-
     }
 
     private void SidewaysDrag()
     {
         float currentSidewaysSpeed = currentCarLocalVelocity.x;
 
-        float effectiveDrag = dragCoefficient * activeSurface.dragCoefficientMultiplier;
-        float dragForceMagnitude = -currentSidewaysSpeed * effectiveDrag;
+        float targetDrag = dragCoefficient * activeSurface.dragCoefficientMultiplier;
+
+        float shiftSpeed = (targetDrag < currentActualDrag) ? 15f : gripRecoverySpeed;
+
+        currentActualDrag = Mathf.MoveTowards(currentActualDrag, targetDrag, shiftSpeed * Time.fixedDeltaTime);
+
+        float dragForceMagnitude = -currentSidewaysSpeed * currentActualDrag;
 
         Vector3 dragForce = transform.right * dragForceMagnitude;
 
@@ -413,8 +384,6 @@ public class CarController : MonoBehaviour
 
         ToggleSkidMarks(isSkidding);
         ToggleSkidSmokes(isSkidding);
-
-        UpdateSkidSound(isSkidding, sidewaysSpeed);
     }
 
     private void ToggleSkidMarks(bool toggle)
@@ -475,50 +444,6 @@ public class CarController : MonoBehaviour
         return false;
     }
 
-    #endregion
-
-    #region Audio
-    private void Audio()
-    {
-        if (engineSound != null)
-        {
-
-
-            float currentRatio = Mathf.Abs(carVelocityRatio);
-
-            float targetPitch = Mathf.Lerp(minPitch, maxPitch, currentRatio);
-
-            engineSound.pitch = Mathf.Lerp(engineSound.pitch, targetPitch, Time.deltaTime * pitchSmoothSpeed);
-        }
-    }
-    private void UpdateSkidSound(bool isSkidding, float sidewaysSpeed)
-    {
-        if (skidSound == null) return;
-
-        if (isSkidding)
-        {
-            if (skidSound.mute) skidSound.mute = false;
-            if (!skidSound.isPlaying) skidSound.Play();
-
-            float maxSkidIntensitySpeed = minSkidVelocity + skidIntensityRange;
-            float skidIntensity = Mathf.InverseLerp(minSkidVelocity, maxSkidIntensitySpeed, sidewaysSpeed);
-
-            skidSound.volume = Mathf.Lerp(skidSound.volume, skidIntensity, Time.deltaTime * skidSmoothSpeed);
-
-            float targetSkidPitch = Mathf.Lerp(minSkidPitch, maxSkidPitch, skidIntensity);
-            skidSound.pitch = Mathf.Lerp(skidSound.pitch, targetSkidPitch, Time.deltaTime * skidSmoothSpeed);
-        }
-        else
-        {
-
-            skidSound.volume = Mathf.Lerp(skidSound.volume, 0f, Time.deltaTime * (skidSmoothSpeed * 1.5f));
-
-            if (skidSound.volume < 0.05f && !skidSound.mute)
-            {
-                skidSound.mute = true;
-            }
-        }
-    }
     #endregion
 
     #region Car Status Check
@@ -612,29 +537,37 @@ public class CarController : MonoBehaviour
         float lastInput = moveInput;
         moveInput = Input.GetAxisRaw("Vertical");
         steerInput = Input.GetAxisRaw("Horizontal");
+        float targetSteer = Input.GetAxisRaw("Horizontal");
+        smoothedSteerInput = Mathf.MoveTowards(smoothedSteerInput, targetSteer, Time.deltaTime * steeringSpeed);
+
+        steerInput = smoothedSteerInput;
 
         bool pressingBrake = moveInput < -0.1f;
-
-        if (pressingBrake && !isBraking)
+        if (pressingBrake)
         {
-            isBraking = true;
-
-            if (currentCarLocalVelocity.z > reverseSpeedThreshold)
+            // Kód se provede jen v prvním framu, kdy hráè zmáèkne brzdu
+            if (!isBraking)
             {
-                preventReverse = true;
+                isBraking = true;
+                // Pokud jedeme dopøedu rychleji než threshold, zabráníme okamžitému couvání
+                preventReverse = currentCarLocalVelocity.z > reverseSpeedThreshold;
             }
-            else
+
+            // NOVÉ: Pokud už brzdíme (preventReverse je aktivní), ale auto už 
+            // prakticky zastavilo (rychlost klesla pod 0.2f), odemkneme couvání.
+            if (preventReverse && currentCarLocalVelocity.z < 0.2f)
             {
                 preventReverse = false;
             }
         }
-        else if (!pressingBrake)
+        else
         {
+            // Jakmile hráè pustí klávesu, vše resetujeme
             isBraking = false;
-
             preventReverse = false;
         }
     }
+
     #endregion
 
     #region Surface Detection
