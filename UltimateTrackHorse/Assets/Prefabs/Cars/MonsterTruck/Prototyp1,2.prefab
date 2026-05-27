@@ -10425,17 +10425,9 @@ PrefabInstance:
       value: 0.5
       objectReference: {fileID: 0}
     - target: {fileID: 5339210108367428076, guid: 10f6a70228b2e044b8699dc5530e8ab3, type: 3}
-      propertyPath: skidSound
-      value: 
-      objectReference: {fileID: 3319456709820648041}
-    - target: {fileID: 5339210108367428076, guid: 10f6a70228b2e044b8699dc5530e8ab3, type: 3}
       propertyPath: restLength
       value: 0.32
       objectReference: {fileID: 0}
-    - target: {fileID: 5339210108367428076, guid: 10f6a70228b2e044b8699dc5530e8ab3, type: 3}
-      propertyPath: engineSound
-      value: 
-      objectReference: {fileID: 7230630989922845553}
     - target: {fileID: 5339210108367428076, guid: 10f6a70228b2e044b8699dc5530e8ab3, type: 3}
       propertyPath: wheelRadius
       value: 0.27
@@ -10450,7 +10442,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5339210108367428076, guid: 10f6a70228b2e044b8699dc5530e8ab3, type: 3}
       propertyPath: minSkidVelocity
-      value: 5
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 5339210108367428076, guid: 10f6a70228b2e044b8699dc5530e8ab3, type: 3}
       propertyPath: springStiffness
@@ -10574,118 +10566,13 @@ PrefabInstance:
     m_AddedComponents:
     - targetCorrespondingSourceObject: {fileID: 2933623302875088572, guid: 10f6a70228b2e044b8699dc5530e8ab3, type: 3}
       insertIndex: -1
-      addedObject: {fileID: 7230630989922845553}
-    - targetCorrespondingSourceObject: {fileID: 7996124134738305865, guid: 10f6a70228b2e044b8699dc5530e8ab3, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 3319456709820648041}
+      addedObject: {fileID: 7930849354327666814}
   m_SourcePrefab: {fileID: 100100000, guid: 10f6a70228b2e044b8699dc5530e8ab3, type: 3}
 --- !u!4 &790205760171650173 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 5664243914743953901, guid: 10f6a70228b2e044b8699dc5530e8ab3, type: 3}
   m_PrefabInstance: {fileID: 4930368639229793680}
   m_PrefabAsset: {fileID: 0}
---- !u!1 &3070259427728013017 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 7996124134738305865, guid: 10f6a70228b2e044b8699dc5530e8ab3, type: 3}
-  m_PrefabInstance: {fileID: 4930368639229793680}
-  m_PrefabAsset: {fileID: 0}
---- !u!82 &3319456709820648041
-AudioSource:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3070259427728013017}
-  m_Enabled: 1
-  serializedVersion: 4
-  OutputAudioMixerGroup: {fileID: 0}
-  m_audioClip: {fileID: 0}
-  m_Resource: {fileID: 8300000, guid: f632e2ace80a32e47a2c531f64901a50, type: 3}
-  m_PlayOnAwake: 0
-  m_Volume: 1
-  m_Pitch: 1
-  Loop: 1
-  Mute: 0
-  Spatialize: 0
-  SpatializePostEffects: 0
-  Priority: 128
-  DopplerLevel: 1
-  MinDistance: 1
-  MaxDistance: 500
-  Pan2D: 0
-  rolloffMode: 0
-  BypassEffects: 0
-  BypassListenerEffects: 0
-  BypassReverbZones: 0
-  rolloffCustomCurve:
-    serializedVersion: 2
-    m_Curve:
-    - serializedVersion: 3
-      time: 0
-      value: 1
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0.33333334
-      outWeight: 0.33333334
-    - serializedVersion: 3
-      time: 1
-      value: 0
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0.33333334
-      outWeight: 0.33333334
-    m_PreInfinity: 2
-    m_PostInfinity: 2
-    m_RotationOrder: 4
-  panLevelCustomCurve:
-    serializedVersion: 2
-    m_Curve:
-    - serializedVersion: 3
-      time: 0
-      value: 0
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0.33333334
-      outWeight: 0.33333334
-    m_PreInfinity: 2
-    m_PostInfinity: 2
-    m_RotationOrder: 4
-  spreadCustomCurve:
-    serializedVersion: 2
-    m_Curve:
-    - serializedVersion: 3
-      time: 0
-      value: 0
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0.33333334
-      outWeight: 0.33333334
-    m_PreInfinity: 2
-    m_PostInfinity: 2
-    m_RotationOrder: 4
-  reverbZoneMixCustomCurve:
-    serializedVersion: 2
-    m_Curve:
-    - serializedVersion: 3
-      time: 0
-      value: 1
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0.33333334
-      outWeight: 0.33333334
-    m_PreInfinity: 2
-    m_PostInfinity: 2
-    m_RotationOrder: 4
 --- !u!198 &3507742672934443945 stripped
 ParticleSystem:
   m_CorrespondingSourceObject: {fileID: 8413341239033204281, guid: 10f6a70228b2e044b8699dc5530e8ab3, type: 3}
@@ -10711,6 +10598,11 @@ ParticleSystem:
   m_CorrespondingSourceObject: {fileID: 1258950350804532829, guid: 10f6a70228b2e044b8699dc5530e8ab3, type: 3}
   m_PrefabInstance: {fileID: 4930368639229793680}
   m_PrefabAsset: {fileID: 0}
+--- !u!54 &7176039061010507762 stripped
+Rigidbody:
+  m_CorrespondingSourceObject: {fileID: 2880713484593492578, guid: 10f6a70228b2e044b8699dc5530e8ab3, type: 3}
+  m_PrefabInstance: {fileID: 4930368639229793680}
+  m_PrefabAsset: {fileID: 0}
 --- !u!198 &7684873249583805820 stripped
 ParticleSystem:
   m_CorrespondingSourceObject: {fileID: 3371533275462672620, guid: 10f6a70228b2e044b8699dc5530e8ab3, type: 3}
@@ -10721,100 +10613,28 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 2933623302875088572, guid: 10f6a70228b2e044b8699dc5530e8ab3, type: 3}
   m_PrefabInstance: {fileID: 4930368639229793680}
   m_PrefabAsset: {fileID: 0}
---- !u!82 &7230630989922845553
-AudioSource:
+--- !u!114 &7930849354327666814
+MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7843690545718825772}
   m_Enabled: 1
-  serializedVersion: 4
-  OutputAudioMixerGroup: {fileID: 0}
-  m_audioClip: {fileID: 0}
-  m_Resource: {fileID: 8300000, guid: 164dd1761ae78d5428237146ddc67192, type: 3}
-  m_PlayOnAwake: 0
-  m_Volume: 0.25
-  m_Pitch: 1
-  Loop: 1
-  Mute: 0
-  Spatialize: 0
-  SpatializePostEffects: 0
-  Priority: 128
-  DopplerLevel: 1
-  MinDistance: 1
-  MaxDistance: 500
-  Pan2D: 0
-  rolloffMode: 0
-  BypassEffects: 0
-  BypassListenerEffects: 0
-  BypassReverbZones: 0
-  rolloffCustomCurve:
-    serializedVersion: 2
-    m_Curve:
-    - serializedVersion: 3
-      time: 0
-      value: 1
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0.33333334
-      outWeight: 0.33333334
-    - serializedVersion: 3
-      time: 1
-      value: 0
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0.33333334
-      outWeight: 0.33333334
-    m_PreInfinity: 2
-    m_PostInfinity: 2
-    m_RotationOrder: 4
-  panLevelCustomCurve:
-    serializedVersion: 2
-    m_Curve:
-    - serializedVersion: 3
-      time: 0
-      value: 0
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0.33333334
-      outWeight: 0.33333334
-    m_PreInfinity: 2
-    m_PostInfinity: 2
-    m_RotationOrder: 4
-  spreadCustomCurve:
-    serializedVersion: 2
-    m_Curve:
-    - serializedVersion: 3
-      time: 0
-      value: 0
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0.33333334
-      outWeight: 0.33333334
-    m_PreInfinity: 2
-    m_PostInfinity: 2
-    m_RotationOrder: 4
-  reverbZoneMixCustomCurve:
-    serializedVersion: 2
-    m_Curve:
-    - serializedVersion: 3
-      time: 0
-      value: 1
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0.33333334
-      outWeight: 0.33333334
-    m_PreInfinity: 2
-    m_PostInfinity: 2
-    m_RotationOrder: 4
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c7e92712967946d284ded25ca076f66e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GameLogic.Audio.CarAudioController
+  audioManager: {fileID: 0}
+  rb: {fileID: 7176039061010507762}
+  engineLoopCue: {fileID: 11400000, guid: 0f3718338d4c07446ae4e8c346d55b53, type: 2}
+  skidLoopCue: {fileID: 11400000, guid: aa2eea3b90dd0ef49914a43038eaa38f, type: 2}
+  referenceTopSpeed: 18
+  idleVolume: 0.2
+  driveVolume: 0.9
+  idlePitch: 0.85
+  drivePitch: 1.6
+  skidStartSidewaysSpeed: 1.5
+  skidMaxSidewaysSpeed: 6
+  skidMinPitch: 0.95
+  skidMaxPitch: 1.15
