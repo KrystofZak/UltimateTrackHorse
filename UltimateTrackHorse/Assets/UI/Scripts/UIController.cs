@@ -364,6 +364,7 @@ namespace UI
             });
 
             // Discord Connect popup callbacks
+            
             root.Q<Button>("DiscordConnectButton")?.RegisterCallback<ClickEvent>(evt =>
             {
                 root.Q<VisualElement>("discordConnectView")?.RemoveFromClassList("hidden");
@@ -375,12 +376,20 @@ namespace UI
                 {
                     if (GameLogic.Network.DiscordManager.IsLinked)
                     {
-                        if (codeLabel != null) codeLabel.text = "Connected";
+                        if (codeLabel != null)
+                        {
+                            codeLabel.text = "Connected";
+                            codeLabel.style.color = new StyleColor(Color.green); 
+                        }
                         if (actionButton != null) actionButton.text = "Disconnect";
                     }
                     else
                     {
-                        if (codeLabel != null) codeLabel.text = "Loading...";
+                        if (codeLabel != null)
+                        {
+                            codeLabel.text = "Loading...";
+                            codeLabel.style.color = new StyleColor(Color.blue); 
+                        }
                         if (actionButton != null) actionButton.text = "Copy";
                         discordManager.Authorize();
                     }
@@ -400,7 +409,11 @@ namespace UI
                     if (actionButton != null) actionButton.text = "Copy";
 
                     var codeLabel = root.Q<Label>("DiscordCodeLabel");
-                    if (codeLabel != null) codeLabel.text = "Loading...";
+                    if (codeLabel != null)
+                    {
+                        codeLabel.text = "Loading...";
+                        codeLabel.style.color = new StyleColor(Color.blue); 
+                    }
 
                     // Vygenerujeme rovnou nový kód
                     discordManager.Authorize();
