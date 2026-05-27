@@ -305,7 +305,10 @@ namespace UI
             root.Q<Slider>("UiVolumeSlider")?.RegisterValueChangedCallback(evt => {
                 if (audioManager != null) audioManager.SetVolume("UiVolume", evt.newValue);
             });
-            
+            root.Q<Slider>("CarVolumeSlider")?.RegisterValueChangedCallback(evt => {
+                if (audioManager != null) audioManager.SetVolume("CarVolume", evt.newValue);
+            });
+
             root.Q<Button>("SettingsBackButton")?.RegisterCallback<ClickEvent>(evt => 
             {
                 if (settingsSourceView != null) ShowView(settingsSourceView);
