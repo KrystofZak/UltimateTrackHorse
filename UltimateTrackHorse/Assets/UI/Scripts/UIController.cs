@@ -369,16 +369,19 @@ namespace UI
                 root.Q<VisualElement>("discordConnectView")?.RemoveFromClassList("hidden");
 
                 var codeLabel = root.Q<Label>("DiscordCodeLabel");
+                var actionButton = root.Q<Button>("DiscordCopyButton");
 
                 if (discordManager != null)
                 {
                     if (GameLogic.Network.DiscordManager.IsLinked)
                     {
                         if (codeLabel != null) codeLabel.text = "Connected";
+                        if (actionButton != null) actionButton.text = "Disconnect";
                     }
                     else
                     {
                         if (codeLabel != null) codeLabel.text = "Loading...";
+                        if (actionButton != null) actionButton.text = "Copy";
                         discordManager.Authorize();
                     }
                 }
@@ -386,11 +389,31 @@ namespace UI
 
             root.Q<Button>("DiscordCopyButton")?.RegisterCallback<ClickEvent>(evt =>
             {
-                var codeLabel = root.Q<Label>("DiscordCodeLabel");
-                if (codeLabel != null && codeLabel.text != "Loading..." && codeLabel.text != "Connected")
+                if (discordManager != null && GameLogic.Network.DiscordManager.IsLinked)
                 {
-                    GUIUtility.systemCopyBuffer = codeLabel.text;
-                    Debug.Log("Copied discord code to clipboard: " + codeLabel.text);
+                    // Pokud jsme pøipojeni, tlaèítko slouží jako DISCONNECT
+                    discordManager.Disconnect();
+                    Debug.Log("Úèet byl lokálnì odpojen. Generuji nový kód...");
+
+                    // Zmìníme UI zpìt na proces pøipojování
+                    var actionButton = root.Q<Button>("DiscordCopyButton");
+                    if (actionButton != null) actionButton.text = "Copy";
+
+                    var codeLabel = root.Q<Label>("DiscordCodeLabel");
+                    if (codeLabel != null) codeLabel.text = "Loading...";
+
+                    // Vygenerujeme rovnou nový kód
+                    discordManager.Authorize();
+                }
+                else
+                {
+                    // Pokud NEJSME pøipojeni, tlaèítko funguje jako COPY
+                    var codeLabel = root.Q<Label>("DiscordCodeLabel");
+                    if (codeLabel != null && codeLabel.text != "Loading..." && codeLabel.text != "Connected")
+                    {
+                        GUIUtility.systemCopyBuffer = codeLabel.text;
+                        Debug.Log("Copied discord code to clipboard: " + codeLabel.text);
+                    }
                 }
             });
 
@@ -969,6 +992,9 @@ namespace UI
         {
             var codeLabel = root.Q<Label>("DiscordCodeLabel");
             if (codeLabel != null) codeLabel.text = "Connected";
+
+            var actionButton = root.Q<Button>("DiscordCopyButton");
+            if (actionButton != null) actionButton.text = "Disconnect";
 
             Debug.Log("UIController: Discord successfully linked!");
             // Optionally, you can hide the window using:

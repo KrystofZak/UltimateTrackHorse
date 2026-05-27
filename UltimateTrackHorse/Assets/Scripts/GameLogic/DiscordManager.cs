@@ -26,10 +26,10 @@ namespace GameLogic.Network
 
         private void Awake()
         {
-            /*
+            
             LoadAuthData();
             Debug.Log($"DiscordManager Awake - Loaded DiscordID: {DiscordID}, AuthToken: {(string.IsNullOrEmpty(AuthToken) ? "null" : "exists")}");
-            Authorize();
+            /*Authorize();
             Debug.Log($"DiscordManager Awake - IsLinked: {IsLinked}");
             */
         }
