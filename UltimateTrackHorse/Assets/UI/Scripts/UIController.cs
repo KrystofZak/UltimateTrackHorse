@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using GameLogic.Traps.Core;
 using GameLogic.Audio;
+using GameLogic;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -72,6 +73,8 @@ namespace UI
 
         // Reference for displaying the Map Seed in the Pause Menu
         private Label mapSeedLabel;
+        // Reference for displaying Obstacle counts in Obstacle Choice view
+        private Label obstacleCountLabel;
 
         /// <summary>
         /// Stores the last active view so that the "Back" button functions properly (e.g., from Settings back to Pause or Main Menu).
@@ -163,6 +166,7 @@ namespace UI
             countdownText = root.Q<Label>("CountdownText");
 
             mapSeedLabel = root.Q<Label>("MapSeedLabel");
+            obstacleCountLabel = root.Q<Label>("ObstacleCountLabel");
 
             // Load university logo from Resources if present and assign to the UXML Image element.
             var uniLogoImage = root.Q<UnityEngine.UIElements.Image>("UniversityLogo");
@@ -517,6 +521,22 @@ namespace UI
                 {
                     vcam.Priority = shouldShowMenuCam ? 100 : 0;
                 }
+            }
+
+            // Update obstacle count display when entering obstacle choice view
+            if (newView == obstacleChoiceView && obstacleCountLabel != null)
+            {
+                var obsMgr = FindObjectOfType<ObstacleManager>();
+                var gsm = FindObjectOfType<GameStateManager>();
+
+                int registered = obsMgr != null ? obsMgr.RegisteredObstacleCount : 0;
+                if (gsm != null && gsm.InitialPlaceholderCount == 0)
+                {
+                    gsm.InitializePlaceholderCount();
+                }
+                int total = gsm != null ? gsm.InitialPlaceholderCount : 0;
+
+                obstacleCountLabel.text = $"{registered}/{total}";
             }
 
             // Target the specific background wrapper element so we don't accidentally style the invisible UI Document root.
