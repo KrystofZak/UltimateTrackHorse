@@ -12,10 +12,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 327f12ab155b434abfc813ace7a636be, type: 3}
   m_Name: V10-R8
   m_EditorClassIdentifier: Assembly-CSharp::GameLogic.Audio.AudioCue
-  clips: []
-  category: 2
+  clips:
+  - {fileID: 8300000, guid: 0f08a8a53eef7f043b1986672cc42925, type: 3}
+  category: 3
   spatial: 0
-  loop: 0
+  loop: 1
   volumeRange: {x: 1, y: 1}
   pitchRange: {x: 1, y: 1}
   spatialBlend: 1

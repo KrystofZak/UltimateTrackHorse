@@ -62,6 +62,10 @@ namespace UI
         private VisualElement victoryView;
         private VisualElement defeatView;
 
+        [Header("Discord Integration")]
+        [Tooltip("Drag the DiscordManager GameObject here")]
+        public GameLogic.Network.DiscordManager discordManager;
+
         // References for Lap History UI
         private VisualElement lapHistoryBox;
         private VisualElement lapListContainer;
@@ -129,7 +133,7 @@ namespace UI
             if (gameManager == null) gameManager = FindObjectOfType<GameLogic.GameManager>();
             if (spawnObstacle == null) spawnObstacle = FindObjectOfType<TrapSpawner>();
             if (audioManager == null) audioManager = FindObjectOfType<AudioManager>();
-            
+            if (discordManager == null) discordManager = FindObjectOfType<GameLogic.Network.DiscordManager>();
             if (menuCamera == null) 
             {
                 var camObj = GameObject.Find("MenuCamera");
@@ -163,6 +167,13 @@ namespace UI
             countdownText = root.Q<Label>("CountdownText");
 
             mapSeedLabel = root.Q<Label>("MapSeedLabel");
+
+            // Subscribe to DiscordManager events if the manager exists in the scene, allowing dynamic UI updates based on the linking process.
+            if (discordManager != null)
+            {
+                discordManager.OnCodeGenerated += UpdateDiscordCodeUI;
+                discordManager.OnAuthorizationSuccess += OnDiscordLinkedUI;
+            }
 
             // Load university logo from Resources if present and assign to the UXML Image element.
             var uniLogoImage = root.Q<UnityEngine.UIElements.Image>("UniversityLogo");
@@ -305,7 +316,10 @@ namespace UI
             root.Q<Slider>("UiVolumeSlider")?.RegisterValueChangedCallback(evt => {
                 if (audioManager != null) audioManager.SetVolume("UiVolume", evt.newValue);
             });
-            
+            root.Q<Slider>("CarVolumeSlider")?.RegisterValueChangedCallback(evt => {
+                if (audioManager != null) audioManager.SetVolume("CarVolume", evt.newValue);
+            });
+
             root.Q<Button>("SettingsBackButton")?.RegisterCallback<ClickEvent>(evt => 
             {
                 if (settingsSourceView != null) ShowView(settingsSourceView);
@@ -348,15 +362,28 @@ namespace UI
             // Discord Connect popup callbacks
             root.Q<Button>("DiscordConnectButton")?.RegisterCallback<ClickEvent>(evt =>
             {
-                var codeLabel = root.Q<Label>("DiscordCodeLabel");
-                if (codeLabel != null) codeLabel.text = "1111"; // placeholder code
                 root.Q<VisualElement>("discordConnectView")?.RemoveFromClassList("hidden");
+
+                var codeLabel = root.Q<Label>("DiscordCodeLabel");
+
+                if (discordManager != null)
+                {
+                    if (GameLogic.Network.DiscordManager.IsLinked)
+                    {
+                        if (codeLabel != null) codeLabel.text = "Connected";
+                    }
+                    else
+                    {
+                        if (codeLabel != null) codeLabel.text = "Loading...";
+                        discordManager.Authorize();
+                    }
+                }
             });
 
             root.Q<Button>("DiscordCopyButton")?.RegisterCallback<ClickEvent>(evt =>
             {
                 var codeLabel = root.Q<Label>("DiscordCodeLabel");
-                if (codeLabel != null)
+                if (codeLabel != null && codeLabel.text != "Loading..." && codeLabel.text != "Connected")
                 {
                     GUIUtility.systemCopyBuffer = codeLabel.text;
                     Debug.Log("Copied discord code to clipboard: " + codeLabel.text);
@@ -365,6 +392,12 @@ namespace UI
 
             root.Q<Button>("DiscordBackButton")?.RegisterCallback<ClickEvent>(evt =>
             {
+                // Pokud hr·Ë zav¯e okno a jeötÏ nenÌ propojen, zruöÌme autorizaci, aù se zbyteËnÏ nept·me Firebase
+                if (discordManager != null && !GameLogic.Network.DiscordManager.IsLinked)
+                {
+                    discordManager.CancelAuthorization();
+                }
+
                 root.Q<VisualElement>("discordConnectView")?.AddToClassList("hidden");
             });
 
@@ -899,6 +932,39 @@ namespace UI
                 ShowView(previousView);
             else
                 ShowView(mainMenuView);
+        }
+        /// <summary>
+        /// Callback method subscribed to the DiscordManager.OnCodeGenerated event.
+        /// </summary>
+        private void UpdateDiscordCodeUI(string code)
+        {
+            var codeLabel = root.Q<Label>("DiscordCodeLabel");
+            if (codeLabel != null) codeLabel.text = code;
+        }
+
+        /// <summary>
+        /// Updates the UI to reflect that the Discord account has been successfully linked.
+        /// </summary>
+        private void OnDiscordLinkedUI()
+        {
+            var codeLabel = root.Q<Label>("DiscordCodeLabel");
+            if (codeLabel != null) codeLabel.text = "Connected";
+
+            Debug.Log("UIController: Discord successfully linked!");
+            // Optionally, you can hide the window using:
+            // root.Q<VisualElement>("discordConnectView")?.AddToClassList("hidden");
+        }
+
+        /// <summary>
+        /// Disable event subscriptions when the UIController is disabled to prevent memory leaks or unintended behavior.
+        /// </summary>
+        private void OnDisable()
+        {
+            if (discordManager != null)
+            {
+                discordManager.OnCodeGenerated -= UpdateDiscordCodeUI;
+                discordManager.OnAuthorizationSuccess -= OnDiscordLinkedUI;
+            }
         }
     }
 }
