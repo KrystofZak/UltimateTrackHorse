@@ -13,11 +13,19 @@ namespace GameLogic
 
         private int _initialPlaceholderCount;
 
+        // New public getter so other systems (UI) can show total obstacle slots
+        public int InitialPlaceholderCount => _initialPlaceholderCount;
+
         public bool AreAllObstaclesPlaced(int registeredObstacleCount)
         {
             if (_initialPlaceholderCount == 0) return false;
             
             return registeredObstacleCount >= _initialPlaceholderCount;
+        }
+
+        public void SetPlayerRigidbody(Rigidbody rb)
+        {
+            playerCarRigidbody = rb;
         }
 
         public bool IsLost(bool isTimeUp)

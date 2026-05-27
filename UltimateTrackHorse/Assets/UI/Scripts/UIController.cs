@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using GameLogic.Traps.Core;
 using GameLogic.Audio;
+using GameLogic;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -62,6 +63,10 @@ namespace UI
         private VisualElement victoryView;
         private VisualElement defeatView;
 
+        [Header("Discord Integration")]
+        [Tooltip("Drag the DiscordManager GameObject here")]
+        public GameLogic.Network.DiscordManager discordManager;
+
         // References for Lap History UI
         private VisualElement lapHistoryBox;
         private VisualElement lapListContainer;
@@ -72,6 +77,8 @@ namespace UI
 
         // Reference for displaying the Map Seed in the Pause Menu
         private Label mapSeedLabel;
+        // Reference for displaying Obstacle counts in Obstacle Choice view
+        private Label obstacleCountLabel;
 
         /// <summary>
         /// Stores the last active view so that the "Back" button functions properly (e.g., from Settings back to Pause or Main Menu).
@@ -129,7 +136,7 @@ namespace UI
             if (gameManager == null) gameManager = FindObjectOfType<GameLogic.GameManager>();
             if (spawnObstacle == null) spawnObstacle = FindObjectOfType<TrapSpawner>();
             if (audioManager == null) audioManager = FindObjectOfType<AudioManager>();
-            
+            if (discordManager == null) discordManager = FindObjectOfType<GameLogic.Network.DiscordManager>();
             if (menuCamera == null) 
             {
                 var camObj = GameObject.Find("MenuCamera");
@@ -163,6 +170,34 @@ namespace UI
             countdownText = root.Q<Label>("CountdownText");
 
             mapSeedLabel = root.Q<Label>("MapSeedLabel");
+            obstacleCountLabel = root.Q<Label>("ObstacleCountLabel");
+
+            // Subscribe to DiscordManager events if the manager exists in the scene, allowing dynamic UI updates based on the linking process.
+            if (discordManager != null)
+            {
+                discordManager.OnCodeGenerated += UpdateDiscordCodeUI;
+                discordManager.OnAuthorizationSuccess += OnDiscordLinkedUI;
+            }
+
+            // Load university logo from Resources if present and assign to the UXML Image element.
+            var uniLogoImage = root.Q<UnityEngine.UIElements.Image>("UniversityLogo");
+            if (uniLogoImage != null)
+            {
+                // The file should be placed at: Assets/Resources/UI/Images/university_logo.png (no extension when loading)
+                var logoTex = Resources.Load<Texture2D>("UI/Images/university_logo");
+                if (logoTex != null)
+                {
+                    uniLogoImage.image = logoTex;
+                    // Apply sensible default sizing; the designer can override with USS later
+                    uniLogoImage.style.width = 400;
+                    uniLogoImage.style.height = 160;
+                    uniLogoImage.style.marginTop = 3;
+                }
+                else
+                {
+                    Debug.Log("UIController: University logo not found at Resources/UI/Images/university_logo. Place your PNG there to display it.");
+                }
+            }
 
             // --- Register Global Audio Callbacks for all buttons ---
             var allButtons = root.Query<Button>().ToList();
@@ -285,7 +320,10 @@ namespace UI
             root.Q<Slider>("UiVolumeSlider")?.RegisterValueChangedCallback(evt => {
                 if (audioManager != null) audioManager.SetVolume("UiVolume", evt.newValue);
             });
-            
+            root.Q<Slider>("CarVolumeSlider")?.RegisterValueChangedCallback(evt => {
+                if (audioManager != null) audioManager.SetVolume("CarVolume", evt.newValue);
+            });
+
             root.Q<Button>("SettingsBackButton")?.RegisterCallback<ClickEvent>(evt => 
             {
                 if (settingsSourceView != null) ShowView(settingsSourceView);
@@ -323,6 +361,84 @@ namespace UI
                 gameManager.isGameActive = false;
                 ShowView(mapSelectionView);
                 Time.timeScale = 1f;
+            });
+
+            // Discord Connect popup callbacks
+            
+            root.Q<Button>("DiscordConnectButton")?.RegisterCallback<ClickEvent>(evt =>
+            {
+                root.Q<VisualElement>("discordConnectView")?.RemoveFromClassList("hidden");
+
+                var codeLabel = root.Q<Label>("DiscordCodeLabel");
+                var actionButton = root.Q<Button>("DiscordCopyButton");
+
+                if (discordManager != null)
+                {
+                    if (GameLogic.Network.DiscordManager.IsLinked)
+                    {
+                        if (codeLabel != null)
+                        {
+                            codeLabel.text = "Connected";
+                            codeLabel.style.color = new StyleColor(Color.green); 
+                        }
+                        if (actionButton != null) actionButton.text = "Disconnect";
+                    }
+                    else
+                    {
+                        if (codeLabel != null)
+                        {
+                            codeLabel.text = "Loading...";
+                            codeLabel.style.color = new StyleColor(Color.blue); 
+                        }
+                        if (actionButton != null) actionButton.text = "Copy";
+                        discordManager.Authorize();
+                    }
+                }
+            });
+
+            root.Q<Button>("DiscordCopyButton")?.RegisterCallback<ClickEvent>(evt =>
+            {
+                if (discordManager != null && GameLogic.Network.DiscordManager.IsLinked)
+                {
+                    // Pokud jsme p¯ipojeni, tlaËÌtko slouûÌ jako DISCONNECT
+                    discordManager.Disconnect();
+                    Debug.Log("⁄Ëet byl lok·lnÏ odpojen. Generuji nov˝ kÛd...");
+
+                    // ZmÏnÌme UI zpÏt na proces p¯ipojov·nÌ
+                    var actionButton = root.Q<Button>("DiscordCopyButton");
+                    if (actionButton != null) actionButton.text = "Copy";
+
+                    var codeLabel = root.Q<Label>("DiscordCodeLabel");
+                    if (codeLabel != null)
+                    {
+                        codeLabel.text = "Loading...";
+                        codeLabel.style.color = new StyleColor(Color.blue); 
+                    }
+
+                    // Vygenerujeme rovnou nov˝ kÛd
+                    discordManager.Authorize();
+                }
+                else
+                {
+                    // Pokud NEJSME p¯ipojeni, tlaËÌtko funguje jako COPY
+                    var codeLabel = root.Q<Label>("DiscordCodeLabel");
+                    if (codeLabel != null && codeLabel.text != "Loading..." && codeLabel.text != "Connected")
+                    {
+                        GUIUtility.systemCopyBuffer = codeLabel.text;
+                        Debug.Log("Copied discord code to clipboard: " + codeLabel.text);
+                    }
+                }
+            });
+
+            root.Q<Button>("DiscordBackButton")?.RegisterCallback<ClickEvent>(evt =>
+            {
+                // Pokud hr·Ë zav¯e okno a jeötÏ nenÌ propojen, zruöÌme autorizaci, aù se zbyteËnÏ nept·me Firebase
+                if (discordManager != null && !GameLogic.Network.DiscordManager.IsLinked)
+                {
+                    discordManager.CancelAuthorization();
+                }
+
+                root.Q<VisualElement>("discordConnectView")?.AddToClassList("hidden");
             });
 
             // Initialize default state.
@@ -471,6 +587,22 @@ namespace UI
                 {
                     vcam.Priority = shouldShowMenuCam ? 100 : 0;
                 }
+            }
+
+            // Update obstacle count display when entering obstacle choice view
+            if (newView == obstacleChoiceView && obstacleCountLabel != null)
+            {
+                var obsMgr = FindObjectOfType<ObstacleManager>();
+                var gsm = FindObjectOfType<GameStateManager>();
+
+                int registered = obsMgr != null ? obsMgr.RegisteredObstacleCount : 0;
+                if (gsm != null && gsm.InitialPlaceholderCount == 0)
+                {
+                    gsm.InitializePlaceholderCount();
+                }
+                int total = gsm != null ? gsm.InitialPlaceholderCount : 0;
+
+                obstacleCountLabel.text = $"{registered}/{total}";
             }
 
             // Target the specific background wrapper element so we don't accidentally style the invisible UI Document root.
@@ -856,6 +988,42 @@ namespace UI
                 ShowView(previousView);
             else
                 ShowView(mainMenuView);
+        }
+        /// <summary>
+        /// Callback method subscribed to the DiscordManager.OnCodeGenerated event.
+        /// </summary>
+        private void UpdateDiscordCodeUI(string code)
+        {
+            var codeLabel = root.Q<Label>("DiscordCodeLabel");
+            if (codeLabel != null) codeLabel.text = code;
+        }
+
+        /// <summary>
+        /// Updates the UI to reflect that the Discord account has been successfully linked.
+        /// </summary>
+        private void OnDiscordLinkedUI()
+        {
+            var codeLabel = root.Q<Label>("DiscordCodeLabel");
+            if (codeLabel != null) codeLabel.text = "Connected";
+
+            var actionButton = root.Q<Button>("DiscordCopyButton");
+            if (actionButton != null) actionButton.text = "Disconnect";
+
+            Debug.Log("UIController: Discord successfully linked!");
+            // Optionally, you can hide the window using:
+            // root.Q<VisualElement>("discordConnectView")?.AddToClassList("hidden");
+        }
+
+        /// <summary>
+        /// Disable event subscriptions when the UIController is disabled to prevent memory leaks or unintended behavior.
+        /// </summary>
+        private void OnDisable()
+        {
+            if (discordManager != null)
+            {
+                discordManager.OnCodeGenerated -= UpdateDiscordCodeUI;
+                discordManager.OnAuthorizationSuccess -= OnDiscordLinkedUI;
+            }
         }
     }
 }

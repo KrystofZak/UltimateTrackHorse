@@ -36,6 +36,16 @@ namespace GameLogic.Ghost
             return new GhostLapData(mapId, lapTimer, new List<GhostFrame>(frames));
         }
 
+        public void SetTarget(Transform newTarget)
+        {
+            playerTransform = newTarget;
+        }
+
+        private void Awake()
+        {
+            playerTransform ??= GameObject.FindGameObjectWithTag("Player")?.transform;
+        }
+
         private void Update()
         {
             if (!isRecording || !playerTransform)
@@ -50,6 +60,11 @@ namespace GameLogic.Ghost
                 sampleTimer = 0f;
                 RecordFrame();
             }
+        }
+
+        public void SetPlayerTransform(Transform target)
+        {
+            playerTransform = target;
         }
 
         private void RecordFrame()

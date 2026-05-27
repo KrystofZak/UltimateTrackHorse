@@ -84,9 +84,15 @@ UltimateTrackHorse/ProjectSettings/ProjectVersion.txt
 UltimateTrackHorse/ProjectSettings/ProjectVersion.txt
 /UltimateTrackHorse/ProjectSettings
 
+# github prompts
+UltimateTrackHorse/.github/copilot-instructions.md
+
 # Meta files of trap prefabs
 UltimateTrackHorse/[Aa]ssets/[Pp]refabs/_[Ii]nternal/*.meta
 UltimateTrackHorse/[Aa]ssets/[Oo]bstacles/*/*.meta
 
 # Fonts
 UltimateTrackHorse/[Aa]ssets/[Pp]ackages/[Tt]extMeshPro/*.*
+UltimateTrackHorseBot/BotConfig.cs
+UltimateTrackHorse/ProjectSettings/ProjectVersion.txt
+UltimateTrackHorse/Assets/Scripts/GameLogic/ConfigFile.cs

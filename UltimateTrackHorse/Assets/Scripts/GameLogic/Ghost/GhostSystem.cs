@@ -31,6 +31,15 @@ namespace GameLogic.Ghost
             }
         }
 
+        public void SetTarget(Transform newTarget)
+        {
+            LoadReferences();
+            if (recorder)
+            {
+                recorder.SetTarget(newTarget);
+            }
+        }
+
         public void StartLap()
         {
             Debug.Log($"Ghost StartLap currentBestLap null? {currentBestLap == null}");

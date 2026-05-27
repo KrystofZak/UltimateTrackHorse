@@ -7,6 +7,7 @@
                 <ui:Button text="Play" name="PlayButton" class="animated-button"/>
                 <ui:Button text="Settings" name="SettingsButton" class="animated-button"/>
                 <ui:Button text="About Us" name="AboutButton" class="animated-button"/>
+                <ui:Button text="Discord Connect" name="DiscordConnectButton" class="animated-button" style="background-color: rgb(88,101,242); color: white;"/>
                 <ui:Button text="Quit" name="QuitButton" class="animated-button" style="background-color: rgb(139, 69, 19);"/>
             </ui:VisualElement>
         </ui:VisualElement>
@@ -75,6 +76,10 @@
                     <ui:Button text="Two" name="Two" class="animated-button" style="margin-bottom: 0; width: 160px;"/>
                     <ui:Label text="(Time limit +2s)" style="color: rgb(0, 0, 0); font-size: 22px; -unity-font-style: bold; margin-left: 15px; width: 180px;"/>
                 </ui:VisualElement>
+                <ui:VisualElement style="width:100%; flex-direction: row; align-items: center; justify-content:center; margin-top:8px; margin-bottom:8px; gap:10px;">
+                    <ui:Label text="Number of Obstacles" class="obstacle-count-title" style="font-size: 20px; -unity-font-style: bold; color: rgb(51,51,51);"/>
+                    <ui:Label text="0/0" name="ObstacleCountLabel" class="obstacle-count-label" style="font-size: 24px; -unity-font-style: bold; color: rgb(51,51,51);"/>
+                </ui:VisualElement>
                 <ui:Button text="Back" name="ObstaclesBackButton" class="animated-button" style="margin-top: 20px;"/>
             </ui:VisualElement>
         </ui:VisualElement>
@@ -118,7 +123,6 @@
             <ui:VisualElement class="panel">
                 <ui:Label text="Settings" class="title-label"/>
                 <ui:Button text="Audio" name="SettingsAudioButton" class="animated-button"/>
-                <ui:Toggle label="Fullscreen" name="FullscreenToggle" class="input-field"/>
                 <ui:Button text="Back" name="SettingsBackButton" class="animated-button"/>
             </ui:VisualElement>
         </ui:VisualElement>
@@ -141,6 +145,10 @@
                     <ui:Label text="UI Volume" style="-unity-font-style: bold; color: rgb(51, 51, 51); font-size: 18px; margin-bottom: 5px;"/>
                     <ui:Slider name="UiVolumeSlider" class="input-field" low-value="0" high-value="1" value="0.8"/>
                 </ui:VisualElement>
+                <ui:VisualElement style="margin-bottom: 12px;">
+                    <ui:Label text="Car Volume" style="-unity-font-style: bold; color: rgb(51, 51, 51); font-size: 18px; margin-bottom: 5px;"/>
+                    <ui:Slider name="CarVolumeSlider" class="input-field" low-value="0" high-value="1" value="0.8"/>
+                </ui:VisualElement>
                 <ui:Button text="Back" name="AudioSettingsBackButton" class="animated-button" style="margin-top: 20px;"/>
             </ui:VisualElement>
         </ui:VisualElement>
@@ -155,6 +163,7 @@
                 <ui:Label text="Map Generation, Game logic" class="about-text" style="font-size: 18px; margin-top: 0; -unity-font-style: normal;"/>
                 <ui:Label text="Krystof &quot;The Artist&quot; Zak" class="about-text"/>
                 <ui:Label text="Graphics designer, UI, Sounds" class="about-text" style="font-size: 18px; margin-top: 0; -unity-font-style: normal;"/>
+                <ui:Image name="UniversityLogo" class="about-logo" />
                 <ui:Button text="Back" name="AboutBackButton" class="animated-button" style="margin-top: 30px;"/>
             </ui:VisualElement>
         </ui:VisualElement>
@@ -175,6 +184,18 @@
                 <ui:Label text="Laps Completed: 3" name="VictoryLaps" class="stat-text"/>
                 <ui:Button text="Play Again" name="VictoryRetryButton" class="animated-button" style="margin-top: 30px;"/>
                 <ui:Button text="Main Menu" name="VictoryMainMenuButton" class="animated-button"/>
+            </ui:VisualElement>
+        </ui:VisualElement>
+        <!-- Discord Connect Popup View -->
+        <ui:VisualElement name="discordConnectView" class="view-container hidden">
+            <ui:VisualElement class="panel">
+                <ui:Label text="Discord Connect" class="title-label"/>
+                <ui:Label text="Enter this code in Discord to link your session:" style="font-size: 16px; color: rgb(51,51,51); margin-top: 10px; margin-bottom: 6px;"/>
+                <ui:Label text="1111" name="DiscordCodeLabel" style="font-size: 48px; -unity-font-style: bold; color: rgb(88,101,242); margin-top: 6px; margin-bottom: 12px; align-self: center;"/>
+                <ui:VisualElement style="flex-direction: row; justify-content: center; gap: 24px; margin-top: 12px;">
+                    <ui:Button text="Copy Code" name="DiscordCopyButton" class="animated-button" style="width: 220px; padding-left: 8px; padding-right: 8px; font-size: 16px;"/>
+                    <ui:Button text="Back" name="DiscordBackButton" class="animated-button" style="width: 140px; font-size: 16px;"/>
+                </ui:VisualElement>
             </ui:VisualElement>
         </ui:VisualElement>
     </ui:VisualElement>
