@@ -123,7 +123,6 @@
             <ui:VisualElement class="panel">
                 <ui:Label text="Settings" class="title-label"/>
                 <ui:Button text="Audio" name="SettingsAudioButton" class="animated-button"/>
-                <ui:Toggle label="Fullscreen" name="FullscreenToggle" class="input-field"/>
                 <ui:Button text="Back" name="SettingsBackButton" class="animated-button"/>
             </ui:VisualElement>
         </ui:VisualElement>
@@ -164,6 +163,7 @@
                 <ui:Label text="Map Generation, Game logic" class="about-text" style="font-size: 18px; margin-top: 0; -unity-font-style: normal;"/>
                 <ui:Label text="Krystof &quot;The Artist&quot; Zak" class="about-text"/>
                 <ui:Label text="Graphics designer, UI, Sounds" class="about-text" style="font-size: 18px; margin-top: 0; -unity-font-style: normal;"/>
+                <ui:Image name="UniversityLogo" class="about-logo" />
                 <ui:Button text="Back" name="AboutBackButton" class="animated-button" style="margin-top: 30px;"/>
             </ui:VisualElement>
         </ui:VisualElement>
