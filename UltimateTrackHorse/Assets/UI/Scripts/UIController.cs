@@ -164,6 +164,26 @@ namespace UI
 
             mapSeedLabel = root.Q<Label>("MapSeedLabel");
 
+            // Load university logo from Resources if present and assign to the UXML Image element.
+            var uniLogoImage = root.Q<UnityEngine.UIElements.Image>("UniversityLogo");
+            if (uniLogoImage != null)
+            {
+                // The file should be placed at: Assets/Resources/UI/Images/university_logo.png (no extension when loading)
+                var logoTex = Resources.Load<Texture2D>("UI/Images/university_logo");
+                if (logoTex != null)
+                {
+                    uniLogoImage.image = logoTex;
+                    // Apply sensible default sizing; the designer can override with USS later
+                    uniLogoImage.style.width = 400;
+                    uniLogoImage.style.height = 160;
+                    uniLogoImage.style.marginTop = 3;
+                }
+                else
+                {
+                    Debug.Log("UIController: University logo not found at Resources/UI/Images/university_logo. Place your PNG there to display it.");
+                }
+            }
+
             // --- Register Global Audio Callbacks for all buttons ---
             var allButtons = root.Query<Button>().ToList();
             foreach (var button in allButtons)
@@ -323,6 +343,29 @@ namespace UI
                 gameManager.isGameActive = false;
                 ShowView(mapSelectionView);
                 Time.timeScale = 1f;
+            });
+
+            // Discord Connect popup callbacks
+            root.Q<Button>("DiscordConnectButton")?.RegisterCallback<ClickEvent>(evt =>
+            {
+                var codeLabel = root.Q<Label>("DiscordCodeLabel");
+                if (codeLabel != null) codeLabel.text = "1111"; // placeholder code
+                root.Q<VisualElement>("discordConnectView")?.RemoveFromClassList("hidden");
+            });
+
+            root.Q<Button>("DiscordCopyButton")?.RegisterCallback<ClickEvent>(evt =>
+            {
+                var codeLabel = root.Q<Label>("DiscordCodeLabel");
+                if (codeLabel != null)
+                {
+                    GUIUtility.systemCopyBuffer = codeLabel.text;
+                    Debug.Log("Copied discord code to clipboard: " + codeLabel.text);
+                }
+            });
+
+            root.Q<Button>("DiscordBackButton")?.RegisterCallback<ClickEvent>(evt =>
+            {
+                root.Q<VisualElement>("discordConnectView")?.AddToClassList("hidden");
             });
 
             // Initialize default state.
